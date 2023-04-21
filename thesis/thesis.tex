@@ -22,6 +22,7 @@
 \usepackage[czech,english]{babel}
 \usepackage{lmodern}
 \usepackage{textcomp}
+\usepackage{bbm}
 \usepackage[defaultlines=4,all]{nowidow}
 
 % Turn this on when needed:
@@ -36,6 +37,7 @@
 \usepackage{array}
 \usepackage{amssymb,latexsym,pifont}
 \usepackage{amsmath}
+\usepackage{latexsym}
 \usepackage{enumitem} % custom lists
 \usepackage[normalem]{ulem} % underlining
 \usepackage{setspace} % line spacing
@@ -56,6 +58,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{mathtools}
+\usepackage{relsize}
 
 % acronyms and glossaries
 \usepackage[acronym, nomain]{glossaries}
@@ -94,7 +97,7 @@ da-ta-sets
 da-ta-set
 } % -- custom hyphenation
 
-\setmainfont[Ligatures=Common]{Linux Libertine}
+% \setmainfont[Ligatures=Common]{Linux Libertine}
 \setsansfont[Scale=MatchLowercase]{DejaVu Sans}
 \setmonofont[Scale=MatchLowercase]{DejaVu Sans Mono}
 
@@ -142,13 +145,17 @@ da-ta-set
 
 \def\ignorecolumn#1\unskip{}
 
+\definecolor{lightblue}{rgb}{0.6,0.8,1.0}
+\definecolor{pastelgreen}{rgb}{0.65,0.8,0.4}
+\definecolor{pastelyellow}{rgb}{1.0,0.8,0.5}
+
 \title{Doctoral Thesis Template}
 
 \def\fulldate{}
 \author{Random Author}
 \date{2022}
 \dept{Institute of Formal and Applied Linguistics}
-\supervisor{prof. Tim McTempleface}
+\supervisor{Ondra}
 \studyprogram{Computer Science}
 \studyfield{Computational Linguistics}
 
@@ -190,6 +197,27 @@ I understand that my work relates to the rights and obligations
 %%%   Do not forget to SIGN the printed book here!
 %%%                  *********
 
+\definecolor{darkgreen}{rgb}{0,0.5,0}
+\definecolor{lightblue}{rgb}{0.7,0.9,1}
+\definecolor{lblue}{rgb}{0.25,0.5,1}
+\newcommand{\rewrite}[1] {
+  {\color{blue}\textbf{TO BE REWRITTEN:} #1}
+  }
+\newcommand{\todo}[1] {
+  {\color{red}\textbf{TODO:} #1}
+  }
+\newcommand{\VH}[1] {
+  {\color{darkgreen}\emph{VH:} #1}
+  }
+ \newcommand{\kuba}[1] {
+  {\color{darkgreen}\emph{Kuba:} #1}
+  }
+ \newcommand{\jindra}[1] {
+  {\color{orange}\emph{Jindra:} #1}
+  }
+ \newcommand{\david}[1] {
+  {\color{green}\emph{DM:} #1}
+  }
 
 \cleardoublepage{} % new page
 \pagestyle{plain}
@@ -280,9 +308,10 @@ I understand that my work relates to the rights and obligations
 \setcounter{page}{1}
 
 \sloppy
-\include{01-intro}
-\include{02-method}
-\include{03-conclusions}
+\include{thesis/01-intro.tex}
+\include{thesis/02-related.tex}
+\include{thesis/03-data-analysis.tex}
+\include{thesis/04-dialogue-modeling.tex}
 
 %
 % TEXT END

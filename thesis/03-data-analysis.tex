@@ -1,0 +1,576 @@
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Data analysis}%
+\label{chap:data_analysis}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Task-oriented dialogue systems are widely used for various applications, such as customer service, personal assistance, and information retrieval. These systems aim to assist users in accomplishing specific tasks by engaging in a natural language conversation. In order to represent the meaning of user utterances, annotation based on \emph{slots} is commonly employed \cite{young_pomdp-based_2013}. Slots, which describe semantic concepts relevant to completing the task, serve as a means of capturing the user's desires as well as facilitating the system's communication with the user. Typical examples of slots include \emph{area}, \emph{price}, and \emph{address}, among others. By tracking slots and their values over the course of the dialogue, a dialogue system can maintain a \emph{dialogue state}, which allows it to effectively plan the next actions \cite{williams2013dialog}. The dialogue state represents explicitly all the important knowledge known to the system in a specific point in dialogue. Consequently, it can be utilized to communicate with external sources of information and data, such as databases, structured knowledge bases, or various APIs, in order to provide users with accurate and relevant information.
+
+\section{Discovering dialogue slots}
+Getting just raw, unlabeled, data for dialogue system training is not difficult, especially if we restrict the target domain.
+In general it's sufficient to record some conversations happening either in real life or in artificial conditions. 
+A requirement for dialogue state labels makes this process much more costly.
+The sets of slots and their values typically need to be designed by domain experts.
+This procedure consists of multiple tasks:
+\begin{enumerate}
+    \item Determine which concepts need to be captured
+    \item Define them in consistent way
+    \item Label the occurrences of these concepts in the training data.
+\end{enumerate}
+As mentioned, these steps require expert knowledge and sometimes non-trivial level of domain understanding.
+Although we might design a system that does not rely on the usage of slots, both traditional pipeline systems \cite{young_pomdp-based_2013} and end-to-end task-oriented architectures \cite{wen2016network} typically require such annotation.
+While some systems use implicit, latent state representation and do not require explicit labels \citep{serban2016building}, the behavior of such systems is hard to interpret or control, which can be crucial in practical applications.
+Moreover, the use of slots enable communication with external interfaces, as discussed before.
+There are several works aiming at keeping interpretability and reducing the annotation needs by automating it \citep{chen2014leveraging,chen2015jointly} or transferring annotation across domains \cite{zhao_zero-shot_2018,coope_span-convert_2020}, but they still require significant manual effort.
+We present a novel approach to discovering a set of domain-relevant dialogue slots and their values given a set of dialogues in the target domain (such as transcripts from a call center).
+Our approach requires no manual annotation at all in order to tag slots in dialogue data.
+This substantially simplifies dialogue system design and training process, as the developer no longer needs to design a set of slots and annotate their occurrences in training data.
+\subsection{Method overview}
+We discover slots by analyzing outputs of generic domain-independent natural language taggers such as a semantic frame parser or a named entity recognizer (NER).
+These models are able to detect important and relevant concepts in natural language utterances and subsequently group them using a set of pre-determined generic labels.
+We call this approach \emph{weak supervision} since we are basically using labels as an input but these labels are noisy and do not correspond to the desired labels.
+We use unsupervised clustering on top of annotation obtained by tagging models.
+Nevertheless, the raw output of these models is not polished and cannot be used for the purpose of the dialogue system directly.
+Let us consider an example given in Figure \ref{fig:tagged_example}.
+\begin{figure}[h]
+\centering
+    \includegraphics[width=0.8\textwidth]{images/tagging-example.png}
+    \caption{An utterance from the restaurant recommendation domain tagged with generic semantic parser (green) and Named Entity Recognition system (red). We provide a comparison with ground truth dialogue slot labels (blue)}
+    \label{fig:tagged_example}
+\end{figure}
+First we note that it helps to use multiple tagging models since some of the concepts might not be captured by a respective model.
+The set of tagged words from all the sources covers all the dialogue slot values (\emph{cheap}, \emph{Georgetown}), however, it also contains irrelevant words (\emph{restaurant}).
+This behavior is expected since the used tagging models are trained on generic open-domain data and therefore detect all semantic concepts mentioned in the utterances.
+Therefore, in order to exploit the output of generic models we need to polish it and customize it to the specific domain.
+Our method combines multiple sources of semantic labels and selects only relevant slot candidates.
+Slots discovered by our approach can then be used to design a schema relevant to a specific domain.
+Moreover, we train an independent, domain-specific tagger that can be used as a standalone component for natural language understanding.
+A diagram describing our approach is depicted in Figure \ref{fig:discover_overall}.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/weakly-supervised.pdf}
+    \caption{Illustration of our pipeline. First, we analyze an unlabeled in-domain corpus with supplied domain-agnostic linguistic annotation models, such as a frame-semantic parser or NER. This results in slot candidates. Next, we iteratively merge and select slot candidates to obtain domain-relevant slots. Finally, we use the resulting slot labels in the corpus to train a neural slot tagger.}
+    \label{fig:discover_overall}
+\end{figure}
+
+Next, we are going to describe the tagging models that were used in our experiments and go through all the stages of our method in detail.
+
+\subsection{Tagging semantic concepts}
+\label{03:tagging_concepts}
+Our approach to selecting candidates for our method requires an initial pool of carefully chosen options that represent coherent concepts. This step is critical to ensure the effectiveness of our selection process. To achieve this goal, we strive to gather as many candidates as possible while still preserving the above constraint.
+One of the key features of our method is its ability to merge several concepts into one, which means that we aim for high granularity and specificity in our input labels. As a result, we need to ensure that each candidate represents a unique concept that is distinguishable from others.
+
+Given that we cannot rely on human annotations, we use an automatic procedure to gather the initial set of candidates.
+In this procedure, we combine multiple sequence tagging models to label the input corpus.
+The goal of this procedure is to identify words or phrases in the text that represent distinct concepts that can be used as candidate labels.
+We can use any sequence tagging NLP model that meets the following criteria: (1) a set of words with the same label indicates semantically coherent, distinct concepts, (2) no additional annotation is needed, and (3) the model is domain-independent.
+For our experiments, we chose two types of taggers to obtain the input tags: Frame Semantic Parser and Named Entity Recognition (NER).
+By leveraging these models, we can quickly and accurately identify candidate labels that meet our criteria.
+\begin{figure}[h!]
+\centering
+    \includegraphics[width=0.8\textwidth]{images/framenet.pdf}
+    \caption{An example of two Frames defined in the FrameNet dataset, together with core Frame Elements and respective instances. In this example we can see that a semantic concept representing the location of some place can be captured by multiple frames (\emph{Direction} and \emph{Location}). However, from the perspective of dialogue systems, these differences are negligible.Therefore we employ a merging strategy in our method.}
+    \label{fig:framenet}
+\end{figure}
+
+\paragraph{Frame Semantic Parser} The parser is based on the FrameNet project \cite{baker1998berkeley}.
+FrameNet is a lexical database of English language (although similar datasets exist in other languages) that aims to represent the usage of words in actual texts.
+It contains over 200,000 utterances with more than 1,200 frames, each of which represent one semantic concept.
+From the NLP perspective, it can be approached as a task of Semantic Role Labeling.
+Each frame is formed by one or more frame elements which together form an instance of a certain semantic situation (e.g. \emph{Locale}, \emph{Offenses}, \emph{Size},...).
+For the example of FrameNet instances see Figure \ref{fig:framenet}.
+We take the individual Frame Elements as source for our slot candidates.
+\paragraph{Named Entity Recognition} is a well-established task of labeling occurences of certain named entities in the input text data.
+It fits well our requirements because the task is universal and the named entities definition is not specific to any particular domain.
+\subsection{Selection of slot candidates}
+\label{03:candidate_selection}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/merging.pdf}
+    \caption{The selection step in our pipeline processes the input data and yields a set of slot candidates that should be relevant to the target domain.}
+    \label{fig:candidate_selection}
+\end{figure}
+In the previous step, we obtained a superset of all the slot candidates by using weak supervision from the tagging models.
+Subsequently, we need to identify domain-relevant slots based on candidates provided by the automatic annotation.
+To achieve this, we design an iterative slot discovery procedure -- in each iteration, we: 
+(1) merge similar candidates, 
+(2) rank candidates' relevance and eliminates irrelevant ones.
+Once no more frames are eliminated, the process stops and we obtain slot labels, which are used to train a slot tagger (see Section~\ref{03:training_tagger}).
+
+We refer to the automatically tagged tokens as \emph{(slot) fillers}, and the tags are considered slot candidates.
+In order to be able to select relevant candiates, we need to represent them in continuous space.
+We use word embedding vectors and compute \emph{slot embeddings} $e(s_k)$ for each 
+distinct slot candidate $s_k$ as word embedding averages over all respective slot fillers, weighted proportionally by filler frequency.
+The slot embeddings need to be re-computed after each iteration due to the merging step.
+We will now describe the individual steps.
+
+\subsubsection{Candidate Merging}
+\label{03:candidate_merging}
+Since automatic annotation may have a very fine granularity, entities/objects of the same type are often captured by multiple slot candidates.
+This is indeed the case for frame-semantic annotation, which we mostly use in our experiments.
+With a frame parser, for instance, the frames \emph{Direction} and \emph{Location} both relate to the concept of \emph{area} which can be represented as a single slot.
+We thus need to merge such similar slot candidates subsets $s_1 \dots s_n$ under a single candidate.
+We further use syntactic parser to obtain dependency relations in which the slot fillers appear in the data and use this information to get more accurate similarity scores.
+We measure similarity of slot candidates $s_1,s_2$ as:
+\begin{equation}
+    \text{sim}(s_1,s_2) = \text{sim}_{e}(e(s_1),e(s_2)) + \text{sim}_{\text{ctx}}(s_1,s_2)
+\end{equation}
+where $\text{sim}_{e}$ is a cosine similarity and $\text{sim}_{\text{ctx}}(s_1,s_2)$ is a normalized number of occurrences of $s_1$ and $s_2$ with the same dependency relation.
+If the similarity exceeds a pre-set threshold $T_{\text{sim}}$, the candidates are merged into one.
+
+\subsubsection{Candidate Ranking and Selection}
+\label{03:candidate_select}
+In this step we aim to eliminate irrelevant slot candidates and exclude them from the selection process.
+To achieve this, we rank the slot candidates with respect to their importance computed from the data.
+We hypothesize that different slots are likely to occur in different contexts (e.g., addresses are mentioned more when the system provides information to the user rather than stated by the user).
+Some slots can occur rarely but still be relevant.
+However, such rare slots would be overshadowed by more frequent slot candidates.
+To preserve relevant slots that only occur in rarer contexts, we cluster the data into multiple clusters and then rank candidates within each cluster separately.
+We consider candidates with a score higher than $\alpha$-fraction of a given cluster mean to be relevant and select them for the next iterations.
+If a slot candidate is selected in at least one of the clusters, it is considered viable overall.
+
+\paragraph{Clustering the data}
+The purpose of data clustering step is to distinguish contexts in which the candidates appear.
+We simplify the notion of context to the head verb connected with the respective slot filler word.
+We process the data with a generic semantic role labeling tagger to obtain verb dependency relations.
+Each occurrence of a filler is thus associated with a \emph{head verb} whose semantic argument the corresponding word is, if such exists. 
+We then compute embeddings of the formed \emph{verb-filler} pairs as average of the respective token embeddings.
+The pairs are then clustered using agglomerative (bottom-up) hierarchical clustering with average linkage according to cosine distance of their embeddings.
+Note that fillers for the same slot candidate may end up in multiple clusters.
+This does not mean that the respective slot candidate is split -- it is just ranked for relevance multiple times (with respect to multiple contexts).
+The process stops when a predetermined number of clusters is reached.
+
+\paragraph{Candidate Ranking criteria}
+In order to rank the candidates, we need a function that computes a score for each candidate.
+Since it is not clear how to compute the score, we use multiple attributes and combine them to compute the final score.
+Specifically, we compute the following characteristics for each candidate:
+\begin{itemize}[nosep,leftmargin=10pt]
+    \item \textbf{Frequency} $\text{frq}(s)$ is used since candidates that occur frequently in the data are likely important.
+    
+    \item \textbf{Coherence} $\text{coh}(s)$ is the average pairwise similarity of all fillers' embeddings:
+    \begin{equation}
+        \text{coh}(s) = \frac{\mathlarger{\sum}_{(v,w) \in C^2_s}{d_{\cos}(e(v), e(w))}}{|C^2_s|}
+    \end{equation}
+    where $C^2_s$ is a set of all pairs of fillers for the slot candidate \emph{s}.
+    We follow \citet{chen2014leveraging}'s assumption that fillers with high coherence, i.e., focused on one topic, are good slot candidates.
+    
+    \item \textbf{TextRank} \cite{mihalcea2004textrank} is a keyword extraction algorithm similar to the well-known PageRank todo : cite PageRank.
+    It constructs a graph where nodes represent words and edges represent their co-occurrence.
+    The dominant eigenvector of the adjacency matrix of this graph then gives the individual words' scores.
+\end{itemize}
+The final score is a simple sum of rankings with respect to all three scores.
+For TextRank and frequency we use placeholder representing the slot candidate instead of the respective fillers.
+Therefore we obtain scores relevant to candidates rather than the individual words.
+
+\subsection{Training standalone tagger}
+\label{03:training_tagger}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/tagging.pdf}
+    \caption{After the set of slots is selected we assign the obtained labels to their occurrences in the data and use this labeled corpus to train a standalone tagger. }
+    \label{fig:training_tagger}
+\end{figure}
+The motivation for training a tagger is two-fold.
+First it's usage makes it possible to discard a dependency on the input taggers, thus the method's result is simpler to apply. 
+Second, althoug the selection process can yield a good set of slots candidates, we experimentally discovered that the quality of the taggers used for initial input labeling can be insufficient, especially for some domains.
+Therefore, using the merged and filtered slots directly may result in low recall since the original annotation models used as weak supervision are not adapted to our specific domain.
+Therefore, we use the obtained labels to train a new, domain-specific slot tagger to improve performance.
+The tagger has no access to better labels than those derived by our method; however, it has a simpler task, as the set of target labels is now much smaller and the domain is much narrower.
+
+We model the slot tagging task as sequence tagging, using a convolutional neural network that takes word- and character-based embeddings of the tokens as the input and produces a sequence of respective tags \cite{lample2016neural}.\footnote{\url{https://github.com/deepmipt/ner}}
+The output layer of the tagger network gives softmax probability distributions over possible tags.
+In general, any sequence tagging model can be used, we choose a CNN-based tagger for its performance and a potential to easily customize the model.
+Since our motivation is to improve recall, we add an inference-time rule -- if the most probable predicted tag is `O' (i.e., no slot) and the second most probable tag has a probability higher than a certain preset threshold, the second tag is chosen as a prediction instead.
+Although this modification should improve recall, it also potentially tags irrelevant words and therefore it might harm the precision significantly and thus decrease the overall performance.
+Nevertheless, we show in Section \ref{03:discovery_results} that the impact on precision is negligible while the recall can be indeed improved greatly. 
+
+To improve the robustness of our model, 
+we only use 10\% of the original in-domain training set to train the slot tagger model. The rest of the training set is used for a grid search to determine model hyperparameters (hidden layer size, dropout rate and $T_{\text{tag}}$ threshold). We choose the parameters that yield the best F1 score when compared against the automatic slot discovery results (i.e., no manual annotation is needed here, the aim is at good generalization).
+\subsection{Experiments and results}
+\label{03:discovery_results}
+In this section we provide quantitative analysis of the results with respect to the NLU performance and quality of the discovered slots.
+We also evaluate the application of this method as a module in end-to-end dialogue system model.
+\paragraph{Datasets}
+In order to evaluate our method in a complex way we use multiple datasets.
+The datasets vary in several properties like number of domains or collection process.
+This means we can compare the results on different data distributions and on tasks with different complexities.
+Specifically, we use the following datasets in our experiments:
+\begin{itemize}
+    \item \textbf{CamRest676} (\textbf{CR}) \cite{wen2016network} has 676 dialogues, 2,744 user utterances, 4 tracked slots and 2 intents in the restaurant domain.
+    \item \textbf{MultiWOZ} \cite{budzianowski2018multiwoz,eric2019multiwoz} is a multi-domain corpus; we picked two domains -- hotel reservation and attraction recommendation -- to form \textbf{WOZ-hotel} (\textbf{WH}) with 14,435 utterances, 9 slots, 3 intents and \textbf{WOZ-attr} (\textbf{WA}) with 7524 utterances, 8 slots and 3 intents respectively.\footnote{MultiWOZ contains more domains such as \emph{restaurant, train search, bus search}. However, we decided to not include these as they are nearly identical to the other domains we use.}
+    \item \textbf{Cambridge SLU} \cite{henderson2012discriminative} (\textbf{CS}) contains 10,569 utterances and tracks 5 slots with 5 intents in the restaurant domain.
+    \item \textbf{ATIS} (\textbf{AT}) \cite{hemphill_atis_1990} contains 4,978 utterances with 79 slots and 17 intents in the flights domain.\footnote{We used the ATIS data version from \url{https://www.kaggle.com/siddhadev/atis-dataset-from-ms-cntk}.}
+\end{itemize}
+\paragraph{3rd party models}
+As sources of weak supervision providing slot candidates, we mainly use the frame semantic parsers \textit{SEMAFOR} \cite{das2010semafor} and \textit{open-sesame} \cite{swayamdipta2017frame} -- a union of labels provided by both parsers is used in all our setups. In addition, to explore combined sources on the named-entity-heavy ATIS dataset, we include a generic convolutional NER model provided by SpaCy.\footnote{\url{https://spacy.io}}
+To provide features for slot candidate merging and selection, we use AllenNLP \cite{Gardner2017AllenNLP} for SRL
+and FastText \cite{bojanowski2017enriching} as pretrained word embeddings.
+
+\paragraph{Training details}
+\begin{itemize}
+    \item Slot merging and selection parameters were set heuristically in an initial trial run on the CamRest676 data and proved stable across domains.
+    \item Slot tagger hyperparameters are chosen according to grid search on a portion of the training data.
+    \item Since the models are rather small with regards to number of parameters, it is sufficient to use a regular desktop PC. In our experiments, we require about 4 GB of RAM, and we use Intel Xeon E5-2630 v4 CPUs. 
+    \item Our slot candidate selection step takes roughly 1 hour.
+    The tagger model is lightweight, with only 150k parameters. Its training requires 10-30 minutes, depending on the exact configuration and data size.
+    \item The evaluation scripts are attached and described in the README file.
+    \item We conduct hyperparameter search using a basic grid search algorithm. We tested hidden size values $\in [50,200]$, dropout $\in [0.5,0.85]$ and the threshold $T_{\text{tag}} \in [0.05,0.3]$. Therefore, we ran $4\times8\times6 = 192$ search trials.
+    \item The best parameters were determined by tagger accuracy on the validation set: hidden\_size = 250, dropout = 0.7, $T_{\text{tag}} = 0.3$, $T_{\text{sim}} = 0.9$.
+    \item Links to the data are included in the README file, we use \emph{train:validation:split} ratio equal to \emph{8:1:1}.
+\end{itemize}
+
+\paragraph{Evaluation Metrics}
+We need a \textit{reference mapping} that maps our discovered slots to the ground truth labels to be able to evaluate the quality of the discovered concepts.
+For evaluation, we construct a handcrafted  between our discovered slots and the respective ground-truth slots and intents.
+his mapping is only needed for evaluation; it is not required by our method itself.
+The mapping is domain-specific, but it is very easy to construct even for an untrained person -- the process takes less than 10 minutes for each of our domains.
+It amounts to matching slots from the domain ontology against slots output by our approach, which are represented by FrameNet labels.
+Most importantly, the mapping is \textbf{\emph{only needed for evaluation}}, not by our method itself.
+We provide an example of such a reference mapping in Table \ref{03:ref_mapping}
+\label{sec:app-ref-mapping}
+
+\begin{table}[h!]
+    \centering
+    \small
+    \begin{tabular}{rcl}
+    \textbf{\emph{Ours-full} output} & & \textbf{CambridgeSLU ontology}\\\hline
+     Expensiveness & $ \mapsto$ & Pricerange\\
+     Origin + People\_by\_origin & $ \mapsto$ & Food\\
+     Direction + Part\_orientational & $ \mapsto$ & Area\\
+     Contacting + Artifact & $ \mapsto$ & Phone\\
+     Locale\_by\_use & $ \mapsto$ & Type \\
+     
+
+    \end{tabular}
+    \caption{An example of reference mapping between the output of \emph{Ours-full} represented by FrameNet labels (left) and ground-truth CambridgeSLU ontology (right).
+    Frames merged by our method are shown on a single line, separated by “+”.
+    }
+    \label{03:ref_mapping}
+\end{table}
+
+For quantitative evaluation we use the following evaluation metrics:
+\begin{itemize}[nosep,leftmargin=10pt]
+    \item \textbf{Slot F1 score}: To reflect slot tagging performance, we measure precision, recall, and F1 for every slot individually.
+    An average is then computed from slot-level scores, weighted by the number of slot occurrences in the data.
+    We measure slot F1 both on standalone user utterances (slot tagging) and in the context of a dialogue system (dialogue tracking).
+    \item \textbf{Slot-level Average Precision (AP)}. The slot candidates picking task is a ranking problem and we use the \textit{average precision} metric following \citet{chen2014leveraging}.
+    Considering a ranked list of discovered slots $l = s_1, \dots, s_k, \dots, s_n$ we compute AP:
+    \begin{equation}
+        AP(l) = \frac{\sum_{k=1}^n P@k(l)\mathbbm{1}_k}{\mbox{\#\,mapped\ slots}}
+    \end{equation}
+    where $\mathbbm{1}_k$ is an indicator function that equals one if slot $k$ has a reference mapping defined and $P@k(l)$ is precision at $k$ of the ranked list $l$.
+    \item \textbf{Slot Rand Index (RI)} is a clustering metric, used to evaluate slot candidate merging. RI is the proportion of pairs of slot candidates that are correctly assigned into the same or into different slots (following the reference mapping).\footnote{We compute RI on a union of labels that have a ground-truth slot mapping and all labels selected by our method. Labels without ground-truth mapping are assumed to form single-item “pseudo-slots”.}
+    
+    \item \textbf{Normalized Mutual Information (NMI)} is the mutual information between two clusterings normalized into the (0, 1) interval.
+    Thanks to the normalization, it is suitable for comparing two clusterings with different numbers of clusters.
+
+    
+    \item \textbf{Intent Accuracy} is the percentage of slot occurrences assigned into the correct intent cluster under the reference mapping.
+    \item \textbf{Dialogue Joint Goal Accuracy} calculates the proportion of dialogue turns where all user constraints (i.e., dialogue state summarizing slot values) are captured correctly \cite{mrkvsic2016neural}.
+    
+    \item \textbf{Dialogue Entity Match Rate} calculates the last turn's entity in each dialogue. It verifies if  a correct entity would be retrieved from the database using the final constraints \cite{wen2016network}.
+
+\end{itemize}
+For slot tagging and ranking evaluation, we sampled a random data order 50 times and performed 5-fold cross-validation for each permutation.
+For the dialogue generation evaluation, we trained the models 100 times and used averaged results.
+All results are given with 95\% confidence intervals.
+
+\paragraph{Evaluated systems}
+We test multiple variants of our system.
+This gives us an idea about contributions of all the individual methods that we propose.
+Here we give an overview of all the system variants:
+\begin{itemize}[nosep,leftmargin=10pt]
+    \item \textit{Ours-full} is the full version of our method (full annotation setup and trained slot tagger).
+    \item \textit{Ours-nothr} does not use the recall-increasing second-candidate rule in the slot tagger.
+    \item \textit{Ours-notag} excludes the slot tagger. This means that the outputs of input taggers are used directly to annotate the data.
+    \item \textit{Ours-nocl} further excludes the clustering step; slot candidate ranking and selection is performed over all candidates together.
+\end{itemize}
+We also compare to previous work of \citet{chen2014leveraging},\footnote{We use our own reimplementation of their approach.}
+This method is similar to the variant \textit{Ours-nocl}, but it does not merge similar frames and uses different ranking criteria.
+Essentially, they use outputs of the input tagger after the selection step directly without any further processing.
+
+To put our results into perspective, we also include two supervised models for comparison:
+\emph{Tag-supervised} is the same model that we use as our slot tagger (see \ref{03:training_tagger}), but it is trained on supervised data with all ground truth labels available.
+The other supervised baseline is called \emph{Dict-supervised}.
+It uses a simple dictionary of slot fillers that is obtained directly from the training data.
+We use straightforward word matching based on regular expressions to tag occurences of these values.
+
+
+Apart from evaluation of the tagging performance w.r.t. NLU we are also interested in the intrinsic evaluation of the verb-slot pair clusters formed for slot ranking.
+Specifically, we ask a question how well are these clusters formed and if they are meaningful.
+We compare to gold-standard intent annotation with respect to the following baselines: (1) a majority baseline (assigning the most frequent intent class to all instances), and (2) a simple method that represents the utterances as averages of respective word embeddings and performs sentence-level intent clustering.
+All the slots in a given utterance are then assumed to have the same intent.
+
+
+\subsubsection{NLU}
+\begin{figure}[h]
+\includegraphics[width=1.0\textwidth]{images/label_example.pdf}
+%\newtcbox{\bluebox}[1][]{nobeforeafter, tcbox raise base, shrink tight, sharp corners, extrude by=1mm, colback=blue!15, colframe=blue, #1}
+%\newtcbox{\graybox}[1][]{nobeforeafter, tcbox raise base, shrink tight, sharp corners, extrude by=1mm, colback=gray!15, colframe=gray, #1}
+%\small
+%        \centering
+%        \begin{tabular}{rl}
+%        \hline
+%        \texttt{user input 1:} & \textit{\texttt{I would like an \bluebox{expensive} \graybox{restaurant} that serves \bluebox{Afghan} food }} \\
+%        \texttt{original annotation:} & \hspace{29mm} Expensiveness \hspace{4mm} Locale \hspace{33mm} - \\
+        %\rowcolor{lightblue}
+%        \texttt{our slot tagger:} & \bf\hspace{31mm} slot-0 \hspace{15mm} - \hspace{38mm}slot-1  \\
+%        \hline
+%        \texttt{user input 2:} & \textit{\texttt{How about \bluebox{Asian} oriental \graybox{food}?}} \\
+%        \texttt{original annotation:} & \hspace{19mm} Origin \hspace{19mm} Food \\
+        %\rowcolor{lightblue}
+%        \texttt{our slot tagger:} & \bf\hspace{20mm}slot-0 \hspace{22mm} - \\
+%        \hline
+%        & ...
+%        \end{tabular}
+        \caption{A sample of a dialogue from CamRest676 data, with labels from a frame-semantic parser (middle) and our slot tagger (bottom).
+        Although ``Afghan'' food is not in the frame parser output, our tagger was able to recognize it. The change in value for slot-1 (corresponding to food type) is successfully captured in the second utterance. This shows that our model can categorize entities (both ``Afghan'' and ``Asian'' relate to the same slot).}
+    \label{fig:example}
+\end{figure}
+We evaluate our approach to slot discovery by comparing the resulting slot labels to gold-standard supervised slot annotation.
+\paragraph{Slot tagging}\hspace{-3mm} is evaluated in Table \ref{table:slotfilling}.
+\emph{Ours-full} (slot selection + trained tagger) outperforms all other approaches by a large margin, especially in terms of recall.
+%\newtext{We note that the slot filling score is low even for the supervised version of our tagger.
+%This is probably due to paraphrases and variants of slot values that can't be captured  well by the tagger.
+The performance cannot match the supervised models, but it is not far off in some domains.\footnote{Note that our measurements of slot F1 only consider the `O' tag as negative (the average is computed over slots only). This results in lower numbers than those reported in literature \cite[cf.~e.g.][]{goo_slot-gated_2018}, but we believe that this reflects the actual performance more accurately.}
+\citet{chen2014leveraging}'s method has a slightly higher precision, but our recall is much higher than theirs.
+Note that \citet{chen2014leveraging} do not reduce the set of candidates, they only rank them so that a manual cut-off can be made.
+In contrast, our method reduces the set of candidates significantly.
+A comparison between \textit{Ours-notag} and \textit{Ours-full} shows that applying the slot tagger improves both precision and recall.
+Tagger without the threshold decision rule (\textit{Ours-nothr}) mostly performs better than the parser; however, using the threshold is essential to improve recall.
+Experiments on ATIS with NER as an additional source of annotation proved that our method can benefit from it.
+As discussed above, the use of the trained tagging model is crucial to improve the recall of our method. In Figure~\ref{fig:tagger_comp}, we compare the results with and without the tagger. We change the value of prediction threshold and measure the number of cases in which the tagging model encounters more true positives, false positives or false negatives, respectively. As the results show, lowering the threshold increases the number of cases in which the tagger finds more correct slot values (and therefore improves recall), while it does not affect the number of false positives much (and therefore retains precision).
+\begin{table}
+        \centering
+        \small
+        \begin{tabular}{l|c|c|c|c}
+        \hline
+         \textbf{method} $\downarrow$ / \textbf{dataset}$ \rightarrow$ &  \textbf{CS} & \textbf{WH} & \textbf{WA} & \textbf{AT} \\
+         \hline
+        Tag-supervised$^\ast$ & $0.724 \pm .003 $ & $\pmb{0.742} \pm .008$ & $\pmb{0.731} \pm .002$ & $\pmb{0.848} \pm .003$ \\
+         Dict-supervised$^\ast$ & $\pmb{0.753} \pm .005 $ & $\pmb{0.750} \pm .018$ & $0.665 \pm .003$ & $0.678 \pm .002$ \\\hline
+        \bf weak supervision $\rightarrow$ & frames & frames & frames &  frames,NER \\\hline
+         Chen et al. & $0.590 \pm .001 $ & $0.382 \pm .001$ & $0.375 \pm .001$ & $0.616 \pm .001$  \\\hdashline[0.5pt/2pt]
+         %\hline
+         Ours-nocl & $0.393 \pm .011 $ & $0.122 \pm .001$ & $0.266 \pm .008 $ & $ 0.677 \pm .002$ \\
+         %\hline
+         Ours-notag & $0.664 \pm .007$ & $0.388 \pm .002$ & $0.383 \pm .002$ & $ 0.648 \pm .003$ \\
+         Ours-nothr & $0.569 \pm .031$ & $0.485 \pm .032$ & $0.435 \pm .002 $ & $0.698 \pm .004$\\
+         %\hline
+         Ours-full & $\pmb{0.692} \pm .008$ & $\pmb{0.548} \pm .004$ & $\pmb{0.439} \pm .001$ & $\pmb{0.710} \pm .002$ \\
+         \hline
+        \end{tabular}
+                 
+        \caption{F1 score values with 95\% confidence intervals for slot tagging performance comparison among different methods. The measures are evaluated using a manual slot mapping to the datasets' annotation, which is not needed for the methods themselves. $^\ast$Note that supervised setups are not directly comparable to our approach.
+        \label{table:slotfilling}
+        }
+\end{table}
+
+\paragraph{Error analysis:}
+We conducted a manual error analysis of slot tagging to gain more insight about the output quality and sources of errors.
+In general, we found that the tagger can generalize and capture unseen values.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.45\textwidth]{images/slots.png}
+    \caption{The comparison of outputs of our tagger and the parser. The plots show a number of cases in which the respective approach encounters more TPs, FPs or FNs than the other.}
+    \label{fig:tagger_comp}
+\end{figure}
+
+One source of errors is the relatively low recall of the frame-semantic parsers used.
+We successfully address this issue by introducing the slot tagger, however, many slot values remain untagged.
+This is expected as our method's performance is inherently limited by the input linguistic annotation quality.
+Another type of errors is caused by the candidate merging procedure (see also below).
+Due to frequent co-occurrence, it might happen that two semantically unrelated candidates are merged and therefore some tokens are wrongly included as respective slot fillers.
+Nevertheless, the merging step is required in order to obtain a reasonable number of slots for a dialogue domain.
+
+Our approach does leave some room for improvements, especially regarding the consistency of results across different slots, which can be imbalanced.
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{l|ccccccccc}
+    \hline
+    \textbf{dataset} & \textbf{price} & \textbf{area} & \textbf{request} & \textbf{type} & \textbf{food} & \textbf{day} & \textbf{people} & \textbf{stars} & \textbf{stay}
+    \\ \hline
+    \textbf{CR} & 0.54 & 0.76 & 0.76 & -- & 0.59 & -- & -- & -- & -- \\
+    \textbf{CS} & 0.63 & 0.84 & 0.48 & 0.81 & 0.64 & -- & -- & -- & -- \\
+    \textbf{WH} & 0.21 & 0.52 & 0.11 & 0.13 & -- & 0.15 & 0.82 & 0.82 & 0.34 \\
+    \hline
+    \end{tabular}
+    
+    \caption{Per-slot F1 scores of the \emph{Ours-full} method evaluated on selected datasets with slot intersection. For some slots the performance varies a lot among datasets due to different ranges of values and contexts. The measures are evaluated using a manually designed slot mapping to the datasets' annotation, which is not needed for the methods themselves.}
+    \label{table:slotfilling_detail}
+\end{table}
+
+\paragraph{Slot candidate ranking}\hspace{-3mm} results are given in Table~\ref{table:avg-precision}.
+Our pipeline significantly outperforms \citet{chen2014leveraging}'s approach on 4 out of 5 datasets.
+We can also see that the slot-verb pairs clustering step is important -- in the ablation experiment where we do not perform clustering (\emph{Ours-nocl}),
+performance falls dramatically on the WOZ-hotel, WOZ-attr and ATIS data.
+This is because without the clustering step, a large number of context-irrelevant slot candidates is considered, hurting performance.
+
+In addition, we include a detailed evaluation of the contribution of the individual slot candidate ranking scores.
+Results in Table~\ref{table:ablation-ranking} suggest that all of our proposed scores improve the performance.
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{lccccc}
+    \hline
+    %\textbf{method} 
+    \textbf{method} & \textbf{CR} & \textbf{CS} & \textbf{WH} & \textbf{WA} & \textbf{AT} \\
+    \hline
+    \multirow{2}{*}{Chen et al.} & $0.315$ & $0.272$ & $0.269$ & $0.393$ & $\pmb{0.267}$ \\
+    & $\pm .002$ & $\pm .001$ & $ \pm .001$ & $ \pm .002$ & $ \pm .003$ \\ 
+    \multirow{2}{*}{Ours-nocl} & $\pmb{0.519}$ & $0.376$ & $0.069$ & $0.176$ & $0.069$ \\
+    & $\pm .003$ & $ \pm .003$ & $ \pm .074$ & $ \pm .016$ & $ \pm .008$ \\
+    \multirow{2}{*}{Ours-full} & $\pmb{0.520}$ & $\pmb{0.400}$ & $\pmb{0.317}$ & $\pmb{0.403}$ & $0.208$ \\
+    & $\pm .004$ & $\pm .003$ & $\pm .008$ & $ \pm .006$ & $ \pm .018$ \\
+
+\hline
+    \end{tabular}
+    
+    \caption{Slot candidate ranking average precision for all datasets}
+    \label{table:avg-precision}
+\end{table}
+\begin{table}
+    \centering
+    \small
+    \begin{tabular}{lc}
+    \hline
+     \textbf{configuration} & \bf F1 score\\
+     \hline
+     Ours-full & $\mathbf{0.663} \pm 0.012$ \\
+     %\hline
+     Ours -frq & $0.600 \pm 0.008$ \\
+     Ours -coh & $0.582 \pm 0.012$ \\
+     Ours -TextRank & $0.514 \pm 0.006$ \\
+
+     %\hline
+     \hline
+    \end{tabular}
+    \caption{Ablation study of slot ranking features on CamRest676. The full model is compared to variants leaving out of the scores.}
+    \label{table:ablation-ranking}
+\end{table}
+\paragraph{Slot merging}\hspace{-3mm} evaluation is shown in Table~\ref{table:merging}.
+Although candidates in the CamRest676 data are merged into slots reasonably well, other datasets show a relatively low performance.
+The low RI scores are a result of errors in candidate ranking, which wrongly assigned high ranks to some rare, irrelevant candidates.
+These candidates do not appear in the reference mapping and are assumed to form singular “pseudo-slots”.
+However, they are typically joined with similar candidates in the merging process.
+This leads to many pairs of candidates that are merged into one slot by our approach but appear separately in the reference mapping.
+Nevertheless, this behavior barely influences slot tagging performance as the candidates are rare.
+\begin{table}[h]
+    \centering
+    \small
+    
+    \begin{tabular}{ll|ccccc}
+    \hline
+      & \textbf{method}\hspace{-3mm} & \textbf{CR} & \textbf{CS} & \textbf{WH} & \textbf{WA} & \textbf{AT} \\
+     \hline
+     \multirow{2}{*}{\textbf{RI}} & Rnd & $0.466$ & $0.268$ & $0.155$ & $0.153$ & $0.178$ \\
+     & Ours & $0.587$ & $0.319$ & $0.168$ & $0.188$ & $0.171$ \\\hline
+     \multirow{2}{*}{\textbf{NMI}\hspace{-2mm}} & Rnd & $0.212$ & $0.137$ & $0.061$ & $0.128$ & $0.171$ \\
+     & Ours & $0.359$ & $0.207$ & $0.101$ & $0.117$ & $0.194$ \\
+
+     \hline
+    \end{tabular}
+    
+    \caption{Slot merging evaluation using RI and NMI on selected datasets, comparing our approach (\emph{Ours}) with a random baseline (\emph{Rnd}).}
+    \label{table:merging}
+\end{table}
+
+\paragraph{Clustering evaluation:} 
+Table \ref{table:intentclust} suggests that our clustering performs better than simple baselines and can potentially yield useful results if used for intent detection.
+Nevertheless, intent detection is more complex and presumably requires more features and information about the dialogue context, which we reserve for future work.
+The complexity is also suggested by the fact that the naive embedding clustering performs worse than the majority baseline in 4 out of 5 cases.
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{lccccc}
+    \hline
+     \textbf{method} & \textbf{CR} & \textbf{CS} & \textbf{WH} & \textbf{WA} & \textbf{AT} \\
+     \hline
+     Majority & $0.592$ & $0.530$ & $0.883$ & $0.612$ & $\pmb{0.727}$ \\
+     Embedding & $0.535$ & $0.551$ & $0.873$ & $0.595$ & $0.705$ \\
+     Ours & $\pmb{0.705}$ & $\pmb{0.613}$ & $\pmb{0.882}$ & $\pmb{0.699}$ & $0.677$ \\
+     \hline
+    \end{tabular}
+    
+    \caption{Cluster assignment accuracy of our methods if we interpret the clustering as user intent detection. \textit{Majority} is a majority baseline and \textit{Embedding} refers to an average sentence embedding clustering approach.
+    }
+    \label{table:intentclust}
+\end{table}
+
+
+% \subsection{Slot tagging precision and recall}
+% \label{sec:app-pr}
+% \begin{table}[h]
+%         \centering
+%         \small
+%         \begin{tabular}{l|cc|cc|cc|cc|cc|cc}
+%          \hline
+%           \multirow{2}{*}{\textbf{method}} & \multicolumn{2}{c|}{\textbf{CR}} & \multicolumn{2}{c|}{\textbf{CS}} & \multicolumn{2}{c|}{\textbf{WH}} & \multicolumn{2}{c|}{\textbf{WA}} & \multicolumn{2}{c}{\textbf{AT}} & \multicolumn{2}{c}{\textbf{AT(+NER)}} \\
+%          %\hline
+%            & P & R & P & R & P & R & P & R & P & R & P & R \\
+%         \hline
+%         Tag-supervised$^\ast$\hspace{-2mm} & $0.794$ & $0.814$ & $0.823$ & $0.696$ & $0.880$ & $0.683$ & $0.802$ & $0.715$ & $0.772$ & $0.913$ & -- & -- \\
+%         Dict-supervised$^\ast$\hspace{-2mm} & $0.793$ & $0.710$ & $0.831$ & $0.752$ & $0.869$ & $0.710$ & $0.669$ & $0.859$ & $0.546$ & $0.990$ & -- & -- \\
+%         \hline
+%          Chen et al. & $\textbf{0.771}$  & $0.486$ & $\textbf{0.813}$ & $0.529$ & $0.384$ & $0.579$ & $0.362$ & $0.462$ & $0.701$ & $0.583$ & -- & --
+%          \\\hdashline[0.5pt/2pt]
+%          %\hline
+%          Ours-nocl & $0.537$ & $0.347$ & $0.616$ & $0.371$ & $0.101$ & $0.218$ & $0.244$ & $0.340$ & $0.634$ & $0.595$ & $0.662$ & $0.704$ \\
+%          %\hline
+%          Ours-notag & $0.561$ &  $0.586$ & $0.690$ & $0.688$ & $0.369$ & $0.607$ & $0.335$ & $0.575$ & $0.715$ & $0.642$ & $0.685$ & $0.623$  \\
+%          Ours-nothr & $0.636$ & $0.549$ & $0.585$ & $0.566$ & $0.458$ & $0.575$ & $\textbf{0.394}$ & $0.561$ & $0.701$ & $0.687$ & $\textbf{0.710}$ & $0.697$ \\
+%          %\hline
+%          Ours-full & $0.752$ & $\textbf{0.643}$ & $0.718$ & $\textbf{0.703}$ & $\textbf{0.494}$ & $\textbf{0.750}$ & $0.373$ & $\textbf{0.606}$ & $0.684$ & $0.672$ & $0.703$ & $\textbf{0.725}$ \\
+%          \hline
+%         \end{tabular}
+                 
+%         \caption{Precision (P) and recall (R) values slot tagging performance comparison among different methods (see Section~\ref{sec:setups}; frames are used as weak supervision in all setups, the rightmost column on ATIS additionally uses NER). We can see consistent recall improvement when using our slot tagger. The measures are evaluated using a manually designed slot mapping to the datasets' annotation, which is not needed for the methods themselves (see Section~\ref{lbl:mapping}). $^\ast$Note that supervised setups are not directly comparable to our approach.
+%         \label{table:slotfilling_pr}
+%         }
+% \end{table}
+
+\subsubsection{Dialogue generation}
+To verify the usefulness of the labels discovered by our method, we use them to train and evaluate an end-to-end task-oriented dialogue system.
+We choose Sequicity \cite{lei2018sequicity} based architecture for our experiments, an LSTM-based encoder-decoder model that uses a system of copy nets and two-stage decoding.
+First, it decodes the dialogue state, so the database can be queried externally.
+In the subsequent step, Sequicity generates the system response conditioned on the belief state and database results.
+This architecture works with a flat representation of the dialogue state, i.e. the state is represented as a sequence of tokens -- slot values.
+
+The basic architecture is further extended by \citet{jin2018explicit}.
+They propose to model the dialogue state explicitly, in a semi-supervised way.
+They extend and end-to-end encoder-decoder dialogue response generation model of \citet{lei2018sequicity} by introducing an additional decoder that has access to posterior information about the system response.
+This allows them to train a state representation with a reconstruction loss on unsupervised examples, using the state as a limited memory for essential concepts (roughly corresponding to slots).
+Their method can be applied in fully unsupervised way, but it still requires some amount of in-domain annotations to achieve good performance.
+The default Sequicity model uses gold-standard dialogue state annotation. However, a compatible state representation is directly obtainable from our labels, simply by concatenating the labels aggregated in each turn from user utterances. Whenever a new value for a slot is found in user input by our tagger, it is either appended to the state representation, or it replaces a previous value of the same slot.
+
+We run three versions of the \citet{jin2018explicit}'s model: \emph{Jin et al.\ supervised} is a model that is trained fully on supervised data to provide perspective on the achieved performance.
+\emph{Jin et al.\ unsupervised} is, on the contrary, fully unsupervised, i.e. we provide no labeled examples during the training phase, to give a fair comparison against our model.
+Finally, \emph{Jin et al.\ weak-labels} doesn't use any supervised labels but is presented labels obtained by our method.
+
+\begin{table}
+    \centering
+    \smaller
+    \begin{tabular}{l|c|c|c}
+    \hline
+      \textbf{method} & \textbf{Slot F1} & \textbf{Joint Goal Accuracy} & \textbf{Entity Match Rate} \\
+      %\hline
+ %      & onto & no-onto & onto & no-onto & onto & no-onto \\
+      \hline
+        Jin et al.\ supervised & $0.967 \pm .001$ & $0.897 \pm .002$ & $0.869 \pm .004$ \\
+        Jin et al.\ unsupervised & $0.719 \pm .002$ & $0.385 \pm .003$ & $0.019 \pm .002$ \\
+        Jin et al.\ weak-labels & $0.709 \pm .011$ & $0.335 \pm .008$ & $0.269 \pm .012$ \\\hdashline[0.5pt/2pt]
+        Ours-full (unsupervised) & $\pmb{0.756} \pm .004$ & $\pmb{0.465} \pm .007$ & $\pmb{0.368} \pm .008$ \\
+     \hline
+    \end{tabular}
+    \caption{Evaluation on the downstream task of dialogue generation on CamRest676 data. We evaluate with respect to three state tracking metrics. The best results in an unsupervised setting are presented in bold.}
+    \label{table:downstream}
+\end{table}
+\footnotetext{We present results taken in unsupervised setting, i.e. when no ontology is available.}
+
+\paragraph{Results} We explore the influence that our labels have on sequence-to-sequence dialogue response generation in an experiment on the CamRest676 data (see Table~\ref{table:downstream}).
+We can see that our method provides helpful slot labels that improve dialogue state tracking performance.
+Compared to \citet{jin2018explicit}'s system used in a fully unsupervised setting, our approach shows significant improvements in all metrics.
+We achieve better results than \citet{jin2018explicit}'s system especially with respect to entity match rate, suggesting that our model can provide consistent labels throughout the whole dialogue.
+To make a fair comparison, we further evaluate \citet{jin2018explicit}'s system in a setting in which it can learn from the labels provided directly by weak supervision (i.e., the frame-semantic parser, not filtered by our pipeline).
+We observe an improvement in terms of entity match rate, but it does not match the improvement achieved with our filtered labels. Surprisingly, slot F1 and joint goal accuracy even decrease slightly, 
+which suggests that label quality is important and the noisy labels obtained directly from weak supervision are not useful enough.
+

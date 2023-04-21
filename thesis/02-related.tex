@@ -1,0 +1,174 @@
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Related Work}%
+\label{chap:related}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\label{sec:relwork}
+Because of varying use cases of DS, the architectures may vary a lot.
+We thus introduce a classification of dialogue systems that reflects the expected capabilities.
+There are multiple approaches to define a dialogue system taxonomy in the literature.
+Here we introduce the widely used classification scheme \cite{jurafsky2000speech}.
+\begin{enumerate}
+    \item \textbf{Question Answering (QA)} - Although sometimes not mentioned in the context of dialogue systems, QA task can be seen as an instance of a simple conversation. The main task of a QA system is to provide answers to the user's questions.
+    The topics may vary a lot and good understanding is essential for this task as well as knowledge representation.
+    The dialogues are usually quite simple and often consist of just one question and the respective answer.
+    \item \textbf{Task-oriented DS} - In this setting, the system's goal is to complete a task based on the user's instructions.
+    The successful completion may depend on several attributes that the system has to learn from the user utterances.
+    The system is also allowed to ask for additional information if needed and typically works with some external source of information such as database.
+    Here the dialogues are usually much more complex than in the QA setting and dialogue context has to be taken into account.
+    \item \textbf{Chit-chat} - In some cases, we might be interested in a system that is able to talk to the user casually and provide entertainment.
+    Such systems might be used in combination with task-oriented systems to serve as human-like virtual assistants or possibly use the dialogue to advertise for products etc.
+    The context and knowledge base are also important, but in most cases there is no well-defined task to be completed, so the evaluation is subjective.
+\end{enumerate}
+
+Another way of classifying the dialogues considers their domain of operation.
+\textbf{Single-domain} systems are able to work only in one topic area, e.g. public transport or restaurant information, whereas \textbf{multi-domain} systems are able to handle multiple domains.
+These types of systems aren't able to give meaningful answers outside of the domains that they're trained on.
+A dialogue system is considered \textbf{open-domain} if it's able to have a conversation not limited to a predefined set of domains.
+In practice, this is achievable only to some extent since the knowledge base of the program is always limited.
+However, with internet access and smart information retrieval methods, the systems are able to cover tens of different domains.
+
+Here we focus on the task-oriented DS and discuss it in more depth.
+From the domain perspective, task-oriented DS are usually either single or multi domain systems, open-domain is not often the case.
+We can see a task-oriented dialogue as a slot filling task.
+That means we have a predefined set of semantic \textit{slots} that need to be filled with the right \textit{values}.
+Each utterance in the task-oriented dialogue is considered an action that potentially changes the state of the conversation.
+Such actions can be represented using \textit{Dialogue Acts (DA)}\cite{core1997coding}.
+DA is a tuple consisting of user \textit{intent} (overall meaning of the sentence) and optionally also \textit{slot} and the corresponding \textit{value}.
+In case that multiple slot values are present, all are considered to have the same intent.
+An example dialogue with respective DA representation is depicted in Table \ref{fig:das}.
+\begin{table*}[t]
+\small
+\setlength\fboxsep{2pt}
+        \centering
+        \begin{tabular}{rll}
+        \textbf{\texttt{USER:}} & \textit{\texttt{I would like a cheap restaurant.}} & \textbf{\texttt{\colorbox{pastelyellow}{inform}(\colorbox{lightblue}{price}=\colorbox{pastelgreen}{cheap})}} \\
+        \textbf{\texttt{SYSTEM:}} & \textit{\texttt{Golden plate is cheap.}} & \textbf{\texttt{\colorbox{pastelyellow}{inform}(\colorbox{lightblue}{name}=\colorbox{pastelgreen}{Golden plate})}} \\
+        \hdashline[1.5pt/2pt]
+        \textbf{\texttt{USER:}} & \textit{\texttt{What is the cuisine?}} & \textbf{\texttt{\colorbox{pastelyellow}{request}(\colorbox{lightblue}{cuisine})}} \\
+        \textbf{\texttt{SYSTEM:}} & \textit{\texttt{They serve chinese food.}} & \textbf{\texttt{\colorbox{pastelyellow}{inform}(\colorbox{lightblue}{cuisine}=\colorbox{pastelgreen}{chinese})}} \\
+        \hdashline[1.5pt/2pt]
+        \textbf{\texttt{USER:}} & \textit{\texttt{Sounds good. Bye!}} & \textbf{\texttt{\colorbox{pastelyellow}{goodbye}()}} \\
+        \textbf{\texttt{SYSTEM:}} & \textit{\texttt{Have a great day.}} & \textbf{\texttt{\colorbox{pastelyellow}{goodbye}()}} \\
+        \end{tabular}
+\normalsize
+        \caption{Example of task-oriented dialogue in the restaurant reservation domain. Utterance representations as dialogue acts are depicted on the right. Intents are highlighted in orange, slot names in blue and respective values in green. Note that not all dialogue acts include slots and values}
+    \label{fig:das}
+\end{table*}
+Most dialogue system modules for limited domains can be implemented by designing a set of rules and templates.
+Such systems can yield satisfying results in some use cases, nevertheless, they are inflexible and generally not considered promising from the research point of view.
+Therefore, we focus on data-driven approaches based on machine learning models.
+
+\subsection{Modular architectures}
+\label{sec:relwork-modular}
+The traditional dialogue system implementation, especially for task-oriented dialogues, is based on modular architecture.
+The modular system consists of several components connected to form a pipeline.
+First, the Natural Language Understanding (NLU) module parses the utterance and creates structured representation.
+Based on NLU outputs, the dialogue management module determines the next action.
+Dialogue Management usually consists of the state tracker that updates state based on NLU outputs and the policy module that chooses the action.
+Finaly, the language generation module is used to verbalize the chosen action.
+\subsubsection{Natural Language Understanding (NLU)} The purpose of NLU is to extract the meaning of input utterances in natural language and transform it to a structured representation, i.e. dialogue acts.
+Basically, the NLU module has three subtasks.
+It has to determine the domain of the utterance, detect the user intent and capture any slot values, if present.
+From the machine learning point of view, the intent and domain detection can be seen as a classification task and sentence-level classification can be utilized \cite{yaman2008integrative,schapire2000boostexter}.
+The slot-value filling can be approached as a sequence tagging problem.
+Many approaches have been proposed to tackle this issue, ranging from SVM \cite{shi2016recurrent} and HMM \cite{surendran2006dialog} based taggers to various neural models \cite{adel2016comparing, zhang2017position, mesnil2014using}.
+Because of the similar nature of these three sub-tasks, it is reasonable to model them jointly.
+Especially modeling the intent detection together with slot filling proved to be beneficial for the model performance \cite{zhang2017position, liu2016attention, xu2013convolutional}.
+\subsubsection{Dialogue State Tracking (DST)} Dialogue state is used to keep track of the dialogue history, effectively providing the necessary context.
+Dialogue State Trackers are used to update the state with correct values after each turn.
+The most straightforward solution to this problem is a rule-based system that simply tracks the current slot values based on NLU.
+However, the situation is usually more complicated.
+We need to take into account a distribution of slot value probabilities and the update rules can be rather complex.
+\citet{vzilka2013comparison} provides a comparison of different data driven models for dialogue state tracking.
+Neural networks have also been used to model the distributions \cite{mrkvsic2016neural, zhong2018global} and deal with multiple domain handling \cite{rastogi2017scalable}.
+
+\subsubsection{Dialogue Policy} The core component of the DS is the dialogue policy.
+Its responsibility is to make the decision which action should the system take in each turn.
+The policy decision can thus be framed as a classification task \cite{gavsic2013gaussian}.
+Learning the policy just from the offline data might not produce robust policy due to low variability in the data.
+Therefore, many works model the dialogue  as a partially observable Markov decision process \cite{gavsic2010gaussian, thomson2010bayesian}.
+Reinforcement learning techniques are then applied to learn the policy and incorporate human  feedback \cite{peng2017composite, su2016line}.
+
+\subsubsection{Natural Language Generation (NLG)} When the decision on a system action is made, the system needs to verbalize the action.
+In other words, we need to create an utterance in natural language that expresses the information given in the system's underlying representation.
+NLG is often realized with a set of handcrafted templates which are selected heuristically \cite{rudnicky_creating_1999}.
+Variability of the generated utterances is limited and the scalability is poor.
+Therefore corpus-based methods have been proposed \cite{oh2000stochastic, mairesse-young-2014-stochastic}.
+Lately, neural network based systems were proposed as well \cite{wen-etal-2015-semantically, wen-etal-2016-multi}
+
+\subsection{End-to-end architectures}
+\label{sec:relwork-end-to-end}
+The module-based approach is advantageous thanks to its good level of explainability.
+In case of low performance, we can track the respective modules' outputs and find the source of problems.
+On the other hand, error accumulation makes it difficult to recover from errors that were made by the modules early on in the pipeline.
+Another disadvantage is the way how these systems are trained.
+Each component requires specific data annotation, thus it can be difficult and costly to obtain a dataset suitable for training all of the components.
+Also, the system design itself is more complicated since it requires implementation of multiple models.
+
+Various end-to-end solutions have been proposed to address the drawbacks of modular system training.
+This was made possible largely thanks to the growing popularity of Neural Networks (NN) and the backpropagation algorithm over the last decade.
+NN form a family of models that naturally allow us to combine multiple models and train them using single training algorithm.
+Therefore several solutions were proposed that implement the respective modules using neural network based models, interconnect them to form the pipeline and train them jointly \cite{li-etal-2017-end,wen-etal-2017-network}.
+Although the end-to-end training improves scalability of the models, the proposed architectures still require multiple levels of data annotation for training.
+To mitigate this problem, \citet{serban2016building} proposed a hierarchical end-to-end model that uses two levels of encoder-decoder Recurrent Neural Networks (RNN), one operating on dialogue turn level for keeping long-term context and one operating on word level for analyzing the current user input.
+It does not follow the traditional pipeline scheme and thus does not require expert annotations.
+However, it is not suitable for practical use in task-oriented DS in its raw form due to overall low performance and insufficient robustness.
+The idea was further extended by \citet{williams2017hybrid} who introduced the \textit{Hybrid Code Networks}, an architecture that uses multiple utterance representations which are customizable by the developer.
+Despite good performance and flexibility, the proposed model again required a non-trivial amount of data annotation.
+\citet{lei2018sequicity} came with a novel idea to model the dialogue with an extended sequence-to-sequence model.
+\label{sec:sequicity}
+They use an encoder-decoder architecture based on RNN that generates a dialogue state prior to response generation.
+They summarize the dialogue history in the RNN hidden state and use a system of copy mechanisms to be able to track the dialogue state.
+The proposed dialogue state representation is greatly simplified and doesn't require explicit NLU input, thus the annotation process is significantly easier.
+
+In recent years, the NLP word has witnessed a great success of attention based models (Transformers) \cite{vaswani2017attention} and their usage as pre-trained language models \cite{devlin-etal-2019-bert}.
+In the area of dialogue systems, these models also show prominent results in the open-domain setting \cite{DBLP:journals/corr/abs-1901-08149} or for dialogue state tracking \cite{chao2019bert}.
+The pretrained models are naturally utilizable for transfer learning, which proved to be useful in dialogue domain adaptation task \cite{shalyminov-etal-2019-shot}.
+Recently, attention-based architecture was proposed that models latent dialogue actions \cite{bao2019plato}.
+
+\subsection{Unsupervised and transfer learning methods}
+\label{sec:relwork-unsup}
+The research of methods that reduce the amount of supervision needed can be divided into two paradigms.
+One direction of research tries to construct a method of unsupervised or weakly supervised data analysis, focusing on a certain part of the dialogue pipeline.
+Such a method can provide artificial supervision for the supervised models introduced earlier.
+The other option is to design a model that inherently doesn't need supervision or requires less annotation.
+
+\subsubsection{Unsupervised analysis and labeling}
+Various methods have been proposed to deal with NLU without explicit  supervision.
+\citet{chen2016zero} first proposed a model for zero-shot user intent embedding prediction by training convolutional neural network that is trained to score the sentence-intent similarities.
+Recently, \citet{shi2018auto} proposed an intent detection model with the use of sentence clustering based on sentence-level features.
+They have applied their method successfully for the task of intent detection.
+
+The idea of using semantic relations to perform language understanding in the unsupervised setting was proposed by \citet{heck2012exploiting}.
+Here the authors use the Semantic Web \cite{berners2001semantic} which is a triple-based database of entity relations.
+Their approach relies heavily on structured web pages for the target domain.
+They exploit the structure to obtain semantic annotations in an unsupervised setting.
+
+\label{sec:relwork-chen}
+\citet{chen2014leveraging} combine the paradigms of semantic frame parsing with distributional semantics to perform unsupervised semantic slot induction.
+The authors further improve their model in \citet{chen2015jointly} where they select the most prominent slot candidates using lexical knowledge graphs.
+
+\citet{brychcin2016unsupervised} focused on modeling the dialogue as Markov decision process using HMMs.
+By fitting the HMMs to the data, they explore the dialogue dynamics and assign Dialogue Acts to the HMM states.
+\citet{shi2019unsupervised} took this approach one step further by using more complex model based on RNNs and Variational Autoencoders.
+After fitting the model, they analyse the hidden state transitions and infer the dialogue structure from it.
+\subsubsection{Modeling dialogues with less supervision}
+Work regarding the usage of semi-supervised or unsupervised methods for the dialogue response generation task as a whole in the task-oriented setting has been limited so far.
+One of the main challenges is to model the dialogue state with no supervision since it is by definition structured and might be quite complex.
+
+The method proposed by \citet{jin2018explicit} builds on \citet{lei2018sequicity}'s sequence-to-sequence dialogue model (see Section~\ref{sec:sequicity}) by introducing a posterior regularization term in the loss function.
+The model has two modules, a teacher and a student, to track the dialogue state and works in a semi-supervised way.
+For supervised data, both tracker modules are trained with supervised classification loss.
+For unsupervised data, teacher modeule can look at system responses, therefore it operates with more input information and makes more accurate predictions.
+The student module is then trained to minimize the KL divergence loss.
+The teacher module is conditioned on the system response, so it can't be used when the model is deployed, but it helps to train the student even with unlabeled data.
+
+\citet{wen2017latent} introduced a model that learns latent intentions, bypassing the explicit dialogue state modeling.
+\citet{zhao-eskenazi-2018-zero} approached the problem differently.
+They designed a novel dialogue system model based on VAEs.
+Their model uses supervised data from one domain to learn latent action representations.
+Their recognition module is learned to map utterance representations to the same feature space as the action representations.
+When transfering to another domain, the model needs only a small number of so-called seed responses to adapt.
+Based on this idea, other works followed \citep{shalyminov-etal-2019-shot, huang2019mala}.
+
