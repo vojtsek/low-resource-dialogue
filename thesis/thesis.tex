@@ -45,6 +45,7 @@
 \usepackage[above,section]{placeins} % avoid figures pushed at end of chapters
 \usepackage{listings}
 
+\usepackage{pifont}% http://ctan.org/pkg/pifont
 \usepackage{tabularx}
 \usepackage{booktabs} % nicer lines in table
 \usepackage{multicol}
@@ -71,6 +72,23 @@
 \usepackage{subcaption} % sub figures in a fiture
 \usepackage{standalone} % include standoalone tikz images
 \usepackage{bibentry}
+
+\usepackage{inconsolata}
+
+\usepackage{multirow}
+\usepackage{tablefootnote}
+\usepackage{float}
+
+
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\usepackage{color, colortbl}
+
+\definecolor{tablegray}{rgb}{0.9,0.9,0.9}
+\definecolor{darkgreen}{rgb}{0,0.5,0}
+\definecolor{lightblue}{rgb}{0.7,0.9,1}
+\definecolor{lblue}{rgb}{0.25,0.5,1}
+
+\usepackage[normalem]{ulem}
 
 % hack bibentry command for list of publications
 \makeatletter
@@ -136,7 +154,7 @@ da-ta-set
 \newcommand{\veryshortarrow}[1][3pt]{\mathrel{%
      \vcenter{\hbox{\rule[-.5\fontdimen8\textfont3]{#1}{\fontdimen8\textfont3}}}%
      \mkern-4mu\hbox{\usefont{U}{lasy}{m}{n}\symbol{41}}}}
-
+\newcommand{\pz}{\phantom{0}}
 \newcommand{\paperdisclaim}[1]{%
 \begin{center}\begin{minipage}{0.9\textwidth}
 \footnotesize\it #1
@@ -148,6 +166,7 @@ da-ta-set
 \definecolor{lightblue}{rgb}{0.6,0.8,1.0}
 \definecolor{pastelgreen}{rgb}{0.65,0.8,0.4}
 \definecolor{pastelyellow}{rgb}{1.0,0.8,0.5}
+
 
 \title{Doctoral Thesis Template}
 
@@ -209,15 +228,6 @@ I understand that my work relates to the rights and obligations
 \newcommand{\VH}[1] {
   {\color{darkgreen}\emph{VH:} #1}
   }
- \newcommand{\kuba}[1] {
-  {\color{darkgreen}\emph{Kuba:} #1}
-  }
- \newcommand{\jindra}[1] {
-  {\color{orange}\emph{Jindra:} #1}
-  }
- \newcommand{\david}[1] {
-  {\color{green}\emph{DM:} #1}
-  }
 
 \cleardoublepage{} % new page
 \pagestyle{plain}
@@ -237,7 +247,7 @@ I understand that my work relates to the rights and obligations
 
 \begin{description}[leftmargin=7.5em,labelwidth=7em,labelindent=0em,labelsep=0.5em]
         %
-\item[Keywords:] TODO add keywords such as: randomness, deep randomness, deep random processing (notice the nice black block marking the hbox overflow).
+\item[Keywords:]dialogue systems, semi-supervised learning, language models, variational training, hierarchical models, clustering
     %
 \end{description}
 
@@ -309,9 +319,13 @@ I understand that my work relates to the rights and obligations
 
 \sloppy
 \include{thesis/01-intro.tex}
-\include{thesis/02-related.tex}
-\include{thesis/03-data-analysis.tex}
-\include{thesis/04-dialogue-modeling.tex}
+\include{thesis/02-background.tex}
+\include{thesis/03-related.tex}
+\include{thesis/04-data-analysis.tex}
+\include{thesis/05-dialogue-modeling.tex}
+\include{thesis/06-lm-tod.tex}
+\include{thesis/07-large-language-models.tex}
+\include{thesis/08-conclusion.tex}
 
 %
 % TEXT END

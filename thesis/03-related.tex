@@ -1,0 +1,149 @@
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Related Work}%
+\label{chap:related}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:relwork}
+
+\subsection{Modular dialogue architectures}
+\label{sec:relwork-modular}
+The traditional dialogue system implementation, especially for task-oriented dialogues, is based on modular architecture.
+The modular system consists of several components connected to form a pipeline.
+First, the Natural Language Understanding (NLU) module parses the utterance and creates structured representation.
+Based on NLU outputs, the dialogue management module determines the next action.
+Dialogue Management usually consists of the state tracker that updates state based on NLU outputs and the policy module that chooses the action.
+Finaly, the language generation module is used to verbalize the chosen action.
+\subsubsection{Natural Language Understanding (NLU)}
+From the machine learning point of view, the intent and domain detection can be seen as a classification task and sentence-level classification can be utilized \cite{yaman2008integrative,schapire2000boostexter}.
+The slot-value filling can be approached as a sequence tagging problem.
+Many approaches have been proposed to tackle this issue, ranging from SVM \cite{shi2016recurrent} and HMM \cite{surendran2006dialog} based taggers to various neural models \cite{adel2016comparing, zhang2017position, mesnil2014using}.
+Because of the similar nature of these three sub-tasks, it is reasonable to model them jointly.
+Especially modeling the intent detection together with slot filling proved to be beneficial for the model performance \cite{zhang2017position, liu2016attention, xu2013convolutional}.
+\subsubsection{Dialogue State Tracking (DST)} 
+The most straightforward solution to this problem is a rule-based system that simply tracks the current slot values based on NLU.
+However, the situation is usually more complicated.
+We need to take into account a distribution of slot value probabilities and the update rules can be rather complex.
+\citet{vzilka2013comparison} provides a comparison of different data-driven models for dialogue state tracking.
+Neural networks have also been used to model the distributions \cite{mrkvsic2016neural, zhong2018global} and deal with multiple domain handling \cite{rastogi2017scalable}.
+
+\subsubsection{Dialogue Policy}
+The policy decision can thus be framed as a classification task \cite{gavsic2013gaussian}.
+Learning the policy just from the offline data might not produce robust policy due to low variability in the data.
+Therefore, many works model the dialogue as a partially observable Markov decision process \cite{gavsic2010gaussian, thomson2010bayesian}.
+Reinforcement learning techniques are then applied to learn the policy and incorporate human feedback \cite{peng2017composite, su2016line}.
+
+\subsubsection{Natural Language Generation (NLG)}
+NLG is often realized with a set of handcrafted templates which are selected heuristically \cite{rudnicky_creating_1999}.
+Variability of the generated utterances is limited and the scalability is poor.
+Therefore corpus-based methods have been proposed \cite{oh2000stochastic, mairesse-young-2014-stochastic}.
+Lately, neural network based systems were proposed as well \cite{wen-etal-2015-semantically, wen-etal-2016-multi}
+
+\subsection{End-to-end architectures}
+\label{sec:relwork-end-to-end}
+Various end-to-end solutions have been proposed to address the drawbacks of modular system training.
+This was made possible largely thanks to the growing popularity of Neural Networks (NN) and the backpropagation algorithm over the last decade.
+NN form a family of models that naturally allow us to combine multiple models and train them using a single training algorithm.
+Therefore several solutions were proposed that implement the respective modules using neural network-based models, interconnect them to form the pipeline and train them jointly \cite{li-etal-2017-end,wen-etal-2017-network}.
+Although the end-to-end training improves the scalability of the models, the proposed architectures still require multiple levels of data annotation for training.
+To mitigate this problem, \citet{serban2016building} proposed a hierarchical end-to-end model that uses two levels of encoder-decoder Recurrent Neural Networks (RNN), one operating on dialogue turn level for keeping long-term context and one operating on word level for analyzing the current user input.
+It does not follow the traditional pipeline scheme and thus does not require expert annotations.
+However, it is not suitable for practical use in task-oriented DS in its raw form due to overall low performance and insufficient robustness.
+The idea was further extended by \citet{williams2017hybrid} who introduced the \textit{Hybrid Code Networks}, an architecture that uses multiple utterance representations which are customizable by the developer.
+Despite good performance and flexibility, the proposed model again required a non-trivial amount of data annotation.
+\citet{lei2018sequicity} came up with a novel idea to model the dialogue with an extended sequence-to-sequence model.
+\label{sec:sequicity}
+They use an encoder-decoder architecture based on RNN that generates a dialogue state prior to response generation.
+They summarize the dialogue history in the RNN hidden state and use a system of copy mechanisms to be able to track the dialogue state.
+The proposed dialogue state representation is greatly simplified and doesn't require explicit NLU input, thus the annotation process is significantly easier.
+
+In recent years, the NLP word has witnessed a great success of attention-based models (Transformers) \cite{vaswani2017attention} and their usage as pre-trained language models \cite{devlin-etal-2019-bert}.
+In the area of dialogue systems, these models also show prominent results in the open-domain setting \cite{DBLP:journals/corr/abs-1901-08149} or for dialogue state tracking \cite{chao2019bert}.
+The pretrained models are naturally utilizable for transfer learning, which proved to be useful in dialogue domain adaptation task \cite{shalyminov-etal-2019-shot}.
+Recently, attention-based architecture was proposed that models latent dialogue actions \cite{bao2019plato}.
+\
+\subsection{Large Language Models}
+The Transformer architecture \cite{vaswani2017attention} enabled training larger and more capable language models.
+The research on their few-shot and zero-shot abilities probably dates back to the GPT-2 and GPT-3 models \cite{radford2019language,brown2020language}, which are scaled versions of the Transformer decoder.
+Many followed this path of training large Transformer decoders \cite{zhang2022opt,black2022gpt}, yielding models of sizes up to hundreds of billions parameters big \cite{zhao_survey_2023}.
+There are also models that leverage the whole original Transformer architecture (encoder and decoder) such as T5 \cite{2020t5}.
+Recently, we've seen research focusing on training smaller architectures with similar capabilities and thus making the usage of LLMs available to the general public \cite{touvron2023llama}.
+
+\subsubsection{Instruction Tuning}
+The idea of using reinforcement learning techniques to align model-based agents better with users' intents was pioneered in game agent development \cite{christiano2017deep} and later explored for training language models \cite{ziegler2019fine,ouyang2022training}.
+Although these techniques proved to be quite effective, the process is still very demanding in terms of collecting feedback from the users.
+Consequently, several datasets were proposed \cite{supernaturalinstructions,iyer2022opt,black2022gpt} that collected millions of instructions-based tasks in natural language and can be applied to align LMs in a fashion similar to reinforcement learning.
+
+\subsubsection{LM-based modeling of task-oriented dialogue}
+Task-oriented dialogue modeling with the use of pretrained language models was researched by \citet{zhang2019dialogpt} or \citet{peng-etal-2021-soloist} who followed the ideas of text-based state encoding and 2-stage generation proposed in the Sequicity model \cite{lei2018sequicity}.
+In this approach a text-based model is first used to decode the structured belief state.
+The belief state is later used to optionally retrieve db information and finally, the model is called once more, conditioned on the belief state and retrieved information to generate a response.
+Several other improvements were then proposed to the architecture which either improve on contrastive state training \cite{kulhanek-etal-2021-augpt} or redefine state tracking as generation of belief state differences \cite{lin-etal-2020-mintl}.
+Others also proposed a combination of the purely generative models and retrieval-based approaches\cite{pandey-etal-2018-exemplar,cai-etal-2019-retrieval,nekvinda-dusek-2022-aargh}.
+All of the above-mentioned works finetuned the model on the in-domain data, which is in contrast with the pure in-context learning approach that we apply.
+
+\subsection{Unsupervised and transfer learning methods}
+\label{sec:relwork-unsup}
+The research of methods that reduce the amount of supervision needed can be divided into two paradigms.
+One direction of research tries to construct a method of unsupervised or weakly supervised data analysis, focusing on a certain part of the dialogue pipeline.
+Such a method can provide artificial supervision for the supervised models introduced earlier.
+The other option is to design a model that inherently doesn't need supervision or requires less annotation.
+
+\subsubsection{Unsupervised analysis and labeling}
+Various methods have been proposed to deal with NLU without explicit supervision.
+\citet{chen2016zero} first proposed a model for zero-shot user intent embedding prediction by training convolutional neural network that is trained to score the sentence-intent similarities.
+Recently, \citet{shi2018auto} proposed an intent detection model with the use of sentence clustering based on sentence-level features.
+They have applied their method successfully for the task of intent detection.
+
+The idea of using semantic relations to perform language understanding in the unsupervised setting was proposed by \citet{heck2012exploiting}.
+Here the authors use the Semantic Web \cite{berners2001semantic} which is a triple-based database of entity relations.
+Their approach relies heavily on structured web pages for the target domain.
+They exploit the structure to obtain semantic annotations in an unsupervised setting.
+
+\label{sec:relwork-chen}
+\citet{chen2014leveraging} combine the paradigms of semantic frame parsing with distributional semantics to perform unsupervised semantic slot induction.
+The authors further improve their model in \citet{chen2015jointly} where they select the most prominent slot candidates using lexical knowledge graphs.
+However, both approaches only output a ranking of potential slot candidates based on frames.
+Since frame annotation is very fine-grained, this produces a huge number of candidates, requiring their manual merging  %of frame labels 
+into slots for any practical use.
+In contrast, we determine domain-relevant slots automatically.
+\citet{coope_span-convert_2020} focus on a few-shot setting and perform span extraction of slot values using pretrained models. Their approach, however, still requires some expert annotation.
+Another direction of research focuses on zero-shot slot filling.  \citet{bapna2017towards}'s recurrent-neural-network-based slot tagger is pretrained on multiple domains and takes a textual description of the target slot on the input in addition to the user utterance. This way, adapting to a new domain only involves providing new slot descriptions.
+Further works extend this idea with more complex architectures \cite{shah2019robust,liu2020coach}.
+An interesting follow-up work was presented in \citet{yu-etal-2022-unsupervised} who discover dialogue schema slot candidates by analyzing attention spans of pretrained LMs and clustering the spans with the DBSCAN algorithm.
+Recently, \citet{qiu2022structure} proposed an alternative way to dialogue slot discovery by using pretrained sequence tagging models based on BERT taggers.
+
+\subsubsection{Dialogue structure discovery}
+\citet{brychcin2016unsupervised} focused on modeling the dialogue as Markov decision process using HMMs.
+By fitting the HMMs to the data, they explore the dialogue dynamics and assign Dialogue Acts to the HMM states.
+Later, people based the structure discovery on the VRNN-based models.
+In the DVRNN model \cite{shi2019unsupervised} the authors train an unsupervised VRNN model with discrete latent states and explore transition probabilities of the neighboring latent states to explore the dialogue structure.
+This approach is later improved by \citet{qiu-etal-2020-structured} who propose to augment VRNN with the CRF layer in their SVRNN model.
+Yet another work which combines LM-based representations and HMM is presented in \citet{lu-etal-2022-unsupervised}.
+
+\subsubsection{Modeling dialogue generation with less supervision}
+Work regarding the usage of semi-supervised or unsupervised methods for the dialogue response generation task as a whole in the task-oriented setting has been limited so far.
+One of the main challenges is to model the dialogue state with no supervision since it is by definition structured and might be quite complex.
+
+The method proposed by \citet{jin2018explicit} builds on \citet{lei2018sequicity}'s sequence-to-sequence dialogue model (see Section~\ref{sec:sequicity}) by introducing a posterior regularization term in the loss function.
+The model has two modules, a teacher and a student, to track the dialogue state and works in a semi-supervised way.
+For supervised data, both tracker modules are trained with supervised classification loss.
+For unsupervised data, teacher module can look at system responses, therefore it operates with more input information and makes more accurate predictions.
+The student module is then trained to minimize the KL divergence loss.
+The teacher module is conditioned on the system response, so it can't be used when the model is deployed, but it helps to train the student even with unlabeled data.
+
+\citet{wen2017latent} introduced a model that learns latent intentions, bypassing the explicit dialogue state modeling.
+\citet{zhao-eskenazi-2018-zero} approached the problem differently.
+They designed a novel dialogue system model based on VAEs.
+Their model uses supervised data from one domain to learn latent action representations.
+Their recognition module is learned to map utterance representations to the same feature space as the action representations.
+When transfering to another domain, the model needs only a small number of so-called seed responses to adapt.
+Based on this idea, other works followed \citep{shalyminov-etal-2019-shot, huang2019mala}.
+
+\subsubsection{Few-shot dialogue modelling}
+One of the first neural network based models focusing on learning dialogue from few in-domain examples were the Hybrid Code Networks  \cite{williams-etal-2017-hybrid}, a trainable system based on recurrent neural networks, with partially handcrafted components.
+Another approach  was proposed in \citet{zhao-eskenazi-2018-zero} who used latent actions representations to enable transfer of domain knowledge.
+Latent actions were also used in \citet{huang2020mala} or \citet{shalyminov-etal-2019-data}.
+More recent approaches use the Tansformer architecture and pretrained language modesls \cite{shalyminov_fast_2020} to leverage the abilities that these models obtained during large-scaled pretraining.
+Another example is \citet{madotto2020language} or
+\citet{hu-etal-2022-context} who used LLMs and in-context learning to perform belief state tracking.
+They did not use instruction tuned models and formulated the task as an SQL query generation.
+However, they omit the response generation as well as database retrieval.

@@ -6,23 +6,23 @@ Task-oriented dialogue systems are widely used for various applications, such as
 
 \section{Discovering dialogue slots}
 Getting just raw, unlabeled, data for dialogue system training is not difficult, especially if we restrict the target domain.
-In general it's sufficient to record some conversations happening either in real life or in artificial conditions. 
+In general, it's sufficient to record some conversations happening either in real life or in artificial conditions. 
 A requirement for dialogue state labels makes this process much more costly.
 The sets of slots and their values typically need to be designed by domain experts.
 This procedure consists of multiple tasks:
 \begin{enumerate}
     \item Determine which concepts need to be captured
-    \item Define them in consistent way
+    \item Define them in a consistent way
     \item Label the occurrences of these concepts in the training data.
 \end{enumerate}
 As mentioned, these steps require expert knowledge and sometimes non-trivial level of domain understanding.
 Although we might design a system that does not rely on the usage of slots, both traditional pipeline systems \cite{young_pomdp-based_2013} and end-to-end task-oriented architectures \cite{wen2016network} typically require such annotation.
 While some systems use implicit, latent state representation and do not require explicit labels \citep{serban2016building}, the behavior of such systems is hard to interpret or control, which can be crucial in practical applications.
-Moreover, the use of slots enable communication with external interfaces, as discussed before.
+Moreover, the use of slots enables communication with external interfaces, as discussed before.
 There are several works aiming at keeping interpretability and reducing the annotation needs by automating it \citep{chen2014leveraging,chen2015jointly} or transferring annotation across domains \cite{zhao_zero-shot_2018,coope_span-convert_2020}, but they still require significant manual effort.
 We present a novel approach to discovering a set of domain-relevant dialogue slots and their values given a set of dialogues in the target domain (such as transcripts from a call center).
 Our approach requires no manual annotation at all in order to tag slots in dialogue data.
-This substantially simplifies dialogue system design and training process, as the developer no longer needs to design a set of slots and annotate their occurrences in training data.
+This substantially simplifies the dialogue system design and training process, as the developer no longer needs to design a set of slots and annotate their occurrences in training data.
 \subsection{Method overview}
 We discover slots by analyzing outputs of generic domain-independent natural language taggers such as a semantic frame parser or a named entity recognizer (NER).
 These models are able to detect important and relevant concepts in natural language utterances and subsequently group them using a set of pre-determined generic labels.
@@ -55,6 +55,7 @@ Next, we are going to describe the tagging models that were used in our experime
 
 \subsection{Tagging semantic concepts}
 \label{03:tagging_concepts}
+
 Our approach to selecting candidates for our method requires an initial pool of carefully chosen options that represent coherent concepts. This step is critical to ensure the effectiveness of our selection process. To achieve this goal, we strive to gather as many candidates as possible while still preserving the above constraint.
 One of the key features of our method is its ability to merge several concepts into one, which means that we aim for high granularity and specificity in our input labels. As a result, we need to ensure that each candidate represents a unique concept that is distinguishable from others.
 
@@ -82,7 +83,7 @@ We take the individual Frame Elements as source for our slot candidates.
 It fits well our requirements because the task is universal and the named entities definition is not specific to any particular domain.
 \subsection{Selection of slot candidates}
 \label{03:candidate_selection}
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.9\textwidth]{images/merging.pdf}
     \caption{The selection step in our pipeline processes the input data and yields a set of slot candidates that should be relevant to the target domain.}
@@ -96,7 +97,7 @@ To achieve this, we design an iterative slot discovery procedure -- in each iter
 Once no more frames are eliminated, the process stops and we obtain slot labels, which are used to train a slot tagger (see Section~\ref{03:training_tagger}).
 
 We refer to the automatically tagged tokens as \emph{(slot) fillers}, and the tags are considered slot candidates.
-In order to be able to select relevant candiates, we need to represent them in continuous space.
+In order to be able to select relevant candidates, we need to represent them in continuous space.
 We use word embedding vectors and compute \emph{slot embeddings} $e(s_k)$ for each 
 distinct slot candidate $s_k$ as word embedding averages over all respective slot fillers, weighted proportionally by filler frequency.
 The slot embeddings need to be re-computed after each iteration due to the merging step.
@@ -194,11 +195,12 @@ The datasets vary in several properties like number of domains or collection pro
 This means we can compare the results on different data distributions and on tasks with different complexities.
 Specifically, we use the following datasets in our experiments:
 \begin{itemize}
-    \item \textbf{CamRest676} (\textbf{CR}) \cite{wen2016network} has 676 dialogues, 2,744 user utterances, 4 tracked slots and 2 intents in the restaurant domain.
-    \item \textbf{MultiWOZ} \cite{budzianowski2018multiwoz,eric2019multiwoz} is a multi-domain corpus; we picked two domains -- hotel reservation and attraction recommendation -- to form \textbf{WOZ-hotel} (\textbf{WH}) with 14,435 utterances, 9 slots, 3 intents and \textbf{WOZ-attr} (\textbf{WA}) with 7524 utterances, 8 slots and 3 intents respectively.\footnote{MultiWOZ contains more domains such as \emph{restaurant, train search, bus search}. However, we decided to not include these as they are nearly identical to the other domains we use.}
-    \item \textbf{Cambridge SLU} \cite{henderson2012discriminative} (\textbf{CS}) contains 10,569 utterances and tracks 5 slots with 5 intents in the restaurant domain.
-    \item \textbf{ATIS} (\textbf{AT}) \cite{hemphill_atis_1990} contains 4,978 utterances with 79 slots and 17 intents in the flights domain.\footnote{We used the ATIS data version from \url{https://www.kaggle.com/siddhadev/atis-dataset-from-ms-cntk}.}
+    \item \textbf{CamRest676} (\textbf{CR})
+    \item \textbf{MultiWOZ} we picked two domains -- hotel reservation and attraction recommendation -- to form \textbf{WOZ-hotel} (\textbf{WH}) with 14,435 utterances, 9 slots, 3 intents and \textbf{WOZ-attr} (\textbf{WA}) with 7524 utterances, 8 slots and 3 intents respectively.
+    \item \textbf{ATIS} (\textbf{AT}
+    \item \textbf{Cambridge SLU} (\textbf{CS})
 \end{itemize}
+For more details, please refer to Section \ref{02:sec:input-data-desc}.
 \paragraph{3rd party models}
 As sources of weak supervision providing slot candidates, we mainly use the frame semantic parsers \textit{SEMAFOR} \cite{das2010semafor} and \textit{open-sesame} \cite{swayamdipta2017frame} -- a union of labels provided by both parsers is used in all our setups. In addition, to explore combined sources on the named-entity-heavy ATIS dataset, we include a generic convolutional NER model provided by SpaCy.\footnote{\url{https://spacy.io}}
 To provide features for slot candidate merging and selection, we use AllenNLP \cite{Gardner2017AllenNLP} for SRL
@@ -246,7 +248,7 @@ We provide an example of such a reference mapping in Table \ref{03:ref_mapping}
     \label{03:ref_mapping}
 \end{table}
 
-For quantitative evaluation we use the following evaluation metrics:
+For quantitative evaluation we use the following evaluation metrics.
 \begin{itemize}[nosep,leftmargin=10pt]
     \item \textbf{Slot F1 score}: To reflect slot tagging performance, we measure precision, recall, and F1 for every slot individually.
     An average is then computed from slot-level scores, weighted by the number of slot occurrences in the data.
@@ -261,14 +263,11 @@ For quantitative evaluation we use the following evaluation metrics:
     
     \item \textbf{Normalized Mutual Information (NMI)} is the mutual information between two clusterings normalized into the (0, 1) interval.
     Thanks to the normalization, it is suitable for comparing two clusterings with different numbers of clusters.
-
-    
-    \item \textbf{Intent Accuracy} is the percentage of slot occurrences assigned into the correct intent cluster under the reference mapping.
-    \item \textbf{Dialogue Joint Goal Accuracy} calculates the proportion of dialogue turns where all user constraints (i.e., dialogue state summarizing slot values) are captured correctly \cite{mrkvsic2016neural}.
-    
-    \item \textbf{Dialogue Entity Match Rate} calculates the last turn's entity in each dialogue. It verifies if  a correct entity would be retrieved from the database using the final constraints \cite{wen2016network}.
-
+    \item \textbf{Intent Accuracy}
+    \item \textbf{Joint Goal Accuracy}
+    \item \textbf{Entity Match Rate}
 \end{itemize}
+For more details about some of the the metrics please refer to Section \ref{02:sec:eval_metrics}.
 For slot tagging and ranking evaluation, we sampled a random data order 50 times and performed 5-fold cross-validation for each permutation.
 For the dialogue generation evaluation, we trained the models 100 times and used averaged results.
 All results are given with 95\% confidence intervals.
@@ -364,7 +363,7 @@ As discussed above, the use of the trained tagging model is crucial to improve t
         }
 \end{table}
 
-\paragraph{Error analysis:}
+\paragraph{Error analysis}
 We conducted a manual error analysis of slot tagging to gain more insight about the output quality and sources of errors.
 In general, we found that the tagger can generalize and capture unseen values.
 \begin{figure}
@@ -528,7 +527,7 @@ The complexity is also suggested by the fact that the naive embedding clustering
 %         }
 % \end{table}
 
-\subsubsection{Dialogue generation}
+\subsection{Dialogue generation application}
 To verify the usefulness of the labels discovered by our method, we use them to train and evaluate an end-to-end task-oriented dialogue system.
 We choose Sequicity \cite{lei2018sequicity} based architecture for our experiments, an LSTM-based encoder-decoder model that uses a system of copy nets and two-stage decoding.
 First, it decodes the dialogue state, so the database can be queried externally.
@@ -574,3 +573,32 @@ To make a fair comparison, we further evaluate \citet{jin2018explicit}'s system 
 We observe an improvement in terms of entity match rate, but it does not match the improvement achieved with our filtered labels. Surprisingly, slot F1 and joint goal accuracy even decrease slightly, 
 which suggests that label quality is important and the noisy labels obtained directly from weak supervision are not useful enough.
 
+\subsection{Unsupervised candidate selection}
+The method introduced in this chapter is limited by the requirement of third party models that are needed to gather the initial slot of candidates.
+Therefore we experiment with alternative ways of obtaining slot candidates in completely unsupervised manner.
+This can potentially lift the requirement of generic pretrained models.
+
+\subsubsection{Memory Networks for candidates selection}
+\subsubsection{Obtaining candidates from Large Language Models}
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{lccc}
+    \hline
+     \textbf{method} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
+     \hline
+     Mem2Seq & 0.72 & 0.22 & 0.31 \\
+     LLM-ChatGPT & 0.76 & 0.23 & 0.35 \\
+     LLM-Tk-instruct & 0.78 & 0.08 & 0.14 \\
+     Mem2Seq+Ours & 0.92 & 0.26 & 0.38 \\
+     LLM-ChatGPT+Ours & 0.67 & 0.29 & 0.39 \\
+     LLM-Tk-instruct+Ours & 0.49 & 0.17 & 0.22 \\
+     
+     \hline
+    \end{tabular}
+    
+    \caption{Cluster assignment accuracy of our methods if we interpret the clustering as user intent detection. \textit{Majority} is a majority baseline and \textit{Embedding} refers to an average sentence embedding clustering approach.
+    }
+    \label{table:intentclust}
+\end{table}

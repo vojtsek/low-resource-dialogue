@@ -10,7 +10,6 @@
   year =	 2014
 }
 
-
 @inproceedings{vaswani2017attention,
   author =	 {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and
                   Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N and
@@ -211,14 +210,7 @@
   year={2017},
   address={Stockholm, Sweden},
 }
-@inproceedings{lei2018sequicity,
-  title={Sequicity: Simplifying task-oriented dialogue systems with single sequence-to-sequence architectures},
-  author={Lei, Wenqiang and Jin, Xisen and Kan, Min-Yen and Ren, Zhaochun and He, Xiangnan and Yin, Dawei},
-  booktitle={Proceedings of ACL},
-  pages={1437--1447},
-  year={2018},
-  url={https://www.aclweb.org/anthology/P18-1133},
-}
+
 @article{blei2003latent,
   title={Latent dirichlet allocation},
   author={Blei, David M and Ng, Andrew Y and Jordan, Michael I},
@@ -307,14 +299,113 @@
   year={1984},
   XXXpublisher={ACM}
 }
-@inproceedings{papineni2002bleu,
-  title={BLEU: a method for automatic evaluation of machine translation},
-  author={Papineni, Kishore and Roukos, Salim and Ward, Todd and Zhu, Wei-Jing},
-  booktitle={Proceedings of ACL},
-  pages={311--318},
-  year={2002},
-  XXXorganization={Association for Computational Linguistics}
+@article{mikolov2010recurrent,
+  title={Recurrent neural network based language model},
+  author={Mikolov, Tom{\'a}{\v{s}} and Karafi{\'a}t, Martin and Burget, Luk{\'a}{\v{s}} and {\v{C}}ernock{\`y}, Jan and Khudanpur, Sanjeev},
+  journal={Interspeech 2010},
+  year={2010},
+  publisher={ISCA}
 }
+
+@article{radford2018improving,
+  title={Improving language understanding by generative pre-training},
+  author={Radford, Alec and Narasimhan, Karthik and Salimans, Tim and Sutskever, Ilya and others},
+  year={2018},
+  publisher={OpenAI}
+}
+
+@article{liu2019roberta,
+  title={Roberta: A robustly optimized bert pretraining approach},
+  author={Liu, Yinhan and Ott, Myle and Goyal, Naman and Du, Jingfei and Joshi, Mandar and Chen, Danqi and Levy, Omer and Lewis, Mike and Zettlemoyer, Luke and Stoyanov, Veselin},
+  journal={arXiv preprint arXiv:1907.11692},
+  year={2019}
+}
+
+@article{reimers2019sentence,
+  title={Sentence-bert: Sentence embeddings using siamese bert-networks},
+  author={Reimers, Nils and Gurevych, Iryna},
+  journal={arXiv preprint arXiv:1908.10084},
+  year={2019}
+}
+
+@article{brown2020language,
+  title={Language models are few-shot learners},
+  author={Brown, Tom and Mann, Benjamin and Ryder, Nick and Subbiah, Melanie and Kaplan, Jared D and Dhariwal, Prafulla and Neelakantan, Arvind and Shyam, Pranav and Sastry, Girish and Askell, Amanda and others},
+  journal={Advances in neural information processing systems},
+  volume={33},
+  pages={1877--1901},
+  year={2020}
+}
+
+@article{raffel2020exploring,
+  title={Exploring the limits of transfer learning with a unified text-to-text transformer},
+  author={Raffel, Colin and Shazeer, Noam and Roberts, Adam and Lee, Katherine and Narang, Sharan and Matena, Michael and Zhou, Yanqi and Li, Wei and Liu, Peter J},
+  journal={The Journal of Machine Learning Research},
+  volume={21},
+  number={1},
+  pages={5485--5551},
+  year={2020},
+  publisher={JMLRORG}
+}
+
+@article{dong2022survey,
+  title={A survey for in-context learning},
+  author={Dong, Qingxiu and Li, Lei and Dai, Damai and Zheng, Ce and Wu, Zhiyong and Chang, Baobao and Sun, Xu and Xu, Jingjing and Sui, Zhifang},
+  journal={arXiv preprint arXiv:2301.00234},
+  year={2022}
+}
+
+@article{min2022rethinking,
+  title={Rethinking the role of demonstrations: What makes in-context learning work?},
+  author={Min, Sewon and Lyu, Xinxi and Holtzman, Ari and Artetxe, Mikel and Lewis, Mike and Hajishirzi, Hannaneh and Zettlemoyer, Luke},
+  journal={arXiv preprint arXiv:2202.12837},
+  year={2022}
+}
+
+@article{wei2022emergent,
+  title={Emergent abilities of large language models},
+  author={Wei, Jason and Tay, Yi and Bommasani, Rishi and Raffel, Colin and Zoph, Barret and Borgeaud, Sebastian and Yogatama, Dani and Bosma, Maarten and Zhou, Denny and Metzler, Donald and others},
+  journal={arXiv preprint arXiv:2206.07682},
+  year={2022}
+}
+
+@inproceedings{tu-etal-2022-prompt,
+    title = "Prompt-Tuning Can Be Much Better Than Fine-Tuning on Cross-lingual Understanding With Multilingual Language Models",
+    author = "Tu, Lifu  and
+      Xiong, Caiming  and
+      Zhou, Yingbo",
+    booktitle = "Findings of the Association for Computational Linguistics: EMNLP 2022",
+    month = dec,
+    year = "2022",
+    address = "Abu Dhabi, United Arab Emirates",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.findings-emnlp.401",
+    pages = "5478--5485",
+    abstract = "Pre-trained multilingual language models show significant performance gains for zero-shot cross-lingual model transfer on a wide range of natural language understanding (NLU) tasks. Previously, for zero-shot cross-lingual evaluation, pre-trained models are only fine-tuned on English data and tested on a variety of target languages. In this paper, we do cross-lingualevaluation on various NLU tasks (sentence classification, sequence labeling, question answering) using prompt-tuning and compare it with fine-tuning. The results show that prompt tuning achieves much better cross-lingual transfer than fine-tuning across datasets, with only 0.1{\%} to 0.3{\%} tuned parameters. Additionally, we demonstrate through the analysis that prompt tuning can have better cross-lingual transfer-ability of representations on downstream tasks with better aligned decision boundaries.",
+}
+
+@article{hu2021lora,
+  title={Lora: Low-rank adaptation of large language models},
+  author={Hu, Edward J and Shen, Yelong and Wallis, Phillip and Allen-Zhu, Zeyuan and Li, Yuanzhi and Wang, Shean and Wang, Lu and Chen, Weizhu},
+  journal={arXiv preprint arXiv:2106.09685},
+  year={2021}
+}
+
+@inproceedings{pfeiffer2020AdapterHub,
+    title={AdapterHub: A Framework for Adapting Transformers},
+    author={Pfeiffer, Jonas and
+            R{\"u}ckl{\'e}, Andreas and
+            Poth, Clifton and
+            Kamath, Aishwarya and
+            Vuli{\'c}, Ivan and
+            Ruder, Sebastian and
+            Cho, Kyunghyun and
+            Gurevych, Iryna},
+    booktitle={Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing: System Demonstrations},
+    pages={46--54},
+    year={2020}
+}
+
 
 @inproceedings{manning2014stanford,
   title={The Stanford CoreNLP natural language processing toolkit},
@@ -697,42 +788,8 @@
     pages = "1777--1788",
     abstract = "One of the core components of modern spoken dialogue systems is the belief tracker, which estimates the user{'}s goal at every step of the dialogue. However, most current approaches have difficulty scaling to larger, more complex dialogue domains. This is due to their dependency on either: a) Spoken Language Understanding models that require large amounts of annotated training data; or b) hand-crafted lexicons for capturing some of the linguistic variation in users{'} language. We propose a novel Neural Belief Tracking (NBT) framework which overcomes these problems by building on recent advances in representation learning. NBT models reason over pre-trained word vectors, learning to compose them into distributed representations of user utterances and dialogue context. Our evaluation on two datasets shows that this approach surpasses past limitations, matching the performance of state-of-the-art models which rely on hand-crafted semantic lexicons and outperforming them when such lexicons are not provided.",
 }
-@inproceedings{li-etal-2017-end,
-    title = "End-to-End Task-Completion Neural Dialogue Systems",
-    author = "Li, Xiujun  and
-      Chen, Yun-Nung  and
-      Li, Lihong  and
-      Gao, Jianfeng  and
-      Celikyilmaz, Asli",
-    booktitle = "Proceedings of the Eighth International Joint Conference on Natural Language Processing (Volume 1: Long Papers)",
-    month = nov,
-    year = "2017",
-    address = "Taipei, Taiwan",
-    publisher = "Asian Federation of Natural Language Processing",
-    url = "https://www.aclweb.org/anthology/I17-1074",
-    pages = "733--743",
-    abstract = "One of the major drawbacks of modularized task-completion dialogue systems is that each module is trained individually, which presents several challenges. For example, downstream modules are affected by earlier modules, and the performance of the entire system is not robust to the accumulated errors. This paper presents a novel end-to-end learning framework for task-completion dialogue systems to tackle such issues.Our neural dialogue system can directly interact with a structured database to assist users in accessing information and accomplishing certain tasks. The reinforcement learning based dialogue manager offers robust capabilities to handle noises caused by other components of the dialogue system. Our experiments in a movie-ticket booking domain show that our end-to-end system not only outperforms modularized dialogue system baselines for both objective and subjective evaluation, but also is robust to noises as demonstrated by several systematic experiments with different error granularity and rates specific to the language understanding module.",
-}
 
-@inproceedings{wen-etal-2017-network,
-    title = "A Network-based End-to-End Trainable Task-oriented Dialogue System",
-    author = "Wen, Tsung-Hsien  and
-      Vandyke, David  and
-      Mrk{\v{s}}i{\'c}, Nikola  and
-      Ga{\v{s}}i{\'c}, Milica  and
-      Rojas-Barahona, Lina M.  and
-      Su, Pei-Hao  and
-      Ultes, Stefan  and
-      Young, Steve",
-    booktitle = "Proceedings of the 15th Conference of the {E}uropean Chapter of the Association for Computational Linguistics: Volume 1, Long Papers",
-    month = apr,
-    year = "2017",
-    address = "Valencia, Spain",
-    publisher = "Association for Computational Linguistics",
-    url = "https://www.aclweb.org/anthology/E17-1042",
-    pages = "438--449",
-    abstract = "Teaching machines to accomplish tasks by conversing naturally with humans is challenging. Currently, developing task-oriented dialogue systems requires creating multiple components and typically this involves either a large amount of handcrafting, or acquiring costly labelled datasets to solve a statistical learning problem for each component. In this work we introduce a neural network-based text-in, text-out end-to-end trainable goal-oriented dialogue system along with a new way of collecting dialogue data based on a novel pipe-lined Wizard-of-Oz framework. This approach allows us to develop dialogue systems easily and without making too many assumptions about the task at hand. The results show that the model can converse with human subjects naturally whilst helping them to accomplish tasks in a restaurant search domain.",
-}
+
 @inproceedings{zhao-eskenazi-2016-towards,
     title = "Towards End-to-End Learning for Dialog State Tracking and Management using Deep Reinforcement Learning",
     author = "Zhao, Tiancheng  and
@@ -1040,84 +1097,7 @@
   booktitle={ANLP-NAACL 2000 Workshop: Conversational Systems},
   year={2000}
 }
-@article{mairesse-young-2014-stochastic,
-    title = "Stochastic Language Generation in Dialogue using Factored Language Models",
-    author = "Mairesse, Fran{\c{c}}ois  and
-      Young, Steve",
-    journal = "Computational Linguistics",
-    volume = "40",
-    number = "4",
-    month = dec,
-    year = "2014",
-    url = "https://www.aclweb.org/anthology/J14-4003",
-    doi = "10.1162/COLI_a_00199",
-    pages = "763--799",
-}
-@inproceedings{wen-etal-2015-semantically,
-    title = "Semantically Conditioned {LSTM}-based Natural Language Generation for Spoken Dialogue Systems",
-    author = "Wen, Tsung-Hsien  and
-      Ga{\v{s}}i{\'c}, Milica  and
-      Mrk{\v{s}}i{\'c}, Nikola  and
-      Su, Pei-Hao  and
-      Vandyke, David  and
-      Young, Steve",
-    booktitle = "Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing",
-    month = sep,
-    year = "2015",
-    address = "Lisbon, Portugal",
-    publisher = "Association for Computational Linguistics",
-    url = "https://www.aclweb.org/anthology/D15-1199",
-    doi = "10.18653/v1/D15-1199",
-    pages = "1711--1721",
-}
-@inproceedings{wen-etal-2016-multi,
-    title = "Multi-domain Neural Network Language Generation for Spoken Dialogue Systems",
-    author = "Wen, Tsung-Hsien  and
-      Ga{\v{s}}i{\'c}, Milica  and
-      Mrk{\v{s}}i{\'c}, Nikola  and
-      Rojas-Barahona, Lina M.  and
-      Su, Pei-Hao  and
-      Vandyke, David  and
-      Young, Steve",
-    booktitle = "Proceedings of the 2016 Conference of the North {A}merican Chapter of the Association for Computational Linguistics: Human Language Technologies",
-    month = jun,
-    year = "2016",
-    address = "San Diego, California",
-    publisher = "Association for Computational Linguistics",
-    url = "https://www.aclweb.org/anthology/N16-1015",
-    doi = "10.18653/v1/N16-1015",
-    pages = "120--129",
-}
-@inproceedings{zhao-eskenazi-2018-zero,
-    title = "Zero-Shot Dialog Generation with Cross-Domain Latent Actions",
-    author = "Zhao, Tiancheng  and
-      Eskenazi, Maxine",
-    booktitle = "Proceedings of the 19th Annual {SIG}dial Meeting on Discourse and Dialogue",
-    month = jul,
-    year = "2018",
-    address = "Melbourne, Australia",
-    publisher = "Association for Computational Linguistics",
-    url = "https://www.aclweb.org/anthology/W18-5001",
-    doi = "10.18653/v1/W18-5001",
-    pages = "1--10",
-    abstract = "This paper introduces zero-shot dialog generation (ZSDG), as a step towards neural dialog systems that can instantly generalize to new situations with minimum data. ZSDG requires an end-to-end generative dialog system to generalize to a new domain for which only a domain description is provided and no training dialogs are available. Then a novel learning framework, Action Matching, is proposed. This algorithm can learn a cross-domain embedding space that models the semantics of dialog responses which in turn, enables a neural dialog generation model to generalize to new domains. We evaluate our methods on two datasets, a new synthetic dialog dataset, and an existing human-human multi-domain dialog dataset. Experimental results show that our method is able to achieve superior performance in learning dialog models that can rapidly adapt their behavior to new domains and suggests promising future research.",
-}
-@inproceedings{shalyminov-etal-2019-shot,
-    title = "Few-Shot Dialogue Generation Without Annotated Data: A Transfer Learning Approach",
-    author = "Shalyminov, Igor  and
-      Lee, Sungjin  and
-      Eshghi, Arash  and
-      Lemon, Oliver",
-    booktitle = "Proceedings of the 20th Annual SIGdial Meeting on Discourse and Dialogue",
-    month = sep,
-    year = "2019",
-    address = "Stockholm, Sweden",
-    publisher = "Association for Computational Linguistics",
-    url = "https://www.aclweb.org/anthology/W19-5904",
-    doi = "10.18653/v1/W19-5904",
-    pages = "32--39",
-    abstract = "Learning with minimal data is one of the key challenges in the development of practical, production-ready goal-oriented dialogue systems. In a real-world enterprise setting where dialogue systems are developed rapidly and are expected to work robustly for an ever-growing variety of domains, products, and scenarios, efficient learning from a limited number of examples becomes indispensable. In this paper, we introduce a technique to achieve state-of-the-art dialogue generation performance in a few-shot setup, without using any annotated data. We do this by leveraging background knowledge from a larger, more highly represented dialogue source {---} namely, the MetaLWOz dataset. We evaluate our model on the Stanford Multi-Domain Dialogue Dataset, consisting of human-human goal-oriented dialogues in in-car navigation, appointment scheduling, and weather information domains. We show that our few-shot approach achieves state-of-the art results on that dataset by consistently outperforming the previous best model in terms of BLEU and Entity F1 scores, while being more data-efficient than it by not requiring any data annotation.",
-}
+
 @article{huang2019mala,
   title={MALA: Cross-Domain Dialogue Generation with Action Learning},
   author={Huang, Xinting and Qi, Jianzhong and Sun, Yu and Zhang, Rui},
@@ -1149,33 +1129,14 @@
   booktitle={Proc.\ NAACL},
   year={2016}
 }
-@article{zhao2018unsupervised,
-  title={Unsupervised discrete sentence representation learning for interpretable neural dialog generation},
-  author={Zhao, Tiancheng and Lee, Kyusong and Eskenazi, Maxine},
-  journal={arXiv preprint arXiv:1804.08069},
-  year={2018}
-}
+
 @article{gu2016incorporating,
   title={Incorporating copying mechanism in sequence-to-sequence learning},
   author={Gu, Jiatao and Lu, Zhengdong and Li, Hang and Li, Victor OK},
   journal={arXiv preprint arXiv:1603.06393},
   year={2016}
 }
-@inproceedings{papineni-etal-2002-bleu,
-    title = "{B}leu: a Method for Automatic Evaluation of Machine Translation",
-    author = "Papineni, Kishore  and
-      Roukos, Salim  and
-      Ward, Todd  and
-      Zhu, Wei-Jing",
-    booktitle = "Proceedings of the 40th Annual Meeting of the Association for Computational Linguistics",
-    month = jul,
-    year = "2002",
-    address = "Philadelphia, Pennsylvania, USA",
-    publisher = "Association for Computational Linguistics",
-    url = "https://www.aclweb.org/anthology/P02-1040",
-    doi = "10.3115/1073083.1073135",
-    pages = "311--318",
-}
+
 @inproceedings{lowe2017towards,
   title={Towards an Automatic Turing Test: Learning to Evaluate Dialogue Responses},
   author={Lowe, Ryan and Noseworthy, Michael and Serban, Iulian Vlad and Angelard-Gontier, Nicolas and Bengio, Yoshua and Pineau, Joelle},
@@ -1190,6 +1151,61 @@
   month=dec # "~25",
   publisher={Google Patents},
   note={US Patent 10,162,813}
+}
+
+@article{werbos1990backpropagation,
+  title={Backpropagation through time: what it does and how to do it},
+  author={Werbos, Paul J},
+  journal={Proceedings of the IEEE},
+  volume={78},
+  number={10},
+  pages={1550--1560},
+  year={1990},
+  publisher={IEEE}
+}
+
+@article{kaplan2020scaling,
+  title={Scaling laws for neural language models},
+  author={Kaplan, Jared and McCandlish, Sam and Henighan, Tom and Brown, Tom B and Chess, Benjamin and Child, Rewon and Gray, Scott and Radford, Alec and Wu, Jeffrey and Amodei, Dario},
+  journal={arXiv preprint arXiv:2001.08361},
+  year={2020}
+}
+
+@article{hoffmann2022training,
+  title={Training compute-optimal large language models},
+  author={Hoffmann, Jordan and Borgeaud, Sebastian and Mensch, Arthur and Buchatskaya, Elena and Cai, Trevor and Rutherford, Eliza and Casas, Diego de Las and Hendricks, Lisa Anne and Welbl, Johannes and Clark, Aidan and others},
+  journal={arXiv preprint arXiv:2203.15556},
+  year={2022}
+}
+
+@inproceedings{dahl1994expanding,
+  title={Expanding the scope of the ATIS task: The ATIS-3 corpus},
+  author={Dahl, Deborah A and Bates, Madeleine and Brown, Michael K and Fisher, William M and Hunicke-Smith, Kate and Pallett, David S and Pao, Christine and Rudnicky, Alexander and Shriberg, Elizabeth},
+  booktitle={Human Language Technology: Proceedings of a Workshop held at Plainsboro, New Jersey, March 8-11, 1994},
+  year={1994}
+}
+
+@article{qiu2022structure,
+  title={Structure extraction in task-oriented dialogues with slot clustering},
+  author={Qiu, Liang and Wu, Chien-Sheng and Liu, Wenhao and Xiong, Caiming},
+  journal={arXiv preprint arXiv:2203.00073},
+  year={2022}
+}
+
+@article{deriu_survey_2021,
+	title = {Survey on {Evaluation} {Methods} for {Dialogue} {Systems}},
+	volume = {54},
+	url = {http://arxiv.org/abs/1905.04071},
+	doi = {10.1007/s10462-020-09866-x},
+	abstract = {In this paper we survey the methods and concepts developed for the evaluation of dialogue systems. Evaluation is a crucial part during the development process. Often, dialogue systems are evaluated by means of human evaluations and questionnaires. However, this tends to be very cost and time intensive. Thus, much work has been put into finding methods, which allow to reduce the involvement of human labour. In this survey, we present the main concepts and methods. For this, we differentiate between the various classes of dialogue systems (task-oriented dialogue systems, conversational dialogue systems, and question-answering dialogue systems). We cover each class by introducing the main technologies developed for the dialogue systems and then by presenting the evaluation methods regarding this class.},
+	urldate = {2019-10-11},
+	journal = {Artificial Intelligence Review},
+	author = {Deriu, Jan and Rodrigo, Alvaro and Otegi, Arantxa and Echegoyen, Guillermo and Rosset, Sophie and Agirre, Eneko and Cieliebak, Mark},
+	month = jan,
+	year = {2021},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Computation and Language, Computer Science - Human-Computer Interaction, Computer Science - Machine Learning},
+	pages = {755--810},
+	file = {arXiv\:1905.04071 PDF:C\:\\Users\\Ondra\\Zotero\\storage\\QLQ4IXKG\\Deriu et al. - 2019 - Survey on Evaluation Methods for Dialogue Systems.pdf:application/pdf},
 }
 
 
@@ -1241,22 +1257,7 @@
   year={2020}
 }
 
-@inproceedings{devlin-etal-2019-bert,
-    title = "{BERT}: Pre-training of Deep Bidirectional Transformers for Language Understanding",
-    author = "Devlin, Jacob  and
-      Chang, Ming-Wei  and
-      Lee, Kenton  and
-      Toutanova, Kristina",
-    booktitle = "Proceedings of the 2019 Conference of the North {A}merican Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)",
-    month = jun,
-    year = "2019",
-    address = "Minneapolis, Minnesota",
-    publisher = "Association for Computational Linguistics",
-    url = "https://www.aclweb.org/anthology/N19-1423",
-    doi = "10.18653/v1/N19-1423",
-    pages = "4171--4186",
-    abstract = "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models (Peters et al., 2018a; Radford et al., 2018), BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5 (7.7 point absolute improvement), MultiNLI accuracy to 86.7{\%} (4.6{\%} absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
-}
+
 @inproceedings{keizer-etal-2019-user,
     title = "User Evaluation of a Multi-dimensional Statistical Dialogue System",
     author = "Keizer, Simon  and
@@ -1489,22 +1490,6 @@ location = {Long Beach, California, USA},
 series = {NIPS'17}
 }
 
-@inproceedings{eric-etal-2017-key,
-    title = "Key-Value Retrieval Networks for Task-Oriented Dialogue",
-    author = "Eric, Mihail  and
-      Krishnan, Lakshmi  and
-      Charette, Francois  and
-      Manning, Christopher D.",
-    booktitle = "Proceedings of the 18th Annual {SIG}dial Meeting on Discourse and Dialogue",
-    month = aug,
-    year = "2017",
-    address = {Saarbr{\"u}cken, Germany},
-    publisher = "Association for Computational Linguistics",
-    url = "https://www.aclweb.org/anthology/W17-5506",
-    doi = "10.18653/v1/W17-5506",
-    pages = "37--49",
-}
-
 
 @inproceedings{zhang_probabilistic_2020,
 	address = {Online},
@@ -1687,19 +1672,6 @@ Jason Weston},
 	file = {Full Text PDF:C\:\\Users\\Ondra\\Zotero\\storage\\6I5SXVI9\\Ham et al. - 2020 - End-to-End Neural Pipeline for Goal-Oriented Dialo.pdf:application/pdf}
 }
 
-@inproceedings{rosenberg-hirschberg-2007-v,
-    title = "{V}-Measure: A Conditional Entropy-Based External Cluster Evaluation Measure",
-    author = "Rosenberg, Andrew  and
-      Hirschberg, Julia",
-    booktitle = "Proceedings of the 2007 Joint Conference on Empirical Methods in Natural Language Processing and Computational Natural Language Learning ({EMNLP}-{C}o{NLL})",
-    month = jun,
-    year = "2007",
-    address = "Prague, Czech Republic",
-    publisher = "Association for Computational Linguistics",
-    url = "https://www.aclweb.org/anthology/D07-1043",
-    pages = "410--420",
-}
-
 
 @inproceedings{zhang2019,
   title={Task-Oriented Dialog Systems that Consider Multiple Appropriate Responses under the Same Context},
@@ -1723,16 +1695,6 @@ Jason Weston},
 	author = {Radford, Alec and Wu, Jeffrey and Child, Rewon and Luan, David and Amodei, Dario and Sutskever, Ilya},
 	year = {2019},
  url = {https://openai.com/blog/better-language-models/},
-}
-
-@inproceedings{vaswani2017,
-  title={Attention is all you need},
-  author={Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N and Kaiser, {\L}ukasz and Polosukhin, Illia},
-  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
-  pages={5998--6008},
-  year={2017},
-  address={Long Beach, CA, USA},
-  url={http://arxiv.org/abs/1706.03762},
 }
 
 @inproceedings{wen2017,
@@ -1879,27 +1841,6 @@ Mausam},
   timestamp = {Fri, 27 Nov 2020 10:48:03 +0100},
   biburl    = {https://dblp.org/rec/journals/corr/abs-2003-12738.bib},
   bibsource = {dblp computer science bibliography, https://dblp.org}
-}
-
-@inproceedings{qiu-etal-2020-structured,
-    title = "Structured Attention for Unsupervised Dialogue Structure Induction",
-    author = "Qiu, Liang  and
-      Zhao, Yizhou  and
-      Shi, Weiyan  and
-      Liang, Yuan  and
-      Shi, Feng  and
-      Yuan, Tao  and
-      Yu, Zhou  and
-      Zhu, Song-Chun",
-    booktitle = "Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)",
-    month = nov,
-    year = "2020",
-    address = "Online",
-    publisher = "Association for Computational Linguistics",
-    url = "https://aclanthology.org/2020.emnlp-main.148",
-    doi = "10.18653/v1/2020.emnlp-main.148",
-    pages = "1889--1899",
-    abstract = "Inducing a meaningful structural representation from one or a set of dialogues is a crucial but challenging task in computational linguistics. Advancement made in this area is critical for dialogue system design and discourse analysis. It can also be extended to solve grammatical inference. In this work, we propose to incorporate structured attention layers into a Variational Recurrent Neural Network (VRNN) model with discrete latent states to learn dialogue structure in an unsupervised fashion. Compared to a vanilla VRNN, structured attention enables a model to focus on different parts of the source sentence embeddings while enforcing a structural inductive bias. Experiments show that on two-party dialogue datasets, VRNN with structured attention learns semantic structures that are similar to templates used to generate this dialogue corpus. While on multi-party dialogue datasets, our model learns an interactive structure demonstrating its capability of distinguishing speakers or addresses, automatically disentangling dialogues without explicit human annotation.",
 }
 
 @inproceedings{huang-etal-2020-generalizable,
@@ -2053,4 +1994,564 @@ Mausam},
 	month = dec,
 	year = {2014},
 	pages = {360--365},
+}
+
+
+% Use this file for citations not found in the ACL Anthology (contained in "anthology.bib").
+
+@book{Aho:72,
+    author  = {Alfred V. Aho and Jeffrey D. Ullman},
+    title   = {The Theory of Parsing, Translation and Compiling},
+    year    = "1972",
+    volume  = "1",
+    publisher = {Prentice-Hall},
+    address = {Englewood Cliffs, NJ}
+}
+
+@book{APA:83,
+    author  = {{American Psychological Association}},
+    title   = {Publications Manual},
+    year    = "1983",
+    publisher = {American Psychological Association},
+    address = {Washington, DC}
+}
+
+@article{Chandra:81,
+	author = {Ashok K. Chandra and Dexter C. Kozen and Larry J. Stockmeyer},
+	year = "1981",
+	title = {Alternation},
+	journal = {Journal of the Association for Computing Machinery},
+	volume = "28",
+	number = "1",
+	pages = "114--133",
+	doi = "10.1145/322234.322243",
+}
+
+@inproceedings{andrew2007scalable,
+  title={Scalable training of {$L_1$}-regularized log-linear models},
+  author={Andrew, Galen and Gao, Jianfeng},
+  booktitle={Proceedings of the 24th International Conference on Machine Learning},
+  pages={33--40},
+  year={2007},
+  url={https://dl.acm.org/doi/abs/10.1145/1273496.1273501}
+}
+
+@book{Gusfield:97,
+    author  = {Dan Gusfield},
+    title   = {Algorithms on Strings, Trees and Sequences},
+    year    = "1997",
+    publisher = {Cambridge University Press},
+    address = {Cambridge, UK},
+    url={https://www.cambridge.org/core/books/algorithms-on-strings-trees-and-sequences/F0B095049C7E6EF5356F0A26686C20D3}
+}
+
+@article{rasooli-tetrault-2015,
+    author    = {Mohammad Sadegh Rasooli and Joel R. Tetreault},
+    title     = {Yara Parser: {A} Fast and Accurate Dependency Parser},
+    journal   = {Computing Research Repository},
+    volume    = {arXiv:1503.06733},
+    year      = {2015},
+    url       = {http://arxiv.org/abs/1503.06733},
+    note    = {version 2}
+}
+
+@article{Ando2005,
+	Acmid = {1194905},
+	Author = {Ando, Rie Kubota and Zhang, Tong},
+	Issn = {1532-4435},
+	Issue_Date = {12/1/2005},
+	Journal = {Journal of Machine Learning Research},
+	Month = dec,
+	Numpages = {37},
+	Pages = {1817--1853},
+	Publisher = {JMLR.org},
+	Title = {A Framework for Learning Predictive Structures from Multiple Tasks and Unlabeled Data},
+	Volume = {6},
+	Year = {2005},
+	url={https://www.jmlr.org/papers/volume6/ando05a/ando05a.pdf}
+}
+
+@article{ct1965,
+  title={An algorithm for the machine calculation of complex {F}ourier series},
+  author={Cooley, James W. and Tukey, John W.},
+  journal={Mathematics of Computation},
+  volume={19},
+  number={90},
+  pages={297--301},
+  year={1965},
+  url={https://www.ams.org/journals/mcom/1965-19-090/S0025-5718-1965-0178586-1/S0025-5718-1965-0178586-1.pdf}
+}
+
+
+@inproceedings{rastogi2020towards,
+  title={Towards scalable multi-domain conversational agents: The schema-guided dialogue dataset},
+  author={Rastogi, Abhinav and Zang, Xiaoxue and Sunkara, Srinivas and Gupta, Raghav and Khaitan, Pranav},
+  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
+  number={05},
+  pages={8689--8696},
+  year={2020}
+}
+
+
+@article{wang2018glue,
+  title={GLUE: A multi-task benchmark and analysis platform for natural language understanding},
+  author={Wang, Alex and Singh, Amanpreet and Michael, Julian and Hill, Felix and Levy, Omer and Bowman, Samuel R},
+  journal={arXiv preprint arXiv:1804.07461},
+  year={2018}
+}
+
+@inproceedings{yang2021ubar,
+  title={Ubar: Towards fully end-to-end task-oriented dialog system with gpt-2},
+  author={Yang, Yunyi and Li, Yunhao and Quan, Xiaojun},
+  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
+  number={16},
+  pages={14230--14238},
+  year={2021}
+}
+
+
+@inproceedings{shalyminov_fast_2020,
+	title = {Fast {Domain} {Adaptation} for {Goal}-{Oriented} {Dialogue} {Using} a {Hybrid} {Generative}-{Retrieval} {Transformer}},
+	doi = {10.1109/ICASSP40776.2020.9053599},
+	abstract = {Goal-oriented dialogue systems are now widely adopted in industry, where practical aspects of using them becomes of key importance. As such, it is expected from such systems to fit into a rapid prototyping cycle for new products and domains. For data-driven dialogue systems (especially those based on deep learning) that amounts to maintaining production-level performance having been provided with a few `seed' dialogue examples, normally referred to as data efficiency.With extremely data-dependent deep learning methods, the most promising way to achieve practical data efficiency is transfer learning-i.e., leveraging a greater, highly represented data source for training a base model, then fine-tuning it to available in-domain data.In this paper, we present a hybrid generative-retrieval model that can be trained using transfer learning. By using GPT-2 as the base model and fine-tuning it to the multidomain MetaLWOz dataset, we obtain a robust dialogue model able to perform both response generation and ranking 1. Combining both, it outperforms several competitive generative-only and retrieval-only baselines, measured by language modeling quality on MetaLWOz as well as in goal- oriented metrics (Intent/Slot Fl-scores) on the MultiWoz corpus.},
+	booktitle = {{ICASSP} 2020 - 2020 {IEEE} {International} {Conference} on {Acoustics}, {Speech} and {Signal} {Processing} ({ICASSP})},
+	author = {Shalyminov, I. and Sordoni, A. and Atkinson, A. and Schulz, H.},
+	month = may,
+	year = {2020},
+	note = {ISSN: 2379-190X},
+	keywords = {domain adaptation, interactive systems, learning (artificial intelligence), neural nets, Dialogue systems, deep learning, information retrieval, data efficiency, data source, data-driven dialogue systems, generative-retrieval model, goal-oriented dialogue systems, goal-oriented metrics, hybrid generative-retrieval transformer, in-domain data, rapid prototyping cycle, response generation, retrieval-only baselines, robust dialogue model, transfer learning},
+	pages = {8039--8043},
+	file = {Shalyminov et al. - 2020 - Fast Domain Adaptation for Goal-Oriented Dialogue .pdf:C\:\\Users\\Ondra\\Zotero\\storage\\I9DJJGZP\\Shalyminov et al. - 2020 - Fast Domain Adaptation for Goal-Oriented Dialogue .pdf:application/pdf},
+}
+
+@inproceedings{hu-etal-2022-context,
+    title = "In-Context Learning for Few-Shot Dialogue State Tracking",
+    author = "Hu, Yushi  and
+      Lee, Chia-Hsuan  and
+      Xie, Tianbao  and
+      Yu, Tao  and
+      Smith, Noah A.  and
+      Ostendorf, Mari",
+    booktitle = "Findings of the Association for Computational Linguistics: EMNLP 2022",
+    month = dec,
+    year = "2022",
+    address = "Abu Dhabi, United Arab Emirates",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.findings-emnlp.193",
+    pages = "2627--2643",
+    abstract = "Collecting and annotating task-oriented dialogues is time-consuming and costly. Thus, zero and few shot learning for dialogue tasks presents an exciting opportunity. In this work, we propose an in-context (IC) learning framework for zero-shot and few-shot learning dialogue state tracking (DST), where a large pretrained language model (LM) takes a test instance and a few exemplars as input, and directly decodes the dialogue state without any parameter updates. This approach is more flexible and scalable than prior DST work when adapting to new domains and scenarios. To better leverage a tabular domain description in the LM prompt, we reformulate DST into a text-to-SQL problem. We also propose a novel approach to retrieve annotated dialogues as exemplars. Empirical results on MultiWOZ show that our method IC-DST substantially outperforms previous fine-tuned state-of-the-art models in few-shot settings. In addition, we test IC-DST in zero-shot settings, in which the model only takes a fixed task instruction as input, finding that it outperforms previous zero-shot methods by a large margin.",
+}
+
+
+
+@inproceedings{DBLP:journals/corr/WestonCB14,
+  author       = {Jason Weston and
+                  Sumit Chopra and
+                  Antoine Bordes},
+  editor       = {Yoshua Bengio and
+                  Yann LeCun},
+  title        = {Memory Networks},
+  booktitle    = {3rd International Conference on Learning Representations, {ICLR} 2015,
+                  San Diego, CA, USA, May 7-9, 2015, Conference Track Proceedings},
+  year         = {2015},
+  url          = {http://arxiv.org/abs/1410.3916},
+  timestamp    = {Wed, 17 Jul 2019 10:40:54 +0200},
+  biburl       = {https://dblp.org/rec/journals/corr/WestonCB14.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@INPROCEEDINGS{neil2016phased,
+	isbn = {978-1-5108-3881-9},
+	year = {2017},
+	booktitle = {Advances in Neural Information Processing Systems 29},
+	type = {Conference Paper},
+	editor = {Lee, Daniel D. and von Luxburg, Ulrike and Garnett, Roman and Sugiyama, Masashi and Guyon, Isabelle},
+	author = {Neil, Daniel and Pfeiffer, Michael and Liu, Shih-Chii},
+	language = {en},
+	address = {Red Hook, NY},
+	publisher = {Curran},
+	title = {Phased LSTM: Accelerating Recurrent Network Training for Long or Event-based Sequences},
+	PAGES = {3889 - 3898},
+	Note = {30th Annual Conference on Neural Information Processing Systems (NIPS 2016); Conference Location: Barcelona, Spain; Conference Date: December 5-10, 2016; Poster presentation}
+}
+
+@article{sukhbaatar2015end,
+  title={End-to-end memory networks},
+  author={Sukhbaatar, Sainbayar and Weston, Jason and Fergus, Rob and others},
+  journal={Advances in neural information processing systems},
+  volume={28},
+  year={2015}
+}
+
+@inproceedings{lu-etal-2022-unsupervised,
+    title = "Unsupervised Learning of Hierarchical Conversation Structure",
+    author = "Lu, Bo-Ru  and
+      Hu, Yushi  and
+      Cheng, Hao  and
+      Smith, Noah A.  and
+      Ostendorf, Mari",
+    booktitle = "Findings of the Association for Computational Linguistics: EMNLP 2022",
+    month = dec,
+    year = "2022",
+    address = "Abu Dhabi, United Arab Emirates",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.findings-emnlp.415",
+    pages = "5657--5670",
+    abstract = "Human conversations can evolve in many different ways, creating challenges for automatic understanding and summarization. Goal-oriented conversations often have meaningful sub-dialogue structure, but it can be highly domain-dependent. This work introduces an unsupervised approach to learning hierarchical conversation structure, including turn and sub-dialogue segment labels, corresponding roughly to dialogue acts and sub-tasks, respectively. The decoded structure is shown to be useful in enhancing neural models of language for three conversation-level understanding tasks. Further, the learned finite-state sub-dialogue network is made interpretable through automatic summarization.",
+}
+
+% Use this file for citations not found in the ACL Anthology (contained in "anthology.bib").
+
+@book{Aho:72,
+    author  = {Alfred V. Aho and Jeffrey D. Ullman},
+    title   = {The Theory of Parsing, Translation and Compiling},
+    year    = "1972",
+    volume  = "1",
+    publisher = {Prentice-Hall},
+    address = {Englewood Cliffs, NJ}
+}
+
+@book{APA:83,
+    author  = {{American Psychological Association}},
+    title   = {Publications Manual},
+    year    = "1983",
+    publisher = {American Psychological Association},
+    address = {Washington, DC}
+}
+
+@article{Chandra:81,
+	author = {Ashok K. Chandra and Dexter C. Kozen and Larry J. Stockmeyer},
+	year = "1981",
+	title = {Alternation},
+	journal = {Journal of the Association for Computing Machinery},
+	volume = "28",
+	number = "1",
+	pages = "114--133",
+	doi = "10.1145/322234.322243",
+}
+
+@inproceedings{andrew2007scalable,
+  title={Scalable training of {$L_1$}-regularized log-linear models},
+  author={Andrew, Galen and Gao, Jianfeng},
+  booktitle={Proceedings of the 24th International Conference on Machine Learning},
+  pages={33--40},
+  year={2007},
+  url={https://dl.acm.org/doi/abs/10.1145/1273496.1273501}
+}
+
+@book{Gusfield:97,
+    author  = {Dan Gusfield},
+    title   = {Algorithms on Strings, Trees and Sequences},
+    year    = "1997",
+    publisher = {Cambridge University Press},
+    address = {Cambridge, UK},
+    url={https://www.cambridge.org/core/books/algorithms-on-strings-trees-and-sequences/F0B095049C7E6EF5356F0A26686C20D3}
+}
+
+@article{rasooli-tetrault-2015,
+    author    = {Mohammad Sadegh Rasooli and Joel R. Tetreault},
+    title     = {Yara Parser: {A} Fast and Accurate Dependency Parser},
+    journal   = {Computing Research Repository},
+    volume    = {arXiv:1503.06733},
+    year      = {2015},
+    url       = {http://arxiv.org/abs/1503.06733},
+    note    = {version 2}
+}
+
+@article{Ando2005,
+	Acmid = {1194905},
+	Author = {Ando, Rie Kubota and Zhang, Tong},
+	Issn = {1532-4435},
+	Issue_Date = {12/1/2005},
+	Journal = {Journal of Machine Learning Research},
+	Month = dec,
+	Numpages = {37},
+	Pages = {1817--1853},
+	Publisher = {JMLR.org},
+	Title = {A Framework for Learning Predictive Structures from Multiple Tasks and Unlabeled Data},
+	Volume = {6},
+	Year = {2005},
+	url={https://www.jmlr.org/papers/volume6/ando05a/ando05a.pdf}
+}
+
+@article{ct1965,
+  title={An algorithm for the machine calculation of complex {F}ourier series},
+  author={Cooley, James W. and Tukey, John W.},
+  journal={Mathematics of Computation},
+  volume={19},
+  number={90},
+  pages={297--301},
+  year={1965},
+  url={https://www.ams.org/journals/mcom/1965-19-090/S0025-5718-1965-0178586-1/S0025-5718-1965-0178586-1.pdf}
+}
+
+@inproceedings{supernaturalinstructions,
+  title={Super-NaturalInstructions:Generalization via Declarative Instructions on 1600+ Tasks},
+  author={Wang, Yizhong and Mishra, Swaroop and Alipoormolabashi, Pegah and Kordi, Yeganeh and Mirzaei, Amirreza and Arunkumar, Anjana and Ashok, Arjun and Dhanasekaran, Arut Selvan and Naik, Atharva and Stap, David and others},
+  booktitle={EMNLP},
+  year={2022}
+}
+
+@article{2020t5,
+  author  = {Colin Raffel and Noam Shazeer and Adam Roberts and Katherine Lee and Sharan Narang and Michael Matena and Yanqi Zhou and Wei Li and Peter J. Liu},
+  title   = {Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer},
+  journal = {Journal of Machine Learning Research},
+  year    = {2020},
+  volume  = {21},
+  number  = {140},
+  pages   = {1-67},
+  url     = {http://jmlr.org/papers/v21/20-074.html}
+}
+
+@article{touvron2023llama,
+  title={LLaMA: Open and Efficient Foundation Language Models},
+  author={Touvron, Hugo and Lavril, Thibaut and Izacard, Gautier and Martinet, Xavier and Lachaux, Marie-Anne and Lacroix, Timoth{\'e}e and Rozi{\`e}re, Baptiste and Goyal, Naman and Hambro, Eric and Azhar, Faisal and Rodriguez, Aurelien and Joulin, Armand and Grave, Edouard and Lample, Guillaume},
+  journal={arXiv preprint arXiv:2302.13971},
+  year={2023}
+}
+
+@misc{alpaca,
+  author = {Rohan Taori and Ishaan Gulrajani and Tianyi Zhang and Yann Dubois and Xuechen Li and Carlos Guestrin and Percy Liang and Tatsunori B. Hashimoto },
+  title = {Stanford Alpaca: An Instruction-following LLaMA model},
+  year = {2023},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/tatsu-lab/stanford_alpaca}},
+}
+
+@article{black2022gpt,
+  title={Gpt-neox-20b: An open-source autoregressive language model},
+  author={Black, Sid and Biderman, Stella and Hallahan, Eric and Anthony, Quentin and Gao, Leo and Golding, Laurence and He, Horace and Leahy, Connor and McDonell, Kyle and Phang, Jason and others},
+  journal={arXiv preprint arXiv:2204.06745},
+  year={2022}
+}
+
+@article{iyer2022opt,
+  title={OPT-IML: Scaling Language Model Instruction Meta Learning through the Lens of Generalization},
+  author={Iyer, Srinivasan and Lin, Xi Victoria and Pasunuru, Ramakanth and Mihaylov, Todor and Simig, D{\'a}niel and Yu, Ping and Shuster, Kurt and Wang, Tianlu and Liu, Qing and Koura, Punit Singh and others},
+  journal={arXiv preprint arXiv:2212.12017},
+  year={2022}
+}
+
+@article{zhang2022opt,
+  title={Opt: Open pre-trained transformer language models},
+  author={Zhang, Susan and Roller, Stephen and Goyal, Naman and Artetxe, Mikel and Chen, Moya and Chen, Shuohui and Dewan, Christopher and Diab, Mona and Li, Xian and Lin, Xi Victoria and others},
+  journal={arXiv preprint arXiv:2205.01068},
+  year={2022}
+}
+
+@inproceedings{rastogi2020towards,
+  title={Towards scalable multi-domain conversational agents: The schema-guided dialogue dataset},
+  author={Rastogi, Abhinav and Zang, Xiaoxue and Sunkara, Srinivas and Gupta, Raghav and Khaitan, Pranav},
+  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
+  number={05},
+  pages={8689--8696},
+  year={2020}
+}
+
+@inproceedings{reimers-2020-multilingual-sentence-bert,
+  title = "Making Monolingual Sentence Embeddings Multilingual using Knowledge Distillation",
+  author = "Reimers, Nils and Gurevych, Iryna",
+  booktitle = "Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing",
+  month = "11",
+  year = "2020",
+  publisher = "Association for Computational Linguistics",
+  url = "https://arxiv.org/abs/2004.09813",
+}
+
+@article{johnson2019billion,
+  title={Billion-scale similarity search with {GPUs}},
+  author={Johnson, Jeff and Douze, Matthijs and J{\'e}gou, Herv{\'e}},
+  journal={IEEE Transactions on Big Data},
+  volume={7},
+  number={3},
+  pages={535--547},
+  year={2019},
+  publisher={IEEE}
+}
+
+@article{ouyang2022training,
+  title={Training language models to follow instructions with human feedback},
+  author={Ouyang, Long and Wu, Jeffrey and Jiang, Xu and Almeida, Diogo and Wainwright, Carroll and Mishkin, Pamela and Zhang, Chong and Agarwal, Sandhini and Slama, Katarina and Ray, Alex and others},
+  journal={Advances in Neural Information Processing Systems},
+  volume={35},
+  pages={27730--27744},
+  year={2022}
+}
+
+@article{christiano2017deep,
+  title={Deep reinforcement learning from human preferences},
+  author={Christiano, Paul F and Leike, Jan and Brown, Tom and Martic, Miljan and Legg, Shane and Amodei, Dario},
+  journal={Advances in neural information processing systems},
+  volume={30},
+  year={2017}
+}
+
+@article{ziegler2019fine,
+  title={Fine-tuning language models from human preferences},
+  author={Ziegler, Daniel M and Stiennon, Nisan and Wu, Jeffrey and Brown, Tom B and Radford, Alec and Amodei, Dario and Christiano, Paul and Irving, Geoffrey},
+  journal={arXiv preprint arXiv:1909.08593},
+  year={2019}
+}
+
+@inproceedings{lei2018sequicity,
+  title={Sequicity: Simplifying task-oriented dialogue systems with single sequence-to-sequence architectures},
+  author={Lei, Wenqiang and Jin, Xisen and Kan, Min-Yen and Ren, Zhaochun and He, Xiangnan and Yin, Dawei},
+  booktitle={Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  pages={1437--1447},
+  year={2018}
+}
+
+@article{radford2019language,
+  title={Language models are unsupervised multitask learners},
+  author={Radford, Alec and Wu, Jeffrey and Child, Rewon and Luan, David and Amodei, Dario and Sutskever, Ilya and others},
+  journal={OpenAI blog},
+  volume={1},
+  number={8},
+  pages={9},
+  year={2019}
+}
+
+
+@article{madotto2020language,
+  title={Language models as few-shot learner for task-oriented dialogue systems},
+  author={Madotto, Andrea and Liu, Zihan and Lin, Zhaojiang and Fung, Pascale},
+  journal={arXiv preprint arXiv:2008.06239},
+  year={2020}
+}
+
+@inproceedings{levesque2012winograd,
+  title={The winograd schema challenge},
+  author={Levesque, Hector and Davis, Ernest and Morgenstern, Leora},
+  booktitle={Thirteenth international conference on the principles of knowledge representation and reasoning},
+  year={2012}
+}
+
+
+@inproceedings{huang2020mala,
+  author    = {Xinting Huang and
+               Jianzhong Qi and
+               Yu Sun and
+               Rui Zhang},
+  title     = {{MALA:} Cross-Domain Dialogue Generation with Action Learning},
+  booktitle = {The Thirty-Fourth {AAAI} Conference on Artificial Intelligence, {AAAI}
+               2020, The Thirty-Second Innovative Applications of Artificial Intelligence
+               Conference, {IAAI} 2020, The Tenth {AAAI} Symposium on Educational
+               Advances in Artificial Intelligence, {EAAI} 2020, New York, NY, USA,
+               February 7-12, 2020},
+  pages     = {7977--7984},
+  publisher = {{AAAI} Press},
+  year      = {2020},
+  url       = {https://ojs.aaai.org/index.php/AAAI/article/view/6306},
+  timestamp = {Mon, 07 Mar 2022 16:58:05 +0100},
+  biburl    = {https://dblp.org/rec/conf/aaai/Huang00020.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{budzianowski_multiwoz_2018,
+	address = {Brussels, Belgium},
+	title = {{MultiWOZ} - {A} {Large}-{Scale} {Multi}-{Domain} {Wizard}-of-{Oz} {Dataset} for {Task}-{Oriented} {Dialogue} {Modelling}},
+	url = {https://aclanthology.org/D18-1547/},
+	abstract = {Even though machine learning has become the major scene in dialogue research community, the real breakthrough has been blocked by the scale of data available. To address this fundamental obstacle, we introduce the Multi-Domain Wizard-of-Oz dataset (MultiWOZ), a fully-labeled collection of human-human written conversations spanning over multiple domains and topics. At a size of \$10\$k dialogues, it is at least one order of magnitude larger than all previous annotated task-oriented corpora. The contribution of this work apart from the open-sourced dataset labelled with dialogue belief states and dialogue actions is two-fold: firstly, a detailed description of the data collection procedure along with a summary of data structure and analysis is provided. The proposed data-collection pipeline is entirely based on crowd-sourcing without the need of hiring professional annotators; secondly, a set of benchmark results of belief tracking, dialogue act and response generation is reported, which shows the usability of the data and sets a baseline for future studies.},
+	urldate = {2018-10-08},
+	booktitle = {Proceedings of the 2018 {Conference} on {Empirical} {Methods} in {Natural} {Language} {Processing}},
+	author = {Budzianowski, Paweł and Wen, Tsung-Hsien and Tseng, Bo-Hsiang and Casanueva, Iñigo and Ultes, Stefan and Ramadan, Osman and Gašić, Milica},
+	month = nov,
+	year = {2018},
+	note = {arXiv: 1810.00278},
+	keywords = {Computer Science - Computation and Language, MultiWOZ},
+	pages = {5016--5026},
+	annote = {Comment: Accepted for publication at EMNLP 2018},
+	file = {arXiv\:1810.00278 PDF:C\:\\Users\\Ondra\\Zotero\\storage\\VSYEHCJ7\\Budzianowski et al. - 2018 - MultiWOZ - A Large-Scale Multi-Domain Wizard-of-Oz.pdf:application/pdf},
+}
+
+
+@misc{zhao_survey_2023,
+	title = {A {Survey} of {Large} {Language} {Models}},
+	url = {http://arxiv.org/abs/2303.18223},
+	doi = {10.48550/arXiv.2303.18223},
+	abstract = {Language is essentially a complex, intricate system of human expressions governed by grammatical rules. It poses a significant challenge to develop capable AI algorithms for comprehending and grasping a language. As a major approach, language modeling has been widely studied for language understanding and generation in the past two decades, evolving from statistical language models to neural language models. Recently, pre-trained language models (PLMs) have been proposed by pre-training Transformer models over large-scale corpora, showing strong capabilities in solving various NLP tasks. Since researchers have found that model scaling can lead to performance improvement, they further study the scaling effect by increasing the model size to an even larger size. Interestingly, when the parameter scale exceeds a certain level, these enlarged language models not only achieve a significant performance improvement but also show some special abilities that are not present in small-scale language models. To discriminate the difference in parameter scale, the research community has coined the term large language models (LLM) for the PLMs of significant size. Recently, the research on LLMs has been largely advanced by both academia and industry, and a remarkable progress is the launch of ChatGPT, which has attracted widespread attention from society. The technical evolution of LLMs has been making an important impact on the entire AI community, which would revolutionize the way how we develop and use AI algorithms. In this survey, we review the recent advances of LLMs by introducing the background, key findings, and mainstream techniques. In particular, we focus on four major aspects of LLMs, namely pre-training, adaptation tuning, utilization, and capacity evaluation. Besides, we also summarize the available resources for developing LLMs and discuss the remaining issues for future directions.},
+	urldate = {2023-04-08},
+	publisher = {arXiv},
+	author = {Zhao, Wayne Xin and Zhou, Kun and Li, Junyi and Tang, Tianyi and Wang, Xiaolei and Hou, Yupeng and Min, Yingqian and Zhang, Beichen and Zhang, Junjie and Dong, Zican and Du, Yifan and Yang, Chen and Chen, Yushuo and Chen, Zhipeng and Jiang, Jinhao and Ren, Ruiyang and Li, Yifan and Tang, Xinyu and Liu, Zikang and Liu, Peiyu and Nie, Jian-Yun and Wen, Ji-Rong},
+	month = mar,
+	year = {2023},
+	note = {arXiv:2303.18223 [cs]},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Computation and Language},
+	annote = {Comment: ongoing work; 51 pages},
+	file = {arXiv Fulltext PDF:C\:\\Users\\Ondra\\Zotero\\storage\\3GR7AQAV\\Zhao et al. - 2023 - A Survey of Large Language Models.pdf:application/pdf},
+}
+
+@article{su2022selective,
+  title={Selective annotation makes language models better few-shot learners},
+  author={Su, Hongjin and Kasai, Jungo and Wu, Chen Henry and Shi, Weijia and Wang, Tianlu and Xin, Jiayi and Zhang, Rui and Ostendorf, Mari and Zettlemoyer, Luke and Smith, Noah A and others},
+  journal={arXiv preprint arXiv:2209.01975},
+  year={2022}
+}
+
+@article{huangrobustness,
+  title={Robustness through Data Augmentation Loss Consistency},
+  author={Huang, Tianjian and Halbe, Shaunak Ashish and Sankar, Chinnadhurai and Amini, Pooyan and Kottur, Satwik and Geramifard, Alborz and Razaviyayn, Meisam and Beirami, Ahmad},
+  journal={Transactions on Machine Learning Research},
+  year={2023},
+  url = {https://openreview.net/forum?id=a1meaRy1bN}
+}
+
+@article{sun2022mars,
+  title={Mars: Semantic-aware Contrastive Learning for End-to-End Task-Oriented Dialog},
+  author={Sun, Haipeng and Bao, Junwei and Wu, Youzheng and He, Xiaodong},
+  journal={arXiv preprint arXiv:2210.08917},
+  year={2022}
+}
+
+@article{feng2023fantastic,
+  title={Fantastic Rewards and How to Tame Them: A Case Study on Reward Learning for Task-oriented Dialogue Systems},
+  author={Feng, Yihao and Yang, Shentao and Zhang, Shujian and Zhang, Jianguo and Xiong, Caiming and Zhou, Mingyuan and Wang, Huan},
+  journal={arXiv preprint arXiv:2302.10342},
+  year={2023}
+}
+
+
+@article{zhu2022convlab3,
+    title={ConvLab-3: A Flexible Dialogue System Toolkit Based on a Unified Data Format},
+    author={Qi Zhu and Christian Geishauser and Hsien-chin Lin and Carel van Niekerk and Baolin Peng and Zheng Zhang and Michael Heck and Nurul Lubis and Dazhen Wan and Xiaochen Zhu and Jianfeng Gao and Milica Gašić and Minlie Huang},
+    journal={arXiv preprint arXiv:2211.17148},
+    year={2022},
+    url={http://arxiv.org/abs/2211.17148}
+}
+
+
+@inproceedings{rastogi_multi-task_2018,
+	address = {Melbourne, Australia},
+	title = {Multi-task {Learning} for {Joint} {Language} {Understanding} and {Dialogue} {State} {Tracking}},
+	url = {https://aclanthology.org/W18-5045},
+	doi = {10.18653/v1/W18-5045},
+	abstract = {This paper presents a novel approach for multi-task learning of language understanding (LU) and dialogue state tracking (DST) in task-oriented dialogue systems. Multi-task training enables the sharing of the neural network layers responsible for encoding the user utterance for both LU and DST and improves performance while reducing the number of network parameters. In our proposed framework, DST operates on a set of candidate values for each slot that has been mentioned so far. These candidate sets are generated using LU slot annotations for the current user utterance, dialogue acts corresponding to the preceding system utterance and the dialogue state estimated for the previous turn, enabling DST to handle slots with a large or unbounded set of possible values and deal with slot values not seen during training. Furthermore, to bridge the gap between training and inference, we investigate the use of scheduled sampling on LU output for the current user utterance as well as the DST output for the preceding turn.},
+	urldate = {2023-05-21},
+	booktitle = {Proceedings of the 19th {Annual} {SIGdial} {Meeting} on {Discourse} and {Dialogue}},
+	publisher = {Association for Computational Linguistics},
+	author = {Rastogi, Abhinav and Gupta, Raghav and Hakkani-Tur, Dilek},
+	month = jul,
+	year = {2018},
+	pages = {376--384},
+	file = {Full Text PDF:C\:\\Users\\Ondra\\Zotero\\storage\\UELG7YGW\\Rastogi et al. - 2018 - Multi-task Learning for Joint Language Understandi.pdf:application/pdf},
+}
+
+
+@inproceedings{lewis_bart:_2020,
+	address = {Online},
+	title = {{BART}: {Denoising} {Sequence}-to-{Sequence} {Pre}-training for {Natural} {Language} {Generation}, {Translation}, and {Comprehension}},
+	shorttitle = {{BART}},
+	url = {https://aclanthology.org/2020.acl-main.703/},
+	doi = {10.18653/v1/2020.acl-main.703},
+	abstract = {We present BART, a denoising autoencoder for pretraining sequence-to-sequence models. BART is trained by (1) corrupting text with an arbitrary noising function, and (2) learning a model to reconstruct the original text. It uses a standard Tranformer-based neural machine translation architecture which, despite its simplicity, can be seen as generalizing BERT (due to the bidirectional encoder), GPT (with the left-to-right decoder), and other recent pretraining schemes. We evaluate a number of noising approaches, finding the best performance by both randomly shuffling the order of sentences and using a novel in-filling scheme, where spans of text are replaced with a single mask token. BART is particularly effective when fine tuned for text generation but also works well for comprehension tasks. It matches the performance of RoBERTa on GLUE and SQuAD, and achieves new state-of-the-art results on a range of abstractive dialogue, question answering, and summarization tasks, with gains of up to 3.5 ROUGE. BART also provides a 1.1 BLEU increase over a back-translation system for machine translation, with only target language pretraining. We also replicate other pretraining schemes within the BART framework, to understand their effect on end-task performance.},
+	urldate = {2021-02-15},
+	booktitle = {Proceedings of the 58th {Annual} {Meeting} of the {Association} for {Computational} {Linguistics}},
+	publisher = {Association for Computational Linguistics},
+	author = {Lewis, Mike and Liu, Yinhan and Goyal, Naman and Ghazvininejad, Marjan and Mohamed, Abdelrahman and Levy, Omer and Stoyanov, Veselin and Zettlemoyer, Luke},
+	month = jul,
+	year = {2020},
+	keywords = {Computer Science - Computation and Language, Computer Science - Machine Learning, Statistics - Machine Learning, Xinnuo, Xsum/BBC data, Zdenek},
+	pages = {7871--7880},
+	file = {Full Text PDF:C\:\\Users\\Ondra\\Zotero\\storage\\U5C67R54\\Lewis et al. - 2020 - BART Denoising Sequence-to-Sequence Pre-training .pdf:application/pdf},
 }
