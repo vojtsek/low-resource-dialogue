@@ -416,6 +416,7 @@ The dataset assumes interaction with the database or external APIs, however, the
 \begin{table}[h]
     \centering
     \begin{tabular}{l|l}
+    \toprule
          \textbf{User} & \texttt{I need to book a hotel in the {\color{cyan!80!yellow!80!black!100 }east} that has { \color{orange!50!yellow!90!black!100!}4 stars.}} \\
          \textbf{System} & \texttt{I can help you with that. What is your price range?} \\
          \textbf{State} & \texttt{restaurant \{\}, ..., hotel \{"area": "{\color{cyan!80!yellow!80!black!100 }east}", "stars": "{\color{orange!50!yellow!90!black!100!}4}" \}} \\
@@ -423,6 +424,7 @@ The dataset assumes interaction with the database or external APIs, however, the
          \textbf{System} & \texttt{If you'd like something cheap, I recommend the Allenbell.} \\
          \textbf{State} & \texttt{restaurant \{\}, ..., hotel \{"area": "east", "stars": "4",}\\
          & \texttt{"wifi": {\color{cyan!80!yellow!80!black!100}yes}", "parking": "{\color{orange!50!yellow!90!black!100!}yes}"\}} \\
+         \bottomrule
     \end{tabular}
     \caption{A simplified example taken from the MultiWOZ corpus}
     \label{02:tab:mw_example}
@@ -432,16 +434,26 @@ The dataset assumes interaction with the database or external APIs, however, the
 \begin{table}[h]
     \centering
     \begin{tabular}{l|l}
-         \textbf{Driver} & \texttt{I need to find the time and parties attending} \\
-         & \texttt{my optometrist appointment.} \\
-         \textbf{Car} & \texttt{I've 3 appointments scheduled, with Alex, your sister, and Jeff.} \\ 
-         \textbf{State} & \\
-         & \texttt{Which are you referring to?} \\
-         \textbf{Driver} & \texttt{I want to know about the one that Alex is joining me at.}\\
-         \textbf{Car} & \texttt{That optometrist appointment is at 4 pm.} \\
-         \textbf{State} & \texttt{\{\}} \\
+    \toprule
+         \textbf{Driver} & \texttt{What {\color{cyan!80!yellow!80!black!100}gas stations} are here?} \\
+         \textbf{NLU} & \texttt{\{"poi\_type": "{\color{cyan!80!yellow!80!black!100}gas stations}" \}} \\
+         \textbf{Car} & \texttt{There's a Chevron} \\
+         \textbf{Driver} & \texttt{That's good! Please pick the {\color{cyan!80!yellow!80!black!100}quickest} route }\\ & \texttt{to get there and {\color{orange!50!yellow!90!black!100!}avoid all heavy traffic}!} \\
+         \textbf{NLU} & \texttt{\{"distance": "{\color{cyan!80!yellow!80!black!100}quickest}",} \\
+            & \texttt{"traffic\_info": "{\color{orange!50!yellow!90!black!100!}avoid all heavy traffic}"\} }\\
+         \textbf{Car} & \texttt{Taking you to Chevron} \\
+         \midrule
+         \textbf{KB} & \texttt{"items": [} \\
+          & \texttt{    \{"distance": "5 miles",} \\
+          & \texttt{    "traffic\_info": "moderate traffic",} \\
+          & \texttt{    "poi\_type": "gas station",} \\
+          & \texttt{    "address": "783 Arcadia Pl",} \\
+          & \texttt{    "poi": "Chevron"\}} \\
+          & \texttt{    ...} \\
+          & \texttt{]} \\
+          \bottomrule
     \end{tabular}
-    \caption{A simplified example taken from the SMD corpus}
+    \caption{A simplified example taken from the SMD corpus together with }
     \label{02:tab:smd_example}
 \end{table}
 
