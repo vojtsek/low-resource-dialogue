@@ -162,7 +162,7 @@ For TextRank and frequency we use placeholder representing the slot candidate in
 Therefore we obtain scores relevant to candidates rather than the individual words.
 
 \subsection{Training standalone tagger}
-\label{03:training_tagger}
+\label{04:training_tagger}
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{images/tagging.pdf}
@@ -291,15 +291,6 @@ To put our results into perspective, we also include two supervised models for c
 The other supervised baseline is called \emph{Dict-supervised}.
 It uses a simple dictionary of slot fillers that is obtained directly from the training data.
 We use straightforward word matching based on regular expressions to tag occurences of these values.
-
-
-Apart from evaluation of the tagging performance w.r.t. NLU we are also interested in the intrinsic evaluation of the verb-slot pair clusters formed for slot ranking.
-Specifically, we ask a question how well are these clusters formed and if they are meaningful.
-We compare to gold-standard intent annotation with respect to the following baselines: (1) a majority baseline (assigning the most frequent intent class to all instances), and (2) a simple method that represents the utterances as averages of respective word embeddings and performs sentence-level intent clustering.
-All the slots in a given utterance are then assumed to have the same intent.
-
-
-\subsubsection{NLU}
 \begin{figure}[h]
 \includegraphics[width=1.0\textwidth]{images/label_example.pdf}
 %\newtcbox{\bluebox}[1][]{nobeforeafter, tcbox raise base, shrink tight, sharp corners, extrude by=1mm, colback=blue!15, colframe=blue, #1}
@@ -324,6 +315,19 @@ All the slots in a given utterance are then assumed to have the same intent.
         Although ``Afghan'' food is not in the frame parser output, our tagger was able to recognize it. The change in value for slot-1 (corresponding to food type) is successfully captured in the second utterance. This shows that our model can categorize entities (both ``Afghan'' and ``Asian'' relate to the same slot).}
     \label{fig:example}
 \end{figure}
+
+Apart from evaluation of the tagging performance w.r.t. NLU we are also interested in the intrinsic evaluation of the verb-slot pair clusters formed for slot ranking.
+Specifically, we ask a question how well are these clusters formed and if they are meaningful.
+We compare to gold-standard intent annotation with respect to the following baselines: (1) a majority baseline (assigning the most frequent intent class to all instances), and (2) a simple method that represents the utterances as averages of respective word embeddings and performs sentence-level intent clustering.
+All the slots in a given utterance are then assumed to have the same intent.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/slots.png}
+    \caption{The comparison of outputs of our tagger and the parser. The plots show a number of cases in which the respective approach encounters more TPs, FPs or FNs than the other.}
+    \label{fig:tagger_comp}
+\end{figure}
+\subsubsection{NLU}
 We evaluate our approach to slot discovery by comparing the resulting slot labels to gold-standard supervised slot annotation.
 \paragraph{Slot tagging}\hspace{-3mm} is evaluated in Table \ref{table:slotfilling}.
 \emph{Ours-full} (slot selection + trained tagger) outperforms all other approaches by a large margin, especially in terms of recall.
@@ -366,12 +370,6 @@ As discussed above, the use of the trained tagging model is crucial to improve t
 \paragraph{Error analysis}
 We conducted a manual error analysis of slot tagging to gain more insight about the output quality and sources of errors.
 In general, we found that the tagger can generalize and capture unseen values.
-\begin{figure}
-    \centering
-    \includegraphics[width=0.45\textwidth]{images/slots.png}
-    \caption{The comparison of outputs of our tagger and the parser. The plots show a number of cases in which the respective approach encounters more TPs, FPs or FNs than the other.}
-    \label{fig:tagger_comp}
-\end{figure}
 
 One source of errors is the relatively low recall of the frame-semantic parsers used.
 We successfully address this issue by introducing the slot tagger, however, many slot values remain untagged.
@@ -574,13 +572,77 @@ We observe an improvement in terms of entity match rate, but it does not match t
 which suggests that label quality is important and the noisy labels obtained directly from weak supervision are not useful enough.
 
 \subsection{Unsupervised candidate selection}
-The method introduced in this chapter is limited by the requirement of third party models that are needed to gather the initial slot of candidates.
-Therefore we experiment with alternative ways of obtaining slot candidates in completely unsupervised manner.
-This can potentially lift the requirement of generic pretrained models.
+The method introduced in this chapter is limited by the requirement of third-party models that are needed to gather the initial set of candidates.
+Therefore we experiment with alternative ways of obtaining slot candidates in a completely unsupervised manner.
+This can potentially lift the requirement of using generic models finetuned on out-of-distribution data.
 
 \subsubsection{Memory Networks for candidates selection}
-\subsubsection{Obtaining candidates from Large Language Models}
+The end-to-end Memory Networks architecture described in Chapter~\ref{02:sec:mem_nn} offers a great base model due to its usage of memory component.
+The memory is represented by row vectors corresponding to various \emph{memories} that are further used to produce the answer.
+Specifically, we use the Mem2Seq architecture (see Sec.~\ref{02:sec:mem2seq}).
+In the Mem2Seq model, the memories correspond to knowledge base entries representing either entities or their properties s.a. address etc.
+Furthermore, the model saves the conversation context via memory mechanism.
+The content of the memory is further used to copy its entries directly to the produced response.
+Specifically, during the response generation process, the model decides whether the new token will be generated from decoder vocabulary distribution or copied from the memory.
+The intuition is, that when certain token should appear in the generated response, the model decided to copy it rather than generate so it prevent mistakes.
+This is similar to two-step generation process used in multiple architectures.
+In the first step of this process, the model generates placeholders s.a. \emph{[address]} instead of specific values.
+This delexicalized utterance in then lexicalized in the second step by replacing the placeholders with actual values  e.g. using the database.
+This is almost exactly what happens in the Mem2Seq model, only the two steps are joined in one so the database values are put in directly by the model.
+Also, here the lexicalization procedure of placing values instead of placeholder is learned rather than hardcoded.
 
+We train the Mem2Seq model on the target dataset to learn the copy behavior.
+We then use the trained model to obtain a set of slot candidates.
+To achieve this, we let the model generate the test dialogues one-by-one and inspect its behavior.
+We save each token that is copied into the produced response rather than generated.
+These tokens are likely to be slot candidates as they supposedly correspond to entities and slot values mentioned in the context.
+We then run k-means clustering to obtain set of slot candidates.
+This way we obtain multiple groups of word forms that can be used as an input for our slot discovery pipeline.
+
+\subsubsection{LLMs for candidate selection}
+Another way of obtaining the slot candidates is by employing Large Language Models.
+These models can be instructed in the input text (prompted) to perform virtually any task.
+In our case we instruct the model to extract the potential slot candidates directly from the input utterance.
+We use two models: \emph{Tk-Instruct-11B} \cite{supernaturalinstructions}, which is T5 encoder-decoder architecture \cite{2020t5} tuned on a dataset of over 5M task instances with instructions and \emph{ChatGPT} which is a closed source product introduced by the OpenAI company.\footnote{\url{https://openai.com/blog/chatgpt}}.
+The example prompt is given in Table~\ref{04:tab:prompt}.
+We use both models in parallel to obtain two sets of candidates.
+We then use clustering procedure similar to the above mentioned process.
+Note that although the model categorizes the extracted words as part of the output, the category names are arbitrary and not necessarily consisten among examples, therefore we don't use them to obtain the slot groups directly.
+This leaves us witha  set of slot candidates that are again used as input to our pipelined method.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{r|l}
+    \toprule
+        \textbf{Prompt} & \texttt{{\color{cyan!80!yellow!80!black!100 }Extract important concepts or objects }}\\
+        & \texttt{{\color{cyan!80!yellow!80!black!100 }from the following utterance. }} \\
+        & \texttt{{\color{cyan!80!yellow!80!black!100 } Yield all the concepts in one-level JSON dictionary. }} \\
+        & \texttt{{\color{cyan!80!yellow!80!black!100 } Include only entities and concepts that}} \\
+        & \texttt{{\color{cyan!80!yellow!80!black!100 } are mentioned in the utterance.}} \\
+        & \texttt{{\color{cyan!80!yellow!80!black!100 } Don't provide the intent.}} \\
+        & \texttt{{\color{cyan!80!yellow!80!black!100 } See the following examples:}} \\
+        & \texttt{{\color{orange!50!yellow!90!black!100!} ---------- Example ------}} \\
+        & \texttt{{\color{orange!50!yellow!90!black!100!} Utterance: "I am looking for a theater }} \\
+        & \texttt{{\color{orange!50!yellow!90!black!100!} that is reasonably priced." }} \\
+        & \texttt{{\color{orange!50!yellow!90!black!100!} Output: \{'venue': 'theater', 'price': 'reasonable'\} }} \\
+        & \texttt{{\color{orange!50!yellow!90!black!100!} -------------------------}} \\
+        & \texttt{{\color{cyan!80!yellow!80!black!100 } Now complete the following example: }} \\
+        & \texttt{{\color{cyan!80!yellow!80!black!100 } Utterance:}  {\color{red!100!yellow!90!black!100!}"I am looking for a cheap hotel."}} \\
+        & \texttt{{\color{cyan!80!yellow!80!black!100 } Output:  }} \\
+        \bottomrule
+    \end{tabular}
+    \caption{The {\color{cyan!80!yellow!80!black!100 }prompt} used to obtain slot candidates from the input utterance. It contains an {\color{orange!50!yellow!90!black!100!} example} to specify the desired output structure }
+    \label{04:tab:prompt}
+\end{table}
+
+\subsubsection{Performance of unsupervised candidate selection}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/slot-discovery.png}
+    \caption{Comparison of our pipeline performance with different input sources. Note that FrameNet achieves both the best performance and the best trade-off between Precision and Recall}
+    \label{04:fig:compare_sources}
+\end{figure}
+We present the results using the unsupervised clustering in Table~\ref{04:tab:unsup-discovery}.
 \begin{table}[h]
     \centering
     \small
@@ -600,5 +662,11 @@ This can potentially lift the requirement of generic pretrained models.
     
     \caption{Cluster assignment accuracy of our methods if we interpret the clustering as user intent detection. \textit{Majority} is a majority baseline and \textit{Embedding} refers to an average sentence embedding clustering approach.
     }
-    \label{table:intentclust}
+    \label{04:tab:unsup-discovery}
 \end{table}
+\section{Conclusion}
+In this chapter, we propose a method that analyzes a given set of clusters of semantically related values and yields a set of candidates for dialogue slots relevant to the given task.
+The analysis shows, that our method is rather sensitive to the  quality of input clusters, i.e. the input source performance.
+Importantly, the method is able to \textbf{improve performance consistently}, regardless of the input source.
+Our method is easy to apply and with reasonable performance when supplied with good quality input source.
+However, its real-life usage might be impractical due to the lack of slot semantics interpretability.

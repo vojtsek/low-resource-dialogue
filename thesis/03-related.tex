@@ -5,7 +5,7 @@
 \label{sec:relwork}
 
 \subsection{Modular dialogue architectures}
-\label{sec:relwork-modular}
+\label{relwork:modular}
 The traditional dialogue system implementation, especially for task-oriented dialogues, is based on modular architecture.
 The modular system consists of several components connected to form a pipeline.
 First, the Natural Language Understanding (NLU) module parses the utterance and creates structured representation.
@@ -18,7 +18,9 @@ The slot-value filling can be approached as a sequence tagging problem.
 Many approaches have been proposed to tackle this issue, ranging from SVM \cite{shi2016recurrent} and HMM \cite{surendran2006dialog} based taggers to various neural models \cite{adel2016comparing, zhang2017position, mesnil2014using}.
 Because of the similar nature of these three sub-tasks, it is reasonable to model them jointly.
 Especially modeling the intent detection together with slot filling proved to be beneficial for the model performance \cite{zhang2017position, liu2016attention, xu2013convolutional}.
+
 \subsubsection{Dialogue State Tracking (DST)} 
+\label{relwork:DST}
 The most straightforward solution to this problem is a rule-based system that simply tracks the current slot values based on NLU.
 However, the situation is usually more complicated.
 We need to take into account a distribution of slot value probabilities and the update rules can be rather complex.
@@ -26,6 +28,7 @@ We need to take into account a distribution of slot value probabilities and the 
 Neural networks have also been used to model the distributions \cite{mrkvsic2016neural, zhong2018global} and deal with multiple domain handling \cite{rastogi2017scalable}.
 
 \subsubsection{Dialogue Policy}
+\label{relwork:policy}
 The policy decision can thus be framed as a classification task \cite{gavsic2013gaussian}.
 Learning the policy just from the offline data might not produce robust policy due to low variability in the data.
 Therefore, many works model the dialogue as a partially observable Markov decision process \cite{gavsic2010gaussian, thomson2010bayesian}.
@@ -38,7 +41,7 @@ Therefore corpus-based methods have been proposed \cite{oh2000stochastic, maires
 Lately, neural network based systems were proposed as well \cite{wen-etal-2015-semantically, wen-etal-2016-multi}
 
 \subsection{End-to-end architectures}
-\label{sec:relwork-end-to-end}
+\label{relwork:end-to-end}
 Various end-to-end solutions have been proposed to address the drawbacks of modular system training.
 This was made possible largely thanks to the growing popularity of Neural Networks (NN) and the backpropagation algorithm over the last decade.
 NN form a family of models that naturally allow us to combine multiple models and train them using a single training algorithm.
@@ -61,6 +64,7 @@ The pretrained models are naturally utilizable for transfer learning, which prov
 Recently, attention-based architecture was proposed that models latent dialogue actions \cite{bao2019plato}.
 \
 \subsection{Large Language Models}
+\label{relwork:llm-dialogue}
 The Transformer architecture \cite{vaswani2017attention} enabled training larger and more capable language models.
 The research on their few-shot and zero-shot abilities probably dates back to the GPT-2 and GPT-3 models \cite{radford2019language,brown2020language}, which are scaled versions of the Transformer decoder.
 Many followed this path of training large Transformer decoders \cite{zhang2022opt,black2022gpt}, yielding models of sizes up to hundreds of billions parameters big \cite{zhao_survey_2023}.

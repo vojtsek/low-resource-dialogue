@@ -1876,25 +1876,6 @@ Mausam},
     abstract = "Defining action spaces for conversational agents and optimizing their decision-making process with reinforcement learning is an enduring challenge. Common practice has been to use handcrafted dialog acts, or the output vocabulary, e.g. in neural encoder decoders, as the action spaces. Both have their own limitations. This paper proposes a novel latent action framework that treats the action spaces of an end-to-end dialog agent as latent variables and develops unsupervised methods in order to induce its own action space from the data. Comprehensive experiments are conducted examining both continuous and discrete action types and two different optimization methods based on stochastic variational inference. Results show that the proposed latent actions achieve superior empirical performance improvement over previous word-level policy gradient methods on both DealOrNoDeal and MultiWoz dialogs. Our detailed analysis also provides insights about various latent variable approaches for policy learning and can serve as a foundation for developing better latent actions in future research.",
 }
 
-@inproceedings{lubis-etal-2020-lava,
-    title = "{LAVA}: Latent Action Spaces via Variational Auto-encoding for Dialogue Policy Optimization",
-    author = "Lubis, Nurul  and
-      Geishauser, Christian  and
-      Heck, Michael  and
-      Lin, Hsien-chin  and
-      Moresi, Marco  and
-      van Niekerk, Carel  and
-      Gasic, Milica",
-    booktitle = "Proceedings of the 28th International Conference on Computational Linguistics",
-    month = dec,
-    year = "2020",
-    address = "Barcelona, Spain (Online)",
-    publisher = "International Committee on Computational Linguistics",
-    url = "https://aclanthology.org/2020.coling-main.41",
-    doi = "10.18653/v1/2020.coling-main.41",
-    pages = "465--479",
-    abstract = "Reinforcement learning (RL) can enable task-oriented dialogue systems to steer the conversation towards successful task completion. In an end-to-end setting, a response can be constructed in a word-level sequential decision making process with the entire system vocabulary as action space. Policies trained in such a fashion do not require expert-defined action spaces, but they have to deal with large action spaces and long trajectories, making RL impractical. Using the latent space of a variational model as action space alleviates this problem. However, current approaches use an uninformed prior for training and optimize the latent distribution solely on the context. It is therefore unclear whether the latent representation truly encodes the characteristics of different actions. In this paper, we explore three ways of leveraging an auxiliary task to shape the latent variable distribution: via pre-training, to obtain an informed prior, and via multitask learning. We choose response auto-encoding as the auxiliary task, as this captures the generative factors of dialogue responses while requiring low computational cost and neither additional data nor labels. Our approach yields a more action-characterized latent representations which support end-to-end dialogue policy optimization and achieves state-of-the-art success rates. These results warrant a more wide-spread use of RL in end-to-end dialogue models.",
-}
 
 @inproceedings{stevens-su-2021-investigation,
     title = "An Investigation of Language Model Interpretability via Sentence Editing",
@@ -2554,4 +2535,76 @@ Mausam},
 	keywords = {Computer Science - Computation and Language, Computer Science - Machine Learning, Statistics - Machine Learning, Xinnuo, Xsum/BBC data, Zdenek},
 	pages = {7871--7880},
 	file = {Full Text PDF:C\:\\Users\\Ondra\\Zotero\\storage\\U5C67R54\\Lewis et al. - 2020 - BART Denoising Sequence-to-Sequence Pre-training .pdf:application/pdf},
+}
+
+@inproceedings{DBLP:conf/aaai/LiangTCY20,
+  author       = {Weixin Liang and
+                  Youzhi Tian and
+                  Chengcai Chen and
+                  Zhou Yu},
+  title        = {{MOSS:} End-to-End Dialog System Framework with Modular Supervision},
+  booktitle    = {The Thirty-Fourth {AAAI} Conference on Artificial Intelligence, {AAAI}
+                  2020, The Thirty-Second Innovative Applications of Artificial Intelligence
+                  Conference, {IAAI} 2020, The Tenth {AAAI} Symposium on Educational
+                  Advances in Artificial Intelligence, {EAAI} 2020, New York, NY, USA,
+                  February 7-12, 2020},
+  pages        = {8327--8335},
+  publisher    = {{AAAI} Press},
+  year         = {2020},
+  url          = {https://ojs.aaai.org/index.php/AAAI/article/view/6349},
+  timestamp    = {Thu, 13 Jul 2023 13:56:51 +0200},
+  biburl       = {https://dblp.org/rec/conf/aaai/LiangTCY20.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{vahdat2020nvae,
+  title={NVAE: A deep hierarchical variational autoencoder},
+  author={Vahdat, Arash and Kautz, Jan},
+  journal={Advances in neural information processing systems},
+  volume={33},
+  pages={19667--19679},
+  year={2020}
+}
+
+@article{li2020progressive,
+  title={Progressive learning and disentanglement of hierarchical representations},
+  author={Li, Zhiyuan and Murkute, Jaideep Vitthal and Gyawali, Prashnna Kumar and Wang, Linwei},
+  journal={arXiv preprint arXiv:2002.10549},
+  year={2020}
+}
+@article{van2008visualizing,
+  title={Visualizing data using t-SNE.},
+  author={Van der Maaten, Laurens and Hinton, Geoffrey},
+  journal={Journal of machine learning research},
+  volume={9},
+  number={11},
+  year={2008}
+}
+
+@Book{GoodBengCour16,
+  Title                    = {Deep Learning},
+  Author                   = {Ian J. Goodfellow and Yoshua Bengio and Aaron Courville},
+  Publisher                = {MIT Press},
+  Year                     = {2016},
+
+  Address                  = {Cambridge, MA, USA},
+  Note                     = {\url{http://www.deeplearningbook.org}}
+}
+
+@inproceedings{mosbach-etal-2023-shot,
+    title = "Few-shot Fine-tuning vs. In-context Learning: A Fair Comparison and Evaluation",
+    author = "Mosbach, Marius  and
+      Pimentel, Tiago  and
+      Ravfogel, Shauli  and
+      Klakow, Dietrich  and
+      Elazar, Yanai",
+    booktitle = "Findings of the Association for Computational Linguistics: ACL 2023",
+    month = jul,
+    year = "2023",
+    address = "Toronto, Canada",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2023.findings-acl.779",
+    doi = "10.18653/v1/2023.findings-acl.779",
+    pages = "12284--12314",
+    abstract = "Few-shot fine-tuning and in-context learning are two alternative strategies for task adaptation of pre-trained language models. Recently, in-context learning has gained popularity over fine-tuning due to its simplicity and improved out-of-domain generalization, and because extensive evidence shows that fine-tuned models pick up on spurious correlations. Unfortunately, previous comparisons of the two approaches were done using models of different sizes. This raises the question of whether the observed weaker out-of-domain generalization of fine-tuned models is an inherent property of fine-tuning or a limitation of the experimental setup. In this paper, we compare the generalization of few-shot fine-tuning and in-context learning to challenge datasets, while controlling for the models used, the number of examples, and the number of parameters, ranging from 125M to 30B. Our results show that fine-tuned language models can in fact generalize well out-of-domain. We find that both approaches generalize similarly; they exhibit large variation and depend on properties such as model size and the number of examples, highlighting that robust task adaptation remains a challenge.",
 }

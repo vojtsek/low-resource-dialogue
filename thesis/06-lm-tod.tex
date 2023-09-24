@@ -1,5 +1,218 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Language Models for Task-Oriented Dialogue Modeling}
-\label{chap:conclusion}
+\chapter{Sequence-to-Sequence Task-Oriented Dialogue Modeling}
+\label{chap:lm-tod}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Modeling a dialogue is a fairly complicated task which needs to handle communication in natural language as well as  discrete decision process.
+Task-oriented dialogue is a complex task that is typically modeled with architectures consisting of multiple modules \ref{02:sec:basics}.
+This approach makes it challenging to transfer the learned knowledge since all the modules need to be adjusted during the transfer.
+
+This concern can be addressed by using end-to-end trainable models that can potentially transfer the knowledge in one step and therefore can be adjusted to different domains and use cases more easily.
+In the field of task-oriented dialogue, end-to-end implementations are dominated with sequence-to-sequence architectures based on Language Models \ref{relwork:end-to-end}.
+The LM based approaches have taken over the benchmarks \footnote{\url{https://github.com/budzianowski/multiwoz\#trophy-benchmarks}}, demonstrating SoTA performance.
+However, all of these competitive models are finetuned on a single training set.
+In this chapter, we raise a question how well these models are able to transfer the obtained skill of leading the dialogue to other domains.
+In other words, we want to discover if the models really learn useful skills that can be beneficial in other domains or if the demonstrated behavior merely reproduces the patterns seen in the training portion of the data.
+
+\section{AuGPT Model Description}
+We choose AuGPT model introduced by \citet{kulhanek-etal-2021-augpt}.
+The architecture utilizes GPT-2 model~\cite{radford2019language} that is used for both belief state prediction and response generation, following the work described in Section~\ref{relwork:end-to-end}.
+GPT-2 is a pretrained language model based on Transformer decoder, therefore it is suitable for modeling sequences in natural language.
+AuGPT directly builds on the \emph{small} version of the model, resulting in 124M parameter model.
+Additionally, AuGPT introduces multiple training improvements.
+Instead of using solely the cross-entropy loss for language modelling, AuGPT adds the following objectives:
+\begin{enumerate}
+    \item State Corruption Detection - during training, the model is randomly presented with corrupted versions of the belief state.
+    For the corruption, portions of the belief state and replaced with random values.
+    Several strategies can be used, we simply replace the slot values.
+    The model learns to predict if the presented belief state corresponds to the respective context in the training example.
+    This modification aims to improve the robustness of the belief state prediction.
+    \item Unlikelihood loss - this loss component penalizes token repetition, thus aims for more diverse and natural responses. This addition is used for response generation only.
+\end{enumerate}
+Since GPT is able to work with any natural language sentences, it is straightforward to apply this model to our dialogue datasets.
+
+\section{DIASER corpus introduction}
+\label{sec:diaser}
+Motivated by the questions raised in this chapter, we created a collection of several well-established task-oriented dialogue datasets spanning several domains to yield one larger multi-domain corpus.
+Specifically, we used: \textbf{MultiWOZ 2.2} (MW), \textbf{Schema-guided dialogue} (SGD), \textbf{DSTC2} (DSTC) and \textbf{CamRest676} (CR).
+For more details about the aforementioned datasets, please refer to Section~\ref{02:sec:input-data-desc}.
+
+\subsection{Theoretical motivation}
+Our aim here is to cover as many domains as possible in a unified corpus.
+Our source dataset choice is thus mainly based on the level of annotation available -- all source datasets include semantic annotation on the turn level as well as explicit database interaction. 
+Despite the dataset similarities, important differences need to be resolved.
+
+The main task when merging datasets is to unify the different domain-specific ontologies, i.e.\ the different attributes contained in the dialogue acts.
+More precisely, the unified dataset ontology contains all the possible domains, with their corresponding slots and associated value sets. We cannot consider the slots independently from the domain they belong to. Indeed, a slot that represents the \textit{price range} will not have the same range of values when pertaining to a restaurant or a flight ticket. We identified two main problems related to this issue:
+\begin{enumerate}
+    \item \textbf{Name reference ambiguities}
+    We need to design the final ontology so that different slot names refer to different concepts (with due precaution for label choice) and to merge different slot names associated with the same value set under a single label.
+    For example, in MultiWOZ, there are two different slot names \textit{day} and \textit{book-day} for the same value set (week days) and usage contexts. But in SGD, slot names may be misleading since we can find a slot named \textit{start-day} and another one called \textit{day}; the former refers to a calendar date while the latter refers to a week day.
+    %In MultiWOZ again, there is a slot named \textit{leave-at} whose value is always a time frame (independently of the domain), but its dual slot called \textit{arrive-by} can be either a time frame (train domain), or a day of the week (hotel domain). \\
+    %In SGD, all the following slots have exactly the same values : \{\textit{number-of-tickets,number-of-adults,people,total-people,persons,number-of-riders,group-size,number-of-seats} \}.
+    
+    \item \textbf{Absence of ontology/database} When SGD dataset was collected, the authors used API calls instead of database lookup. Therefore there is no database-related metadata released with the corpus, which forced us to create an ontology and a database for the data based on values occurring in the conversations.
+\end{enumerate}
+
+\subsection{Details of the merging approach}
+Here we present details on how me merged the data into common format, including the handling of different ontologies.
+%Then we discuss improvement of the  dialogues consistency.
+Quantitative statistics of the final dataset are shown in the rightmost column of Table~\ref{tab:data_stats}.
+Full technical documentation can be found in the data repository.\footnote{\url{https://github.com/ufal/diaser}}
+Here we list an overview of all the required merging steps:
+
+\paragraph{Matching belief representations.} In DSTC and CR, belief state annotations are extracted from both the user and the system utterance, whereas in the MW and SGD dataset, the belief state is only extracted from the user utterance. We had to filter automatically the annotations from DSTC and CR until they matched the MW belief state representation. 
+    
+\paragraph{Adding meta features} from the original datasets. DSTC2, CamRest and MultiWOZ contain the \emph{goal} of the dialogue (also called task) as a dialogue act with the constraints (e.g.\ expensive restaurant south) and the information the user needs to obtain from the system (e.g.\ phone number and address). They also contain a short text summarizing this goal for crowd workers. We include both versions of the task description with each dialogue.
+    
+\paragraph{Unifying annotation structure.} The final dataset structure is similar to the structure of SGD and MultiWOZ 2.2. We create a \textit{Turn} object that contains either the user utterance and dialogue acts, or the system utterance. Two consecutive entries for user and system share the same turn number -- we consider a \textit{Turn} as an exchange between the user and the system (i.e.\ a pair or utterances). 
+
+\paragraph{Ontology unification.}   
+One of the most difficult parts of this work was to unify ontologies\footnote{Although none of datasets have a formal specification or an RDF representation, the lists of all possible domains, intents, slots, and slot values are generally referred to as ontologies in dialogue systems literature, including the description papers for the source datasets.} of each original dataset because they were not built on the same dimensions.
+This concerns slot, domain, and intent names. After indexing all metadata from the different datasets, we merged them manually using MultiWOZ as the pivot.
+We always checked the meaning in context, so we match slots/intents with the same semantics.
+
+In addition to unifying the naming, we also needed to solve the following problems:
+\begin{enumerate}
+    \item SGD does not include any ontology information; we thus had to build the ontology from scratch based on values from the included API responses. Since SGD uses several API schemas per domain, each with its own set of slots, often using different naming for the same concepts, we also unified the different schemas, same as we did with different data sources.
+
+    \item DSTC2 and CamRest ontologies distinguish between two kinds of slots: informable and requestable. \emph{Informable} (also called \emph{constraints}) are slots for which the value needs to be specified by the user (e.g. price, area); the user cannot specify \emph{requestable} slots but can ask the system for their value (e.g. phone number, address). We use this distinction to also assign slots in the other two datasets into one of these two groups.
+
+\end{enumerate}
+
+\paragraph{Slot co-reference}
+Some of the source corpora (MW and SGD) include co-reference between slots.
+For example \textit{start-time} can take the value “sooner than that” or the slot \emph{hotel-name} can take the value “event you mentioned earlier”.
+This is a problem if we assume to have a self-contained ontology that captures all the possible values from the corpus.
+
+
+\begin{table}[t]
+    \centering\footnotesize
+    \begin{tabular}{l>{\hspace{-3mm}}r>{\hspace{-2mm}}rrr>{\hspace{-2mm}}r}
+        \toprule
+        \bf Intent &
+        \textbf{SGD} & 
+        \textbf{MW} &
+        \textbf{DSTC} &
+        \textbf{CR} &
+         \textbf{all}\\ \midrule
+        \textbf{inform} & 151,467 & 84,259 & 33,451 & 5,786 & 274,963\\ 
+        \textbf{request} & 81,786 & 31,888 & 13,620 & 1,516 & 128,810\\ 
+        \textbf{offer} & 67,095 & 4,497 & 23,763 & 0 & 95,355\\ 
+        \textbf{bye} & 35,089 & 12,380 & 0 & 0 & 47,469\\ 
+        \textbf{else}& 31,030 & 13,779 & 0 & 0 & 44,809 \\ 
+        \textbf{select}& 33,820 & 2,834 & 243 & 0 & 36,897\\ 
+        \textbf{confirm}& 30,327 & 0 & 5,756 & 0 & 36,083\\
+        \textbf{thank}& 23,172 & 9,064 & 0 & 0 & 32,326\\ 
+        \textbf{negate}& 132,01 & 4,399 & 4,413 & 0 & 22,023\\ 
+        \midrule
+        \textbf{total}& 435,957 & 163,100 & 81,346 & 7,312 & 718,645\\
+        \bottomrule
+    \end{tabular}
+    \caption{Most frequent intents in our unified schema, for each source and overall (with absolute numbers of occurrences).}
+    \label{tab:intents}
+\end{table}
+
+\begin{table}[h]
+    \centering\footnotesize
+    \begin{tabular}{l>{\hspace{-2mm}}rrrrr}
+        \toprule
+        \bf Slot &
+        \textbf{SGD} & 
+        \textbf{MW} &
+        \textbf{DSTC} &
+        \textbf{CR} &
+         \textbf{all}\\ \midrule
+        \textbf{name} & 65,999 & 42,215 & 3,135 & 2 & 111,351\\ 
+        \textbf{area} & 8,133 & 48,285 & 37,697 & 4,178 & 98,293 \\ 
+        \textbf{date} & 81,600 & 20,872 & 0 & 0 & 102,472\\
+        \textbf{price} & 1,950 & 33,084 & 32,267 & 4,032 & 71,333\\
+        \textbf{type}& 41,146 & 28,562 & 0 & 0 & 69,708\\
+        \textbf{leave}& 32,625 & 26,684 & 0 & 0 & 59,309\\
+        \textbf{arrive}& 26,180 & 26,228 & 0 & 0 & 52,408\\
+        \textbf{food}& 13,501 & 20,963 & 3,007 & 571 & 38,042\\
+        \textbf{book}& 17,618 & 11,723 & 0 & 0 & 29,341\\
+        \midrule
+        \textbf{total}& 298,752 & 232,388 & 76,106 & 8,783 & 532,257\\
+        \bottomrule
+    \end{tabular}
+    \caption{Most frequent slots in our unified schema, for each source and overall (with absolute numbers of occurrences).}
+    \label{tab:slots}
+\end{table}
+
+\section{Experiments and results}
+\begin{table*}
+    \centering \small
+    \begin{tabular}{ccc >{\hspace{1em}} ccc >{\hspace{1em}} ccc}
+      \toprule
+       \multicolumn{3}{c}{training} & \multicolumn{3}{c}{evaluation} & \multicolumn{3}{c}{metrics}\\
+       \textbf{DSTC} & \textbf{MW} & \textbf{SGD} & \textbf{DSTC} & \textbf{MW} & \textbf{SGD} & \textbf{Slot F1} & \textbf{JGA} & \textbf{BLEU} \\
+       %========================================================
+       \midrule
+       %========================================================
+       % mwoz-mwoz
+       {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & 0.89 & 0.53 & 18.61 \\
+       % schema-mwoz
+       {\textcolor{red} \xmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & 0.16 & 0.02 & 4.01 \\
+       % dsctmwoz-mwoz
+       {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{red} \xmark}  & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & 0.89 & {0.55} & 19.67 \\
+       % dstcschema-mwoz
+       {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & 0.17 & 0.03 & 5.68 \\
+       % mwozschema-mwoz
+       {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & 0.89 & 0.52 & 19.92 \\
+       % all-mwoz
+       {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} &  0.90 & 0.54 & 21.09 \\
+       %========================================================
+       \midrule
+       %========================================================
+       % mwoz-schema
+       {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{red} \xmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & 0.04 & 0.01 & 5.63 \\
+       % schema-schema
+       {\textcolor{red} \xmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & 0.59 & 0.21 & {28.17} \\
+       % dstcmwoz-schema
+       {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{red} \xmark}  & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & 0.03 & 0.01 & 5.51 \\
+       % dstcschema-schema
+       {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & 0.58 & 0.21 & 27.96 \\
+       % mwozschema-schema
+       {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & 0.63 & 0.23 & 27.54 \\
+       % all-schema
+       {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & 0.63 & 0.22 & 27.72 \\
+       %========================================================
+       \midrule
+       %========================================================
+       % dstcmwoz-all
+       {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & 0.28 & 0.12 & 15.30 \\
+       % dstcschema-all
+       {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} &  0.55 & 0.22 & 27.28 \\
+       % mwozschema-all
+       {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & 0.65 & 0.25 & 25.13 \\
+       % all-all
+       {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & 0.70 & 0.28 & \textbf{29.73} \\
+
+      \bottomrule
+  \end{tabular}
+  \caption{Performance of the AuGPT model trained and evaluated on various subsets of the unified dataset.}
+  \label{tab:exp-results}
+\end{table*}
+
+\begin{table*}
+    \centering \small
+    \begin{tabular}{cccccc}
+      \toprule
+       pretraining & finetuning & ft-ratio & \textbf{Slot-F1} & \textbf{JGA} & \textbf{BLEU} \\
+        \midrule
+       -- & SGD & 100\% & 0.59 & 0.21 & 28.17 \\
+       -- & SGD & 10\% & 0.47 & 0.15 & 20.13 \\
+       MW & SGD & 10\% & 0.46 & 0.16 & 19.46 \\
+       -- & SGD & 5\% & 0.29 & 0.08 & 14.65 \\
+       MW & SGD & 5\% & 0.29 & 0.12 & 15.16 \\
+       -- & SGD & 1\% & 0.07 & 0.03 & 6.37\\
+       MW & SGD & 1\% & 0.06 & 0.01 & 8.40 \\
+       -- & SGD & 0.5\% & 0.04 & 0.04 & 3.43 \\
+       MW & SGD & 0.5\% & 0.04 & 0.02 & 5.95 \\
+       %========================================================
+       \midrule
+       %=======================================================
+      \bottomrule
+  \end{tabular}
+  \caption{Performance of the AuGPT model trained and evaluated on various subsets of the unified dataset.}
+  \label{tab:exp-results}
+\end{table*}

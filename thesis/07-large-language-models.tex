@@ -1,29 +1,33 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Large Language Models for Task-Oriented Dialogue}
-\label{07:chap:lms}
+\label{chap:llms}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \label{07:sec:intro}
-Large Language Models (LLMs) have transformed the NLP field,
+As we have described in the previous chapter, pretrained Language Models perform very well in the end-to-end dialogue modeling.
+Despite the success, using the widely used approach of finetuning pretrained LM on a particular dataset still doesn't guarantee easy transferability of the learned knowledge.
+This might change if we use more powerful tools, such as 
+Large Language Models (LLMs), which increased the model size by order of magnitute compare to the previous generation of pretrained LMs.
+Undeniable, LLMs have transformed the NLP field,
 showing outstanding performance across many NLP benchmarks such as Winograd Challenge \cite{levesque2012winograd} or GLUE \cite{wang2018glue}.
-Recently, instruction finetuning of LLMs proved to be able to align the model outputs with human preferences \cite{ouyang2022training,supernaturalinstructions} and improved the LLMs' communication capabilities substantially.
+Instruction finetuning of LLMs proved to be able to align the model outputs with human preferences \cite{ouyang2022training,supernaturalinstructions} and improved the LLMs' communication capabilities substantially (cf. section~\ref{relwork:llm-dialogue}).
+
 State-of-the-art LLMs are not only good at understanding user needs but also capable of providing relevant answers.
-%and even program code snippets.
-Consequently, we see many chatbot applications both inside and outside academia (ChatGPT\footnote{\url{https://openai.com/blog/chatgpt}}, Claude\footnote{\url{https://www.anthropic.com/index/introducing-claude}}or BARD\footnote{\url{https://blog.google/technology/ai/bard-google-ai-search-updates/}}) which build upon the raw power of instruction-finetuned LLMs.
+Consequently, we have seen many chatbot applications both inside and outside academia (ChatGPT\footnote{\url{https://openai.com/blog/chatgpt}}, Claude\footnote{\url{https://www.anthropic.com/index/introducing-claude}}or BARD\footnote{\url{https://blog.google/technology/ai/bard-google-ai-search-updates/}}) which build upon the raw power of instruction-finetuned LLMs.
 
 \section{Motivation}
-Given the millions of daily interactions with these chatbots, it appears that the models are able to handle users' needs to their satisfaction, at least to some extent.
+Given the millions of daily interactions with LLM-based chatbots, it appears that the models are able to handle users' needs to their satisfaction, at least to some extent.
 However, these chatbots are tuned using unstructured open-domain conversations.
-We aim to evaluate these systems
-for more specific applications, where the system has to follow a predetermined structure and handle external sources of information, such as APIs or databases.
+We aim to evaluate these systems w.r.t task-oriented dialogues, where the system has to follow a predetermined structure and handle external sources of information, such as APIs or databases.
 We raise the question to what extent LLMs are capable of handling these applications off-the-shelf, i.e.\ without finetuning.
 This approach, also frequently referred to as \emph{in-context learning} is a common way hoe to work with LLMs and offers competitive performance.
-We  choose to evaluate LLM performance in the task-oriented dialogue (TOD) setting,
+We choose to evaluate LLM performance in the task-oriented dialogue (TOD) setting,
 as it requires precise information handling for communicating with external APIs.
-Moreover, TOD systems output in-domain information which has predetermined structure and lends itself well to evaluation, thanks to pre-existing annotated data sets.
+Moreover, TOD systems output in-domain information which has a predetermined structure and lends itself well to evaluation, thanks to pre-existing annotated data sets.
 We avoid finetuning techniques and focus on zero-shot or few-shot settings using in-context learning, as this approach has lower hardware requirements and barrier of entry and better flexibility or even performance in certain tasks \cite{su2022selective}.
-It is important to note, that we cannot exclude a possibility that some of the models were exposed to our selected datasets during training.
-However, we find it important to evaluate this setting as the real world use cases might largely rely on this approach.
+It is important to note, that we cannot exclude the possibility that some of the models were exposed to our selected datasets during training.
+However, we find it important to evaluate this setting as the real-world use cases might largely rely on this approach.
+\todo{reference to discussion}
 
 In this chapter, we introduce an LLM-based TOD conversation pipeline and evaluate its performance with respect to commonly used task-oriented metrics such as Joint Goal Accuracy, Slot F1, and Dialogue Success \cite{rastogi_multi-task_2018,budzianowski_multiwoz_2018}.
 Our pipeline resembles other approaches based on LMs \cite{peng-etal-2021-soloist,yang2021ubar}, using state tracking and response generation as two main, separate steps, while keeping the role of a dialogue policy implicit.
@@ -446,6 +450,8 @@ It seems that the biggest improvement can be achieved by supplying just a few ex
     \label{07:fig:shots}
 \end{figure}
 
+\subsection{Single-domain performance}
+\todo{Describe performance when restricted to single domain, see Google Keep}
 \section{Model Analysis}
 \label{sec:analysis}
 
@@ -481,6 +487,16 @@ This happens in more than 50\% of their failed dialogues.
 In some cases, this means continuing the conversation for a few more turns (including hallucinating user turns), but the models also often generate unrelated text or even code snippets.
 With \emph{Tk-Instruct}, we observed that in ca.~10\% cases, it copies belief state from the example given in the prompt instead of generating a relevant one.
 Another issue is that the models tend to repeat their previous responses.
+
+\subsection{Limitations}
+One of the drawbacks of our work is the reproducibility.
+Closed models like ChatGPT are only available only via API and their behavior can change with time, making the experiments essentially impossible to reproduce.
+To address this, we include more models for the evaluation.
+Another problem is that with the rapid development in this field of study, new and stronger LLMs appear with high frequency, making some of our results obsolete fast.
+However, our experiments aim to put the LLM performance in context and show that despite their great capabilities, the approach of in-context learning is unlikely to solve the task-oriented dialogues problematic in the near future.
+
+It would be also desirable to focus more on prompt engineering techniques since the LLMs are arguably sensitive to the choice of the right prompt and this choice is model-specific.
+Nevertheless, it's unlikely that solely tweaking the input prompt would affect the performance dramatically.
 
 \begin{table}[t]
     \centering\small
@@ -577,14 +593,15 @@ Another issue is that the models tend to repeat their previous responses.
 \section{Discussion}
 
 We present an experimental evaluation of instruction-tuned LLMs applied to the established task of task-oriented dialogue modeling, with five LLMs evaluated on two datasets.
-We find that LLMs are not performing well in terms of belief state tracking, even when provided with in-context few-shot examples.
-However, there is some potential to improve through prompt tuning and output parsing robust to irregularities.
+We find that current LLMs have difficulties with respect to belief state tracking.
+The LLM-based state trackers struggle even when provided with in-context few-shot examples.
+Some of the problems arise from the fact that the LLM might not provide correctly formatted outputs.
+These errors might be accounted for by restricting the decoding techniques and robust parsing mechanisms.
+On the other hand, a non-trivial portion of errors come from hallucinated slot values that aren't present in the conversation.
+This behavior is harder to address successfully.
 
-If provided with a correct belief state, the models can interact with the user successfully, provide useful information and fulfill the user's needs.
-While the performance does not match supervised state of the art, it is important to note that these models were not finetuned on in-domain data and work with just a domain description or a few examples (which again improve performance). 
-%Moreover, few-shot examples improve the model performance as well as providing oracle belief state.
-Therefore, carefully picking representative examples and combining the LLM with an in-domain belief tracker can be a viable choice for task-oriented dialogue pipeline.
-
-In future work, we want to focus on addressing the prompt-recoverable errors while maintaining the ability to use model-independent prompts and easily swap models. % without the need to change prompts.
-We also aim to find a more effective method of relevant example selection.
-
+If provided with a correct belief state, the models can interact with the user quite well, provide useful information and fulfill the user's needs.
+While the performance does not match the supervised state of the art on the evaluated datasets, it is important to note that these models were not finetuned on in-domain data and work with just a domain description or a few examples (which again improve performance). 
+Moreover, few-shot examples improve the model performance as well as access to the oracle belief state.
+Therefore, carefully picking representative examples and combining the LLM with an in-domain belief tracker can be a viable choice for a task-oriented dialogue pipeline.
+Also, our evaluation experiments suggest, that LLM-based systems are surprisingly good in human interaction, surpassing the results suggested by the corpus-based automatic evaluation metrics.

@@ -1,31 +1,48 @@
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Dialogue modeling}%
+\chapter{Dialogue modeling with less supervision}%
 \label{chap:modeling}
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Modeling a dialogue is a fairly complicated task which needs to handle communication in natural language as well as  discrete decision process.
+Modeling a dialogue is a fairly complicated task that needs to handle communication in natural language as well as the discrete decision process.
 Various architectures were proposed over the years, most of which rely on explicit data annotation on multiple levels to guide the model training process.
 One of the biggest challenges is to model task-oriented dialogue that requires interaction with external interfaces s.a. databases or API services.
-This aspect puts a hard constraint on the dialogue system architecture -- it requires some kind of explicit representation that allows to communicate with external systems.
-It's challenging to achieve this in fully unsupervised setting, however, we explore some of the approaches in this chapter.
-First, we discuss the challenges of unsupervised task-oriented dialogue modeling in more detail in Section \ref{04:to-unsup}.
-Next, we propose our architecture that uses latent representations and explore its abilities and perfromance in Section \ref{04:latent-models}.
-Finally, we discuss the usage of Large Language Models as dialogue models and try to answer a question if the usage of these models is able to close the gap between unsupervised and supervised systems.
+This aspect puts a hard constraint on the dialogue system architecture -- it requires some kind of explicit representation that allows one to communicate with external systems.
+It's challenging to achieve this in a fully unsupervised setting, however, we explore some of the approaches in this chapter.
+First, we discuss the challenges of unsupervised task-oriented dialogue modeling in more detail in Section \ref{05:sec:to-unsup}.
+Next, we propose our architecture that uses latent representations and explore its abilities and performance in Section \ref{05:sec:latent-models}.
+Finally, we discuss the usage of Pretrained Language Models as dialogue models and try to answer the question if the usage of these models is able to close the gap between unsupervised and supervised systems.
 
-\section{Task-oriented dialogue modeling with less supervision}
-\label{04:to-unsup}
-In this section we discuss some of the features we expect from a task-oriented dialogue and how challenging it is to implement them in an unsupervised setting.
+\section{Challenges in TOD modeling with less supervision}
+\label{05:sec:to-unsup}
+In this section, we discuss some of the features we expect from a task-oriented dialogue and how challenging it is to implement them in an unsupervised setting.
 
-\subsection{NLU}
-\subsection{External interfaces}
-Task-oriented dialogue systems must provide accurate and complete information based on user requests, which requires external database interaction.
-%In order to do that, the system needs some form of external database interaction.
-%
+\subsection{Natural Language Understanding (NLU)}
+Recall that the purpose of the NLU component in a traditional dialogue pipeline (Chapter~\ref{02:sec:basics}) is to extract the meaning from input utterances in natural language and represent it in a structured way.
+Doing this in an unsupervised way is challenging because not only that we do not have the labeled data for training but we do not know the structure itself in the first place.
+However, there are some possible ways how to approach this problem.
+In this chapter, we let the model handle NLU implicitly and evaluate the understanding indirectly via modified dialogue success (see Secction~\ref{05:sec:succ}).
+
+\subsection{Action Selection}
+One of the tasks of the dialogue manager is to select a next system action in a given  situation.
+Most of the implemented systems perform this task implicitly, i.e. there is no explicit representation of the system action, just a surface realization of it (in the form of verbalized utterance).
+The reason for this option is that it requires less supervised labels which might be hard and costly to obtain.
+However, modeling the information about system action can be beneficial for the overall performance~\cite{DBLP:conf/aaai/LiangTCY20}.
+We explore the possibility of learning this information implicitly, by introducing bottlenec in the network.
+
+\subsection{Interaction with external interfaces}
+Task-oriented dialogue systems must provide accurate and complete information based on user requests, which requires interaction with external interfaces s.a. databases or some kind of structured knowledge base.
+In order to communicate with such external entities, we typically need to design some kind of representation with predetermined  structure so we can construct API queries etc.
+In the setting where no supervision in form of labels is present, this can be troublesome.
+Without known structure, it is very challenging how to design the communication protocol with external sources of information.
+SPARROW?
+In our approach, we decided to annotate points in the training dialogues in which the interaction with the API was needed.
+Therefore, the model can learn to construct the database queries ad-hoc using special outputs.
 A turn-level annotation of database queries would represent a similar amount of annotation as is used in supervised training, and thus would not lead to our desired setting, where the model is trained without labeled data.
 To support database access while avoiding costly turn-level annotation, we follow \citet{bordes2016learning} and 
 insert sparse database queries and results directly into the training data, forming special dialogue turns.
 Specifically, we identify turns that require database results, e.g.\ to inform about entity attributes or a number of matching entities, and insert a query-result pair in front of those turns (see Table~\ref{table:example}). We argue that this is the minimal level of supervision required to successfully operate a task-oriented system with database access; it is significantly lower than the full dialogue-state supervision used by most systems.
-In addition, it is easily available in the wild (e.g., call center transaction logs).
-In practice, we observe that database queries are only inserted for 24\% turns\footnote{This is the average over all datasets in our experiments. Per-dataset query counts are 36\%, 23\% and 11\% for CamRest676, MultiWOZ and SMD respectively.} on average.
+In addition, this kind of information can be available in real-world scenarios (e.g., call center transaction logs).
+In practice, we observe that database queries are only inserted for 24\% turns on average.
+Per-dataset query counts are 36\%, 23\% and 11\% for CamRest676, MultiWOZ and SMD respectively.
 Note that this approach still covers the task of an explicit state tracker since the necessary entity values are provided when needed.
 To maintain consistency, database query results can be stored and used in follow-up questions.
 \begin{table*}[t]
@@ -49,22 +66,21 @@ To maintain consistency, database query results can be stored and used in follow
         \bottomrule
     \end{tabular}
     \vspace{-2mm}
-    \caption{An example dialogue drawn from the CamRest676 validation set, illustrating the use of database information. We show the user input (or inserted database results), the gold-standard system response, system action annotation based on manual rules and a prediction of our system (Ours-attn configuration using the database, cf.~Table~\ref{04:automatic_metrics_1}). In the first turn, a database query is constructed, the second turn illustrates how the result is retrieved and fed as input. Values inferred correctly by our system are depicted in green, wrong inference is in red.}
-    \label{04:tab:example}
+    \caption{An example dialogue drawn from the CamRest676 validation set, illustrating the use of database information. We show the user input (or inserted database results), the gold-standard system response, system action annotation based on manual rules and a prediction of our system (Ours-attn configuration using the database, cf.~Table~\ref{05:automatic_metrics_1}). In the first turn, a database query is constructed, the second turn illustrates how the result is retrieved and fed as input. Values inferred correctly by our system are depicted in green, wrong inference is in red.}
+    \label{05:tab:example}
 \end{table*}
-\subsection{Policy decisions}
-\section{Latent Dialogue Models}
 
-\subsection{Task-Oriented dialogue with VRNNs}
+\section{Task-Oriented dialogue with VRNNs}
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/vrnn-paper.png}
+    \includegraphics[width=0.9\textwidth]{images/vrnn-diagram.pdf}
     \caption{Visualization of our model architecture (one dialogue turn). Yellow boxes represent the turn-level VRNN's hidden state $h^t$. The user utterance is represented as the last hidden state of the encoder network $\varphi_{enc}^u$, which is trained as an autoencoder along with the decoder $\varphi_{dec}^u$. The system utterance, encoded by the network $\varphi_{enc}^s$, is an input to the posterior network $\varphi_{post}$ that helps to train the prior network $\varphi_{prior}$ to construct meaningful latent variables $\mathbf{z}_s$, which initialize the system utterance decoder $\varphi_{dec}^s$. Training uses the whole architecture, including the posterior network $\varphi_{post}$, while only uses the part shaded in green is used for inference.} $\mathcal{L}_{CE}$ stands for cross-entropy loss, $\mathcal{L}_{KL}$ for KL-divergence loss.
-    \label{fig:vrnn_method}
+    \label{05:fig:vrnn_method}
 \end{figure}
 
-We use the VRNN model introduced in Chapter \ref{background:vrnn} and extend it to fit the task-oriented setup.
-Our model's architecture is depicted in Figure \ref{fig:vrnn_method}.
+\subsection{VRNN model description}
+We use the VRNN model introduced in Chapter \ref{02:sec:vrnn} and extend it to fit the task-oriented setup.
+Our model's architecture is depicted in Figure \ref{05:fig:vrnn_method}.
 We employ a turn-level RNN that summarizes the context to its hidden state.
 In each dialogue turn, we model user and system utterances with separate autoencoders to account for different user and system behavior.
 The user utterance is modeled with a standard autoencoder; the last encoder hidden state $\varphi^u_{enc}(\mathbf{x}^t_u)$ provides the encoded representation.
@@ -84,16 +100,14 @@ When running in inference mode, only the prior distribution $p(\mathbf{z}_s)$ is
 Therefore, the model is able to generate the system response when provided with a user utterance on the input.
 
 \paragraph{Latent Variables}
-\label{sec:method_latent}
+\label{05:sec:method_latent}
 We use a set of $n$ \mbox{$K$-way} $(K=20;n=1,3,5)$ categorical variables to achieve good interpretability, following \citet{zhao2018unsupervised}.
 This means that each variable is represented as a one-hot vector of length $K$, and we use $n$ such vectors.
-%To achieve good interpretability, we need the distribution to yield discrete values. 
+There are multiple ways how to incorporate trainable discrete variables into differentaible network (see Chapter~\ref{02:sec:vae_discrete}).
 We use the Gumbel-Softmax distribution and the reparameterization trick \cite{jang2017categorical}.
-During inference, we apply argmax directly to the predicted distribution, instead of sampling from it.
+During inference, we take always the item with assigned maximum probability w.r.t. the predicted distribution, instead of sampling from the distribution.
 
-\subsection{Hierarchical models for task-oriented dialogue}
-
-\section{Experiments and Results}
+\subsection{VRNN Experiments}
 
 \begin{table}[t]
     \centering\small
@@ -125,22 +139,22 @@ During inference, we apply argmax directly to the predicted distribution, instea
 
 
 In this section, we focus on the quality of responses generated by our model as well as on model performance with respect to dialogue task success.
-We focus on theoretical modeling and feasibility at this stage, which we believe is sufficiently demonstrated by corpus-based evaluation complemented by manual checks. Detailed interpretation of the learned representations follows in Section~\ref{sec:latents}.
+We focus on theoretical modeling and feasibility at this stage, which we believe is sufficiently demonstrated by corpus-based evaluation complemented by manual checks. Detailed interpretation of the learned representations follows in Section~\ref{05:sec:latents}.
 
-\subsection{Data}
-\label{sec:data}
+\subsubsection{Data}
+\label{05:sec:data}
 
 We evaluate the model performance on three datasets: CamRest676 \cite{wen2016network}, MultiWOZ 2.1 \cite{budzianowski2018multiwoz,eric2019multiwoz} and Stanford Multidomain Dialogues \cite[SMD;][]{eric-etal-2017-key}\footnote{We use standard splits for MultiWOZ 2.1 and SMD. We split CamRest676 in the 8:1:1 ratio, following previous work.}
 Detailed descriptions are given in Section \ref{02:sec:input-data-desc}.
 
 \paragraph{Database queries} To include database information in the dialogues, we first identify all turns in the original datasets where database information is required, using handcrafted rules.\footnote{These rules are very simple and require minimal effort: whenever database results are provided in the data (based on simple pattern matches over system actions), we prepend a database query based on ground-truth state. The assumption is that in a real-world scenario, these queries would naturally be available -- database queries induced by human operators can be logged along with client-operator conversations.}
-We then build database query turns based on the respective state annotation (see example in Table~\ref{tab:example}).
+We then build database query turns based on the respective state annotation (see example in Table~\ref{05:tab:example}).
 Note that database query parameters are the only annotation used to train our models apart from utterance texts; no other dialogue state annotation from the original datasets is used.
 %We acknowledge that this approach provides a certain amount of weak supervision to the system; however, it reflects the intended use case of our system, i.e. automating a call center based on recordings of previous human-human dialogues.
-\subsection{Experimental Setup}
-\label{sec:expe_setup}
+\subsubsection{Experimental Setup}
+\label{05:sec:expe_setup}
 %We release our code along with this paper.\footnote{Link removed for anonymity.}
-We evaluate two versions of our model: one that uses the attention mechanism (\emph{attn}) and one without it (\emph{noattn}). The number and size of the variables are set based on a few cursory checks on the training data. Our models use 10 latent variables by default; we discuss the influence of the number of latent variables in Table \ref{04:z_counts}.
+We evaluate two versions of our model: one that uses the attention mechanism (\emph{attn}) and one without it (\emph{noattn}). The number and size of the variables are set based on a few cursory checks on the training data. Our models use 10 latent variables by default; we discuss the influence of the number of latent variables in Table \ref{05:z_counts}.
 Since our approach is the first to be evaluated in a task-oriented setting with this minimal level of supervision, comparing to prior works is difficult. Setups with full dialog state supervision are not comparable and dialog-state metrics are not applicable without the turn-level supervision. Therefore, we compare our models to standard architectures, such as vanilla LSTM or Transformer encoder-decoder, predicting in a sequence-to-sequence fashion using the same amount of supervision as our approach. We also compare to the HRED/VHRED models, which are perhaps the closest prior work to our approach. To put the results into perspective, we also include scores for fully supervised state of the art on our datasets.
 However, note that these scores are not directly comparable.
 \footnote{The training is sensitive to some parameters, such-as the \nobreak{Gumbel-softmax} temperature, but otherwise the model trains easily using conventional optimization methods.}
@@ -172,7 +186,7 @@ However, note that these scores are not directly comparable.
   \caption{Model performance in terms of Entity Match Rate, BLEU for generated responses, Perplexity (Ppl), and Mutual Information (MI) between the generated response and the latent variables $\mathbf{z}_s$. 
   %We do not evaluate the database-enriched models on SMD as SMD's database structure does not map easily to our annotation style. 
   We measure MI only for the models that use latent variables explicitly. The \emph{db} column indicates systems that use database information. $^{*}$Note that the supervised state-of-the-art scores are not directly comparable, as the systems use full turn-level supervision. Systems listed: CamRest676 \cite{peng2021soloist};  MultiWOZ \cite{lin2020mintl}.}
-  \label{04:automatic_metrics_1}
+  \label{05:automatic_metrics_1}
 \end{table}
 \begin{table}[ht]
     \centering\small
@@ -199,10 +213,10 @@ However, note that these scores are not directly comparable.
   \caption{Model performance in terms of BLEU for generated responses, Perplexity (Ppl), and Mutual Information (MI) between the generated response and the latent variables $\mathbf{z}_s$. 
   We do not evaluate the database-enriched models on SMD as SMD's database structure does not map easily to our annotation style. 
   We measure MI only for the models that use latent variables explicitly. The \emph{db} column indicates systems that use database information. $^{*}$Note that the supervised state-of-the-art scores are not directly comparable, as the systems use full turn-level supervision. Systems listed: SMD \cite{qin2020dynamic}; }
-  \label{04:automatic_metrics_2}
+  \label{05:automatic_metrics_2}
 \end{table}
-\subsection{Response quality}
-To evaluate the quality of individual responses, we compute BLEU score \cite{papineni2002} and perplexity on the test set (see Tables~\ref{04:automatic_metrics_1},\ref{04:automatic_metrics_2 }).
+\subsubsection{Response quality}
+To evaluate the quality of individual responses, we compute BLEU score \cite{papineni2002} and perplexity on the test set (see Tables~\ref{05:automatic_metrics_1},\ref{05:automatic_metrics_2 }).
 
 Our architecture performs substantially better than (V)HRED, which commonly fails to pick up the necessary knowledge, especially on larger datasets.
 The attention-based versions perform better on BLEU, but lose slightly on perplexity.
@@ -218,7 +232,7 @@ We compare to other relevant related works:
 Based on manual checks,
 our models are able to generate relevant responses in most cases.
 As expected, only the models including database turns are able to predict correct entities (cf.~Section~\ref{sec:emr}).
-A relatively common error is informing about wrong slots, e.g.\ the model provides a phone number instead of an address or, even more frequently, provides wrong slot values (cf.~Table~\ref{04:tab:example}).
+A relatively common error is informing about wrong slots, e.g.\ the model provides a phone number instead of an address or, even more frequently, provides wrong slot values (cf.~Table~\ref{05:tab:example}).
 %An example of such a situation is highlighted in Table~\ref{tab:example}.
 
 \begin{table}[t]
@@ -243,8 +257,8 @@ A relatively common error is informing about wrong slots, e.g.\ the model provid
   \label{tab:success}
 \end{table}
 
-\subsection{Task-related performance}
-\label{sec:succ}
+\subsubsection{Task-related performance}
+\label{05:sec:succ}
 Without dialogue-state supervision, we cannot measure task-oriented metrics such as \emph{inform} rate or \emph{joint goal accuracy}.
 Therefore, we decided to measure dialogue success and entity match rate, which we adjust to the minimally supervised case (details follow). We also measure database query accuracy.
 
@@ -284,7 +298,7 @@ This metric simply measures if the system queries the database at appropriate tu
 The content of the query is not taken into account in this case, as it is already considered in the success rate. On MultiWOZ, we get a near-perfect accuracy, while our approach loses to VHRED on CamRest676 (see Table~\ref{tab:success}).
 We hypothesize that this discrepancy can be caused by different dialogue structures among theses two datasets. The dialogues in CamRest676 usually contain just zero or one query during a dialogue, so our model might generate more queries than necessary.
 
-\section{Latent Variable Interpretation}
+\subsection{Latent Variable Interpretation}
 \label{sec:latents}
 \begin{table}[h]
     \centering\small
@@ -301,13 +315,13 @@ We hypothesize that this discrepancy can be caused by different dialogue structu
   \end{tabular}
   %\vspace{-2mm}
   \caption{Evaluation of the model performance with respect to automatic measures of BLEU, Perplexity (Ppl) and Mutual Information (MI) on the CamRest676 data.}
-  \label{04:z_counts}
+  \label{05:z_counts}
 \end{table}
 We believe that being able to explain and interpret the model behavior is crucial, especially in a setting without full supervision.
 Therefore, we design a set of experiments to evaluate the model behavior and investigate whether the model captures salient dialogue features in the latent variables obtained during training on CamRest676 and MultiWOZ.
-While it seems that the latent variables are mainly useful for interpretability or structure induction, they are likely also contributing to the performance as smaller latent spaces yield lower performance as we can see in Table \ref{04:z_counts}.
+While it seems that the latent variables are mainly useful for interpretability or structure induction, they are likely also contributing to the performance as smaller latent spaces yield lower performance as we can see in Table \ref{05:z_counts}.
 
-\subsection{Clustering the actions}
+\subsubsection{Clustering the actions}
 \label{sec:clustering}
 First, we want to assess whether similar variables represent similar actions.
 We follow \citet{zhao2018unsupervised} and define utterance clusters according to the latent variables that have been assigned to them by the model.
@@ -329,11 +343,11 @@ Specifically, in this approach we compute sentence representations using a BERT 
     \label{fig:dt}
 \end{figure*}
 
-\subsection{Predictive power of the variables}
+\subsubsection{Predictive power of the variables}
 \label{sec:pred_latents}
 To evaluate the predictive power of the obtained latent representations, we train a simple classifier that predicts the system action and current domain, using solely the obtained latent representations as input features.
 CamRest676 data does not include system action annotation, hence we manually designed a set of rules to determine system actions.
-An example of this rule-based action annotation is shown in Table~\ref{04:tab:example}.
+An example of this rule-based action annotation is shown in Table~\ref{05:tab:example}.
 For MultiWOZ, we predict both system action and the domain of the utterance.
 %We hypothesize that a good representation should capture the information about dialogue system state.
 
@@ -353,7 +367,7 @@ We also observe that using attention harms the performance of the action classif
 The information about domains and system actions is stored in categorical variables and can be extracted by a simple classification model such as the decision tree which allows us to interpret and explain the behavior of our model.
 For illustration, in Figure \ref{fig:dt} we plot a DT with limited depth that achieves 73\% accuracy when predicting the system action on the CamRest676 data.\footnote{The aim is that latent variables hold high-level information, such as intents, actions or domains. This helps interpretability, but is not sufficient for generating appropriate and factually correct responses -- here we need to incorporate correct slot values. This detailed information is captured and carried over via the attention mechanism in \emph{Ours-attn}. Potential alternatives are copy mechanisms \cite{lei2018} or delexicalization on the generated outputs \cite{henderson_robust_2014,peng2021soloist}.}
 
-\subsection{Manual interpretation}
+\subsubsection{Manual interpretation}
 \label{sec:manual}
 To explore the interpretability of our representations even further, we manually annotate the latent variables to obtain a simple handcrafted classifier.
 Specifically, we draw a set of pairs of utterances and corresponding latent representations from the validation set.
@@ -378,8 +392,211 @@ As the results show, this approach works well, despite the above limitation.
   \label{tab:homo}
 \end{table}
 
-\subsection{Mutual Information}
-Finally, we compute mutual information (MI) between the generated text and latent variables as well as among the latent variables themselves (see Table~\ref{04:automatic_metrics_1}).\footnote{
+\subsubsection{Mutual Information}
+Finally, we compute mutual information (MI) between the generated text and latent variables as well as among the latent variables themselves (see Table~\ref{05:automatic_metrics_1}).\footnote{
 Since we measure MI between categorical variables, we quantize the continuous variables used in the VHRED model.}
 We see that using attention has a dramatic effect on the amount of MI between the latent variables and the generated text. % It seems that the since
 It appears that since attention bypasses the latent vectors, the decoder does not need to use them to store information.
+
+\section{Hierarchical Variational Model for TOD (HVTOD)}
+A structured representation of utterances in the dialogue (Chapter~\ref{02:sec:basics}) is hierarchical in the sense that it's a composition of several concepts that can constraint each other.
+Specifically, each utterance is characterized on top level by domain.
+Each domain is connected with use of some intents and system actions that are further connected typically with certain slots.
+
+The use of VAEs for hierarchical architecture was successfully applied in the computer vision domain \cite{vahdat2020nvae,li2020progressive}.
+We take inspiration from these works and apply the hierarchical variational auto encoder architecture to dialogue domain.
+We hypothesize that this structure will allow the model to work with different levels of abstraction and thus represent the decision process more accurately and with greater detail.
+
+\subsection{HVTOD model architecture}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/HVTOD-full-noN.pdf}
+    \caption{The architecture of our HVTOD model. The dialogue context is first processed with recurrent network encoder to obtain a hidden representation. This representation then serves as an input to the hierarchical system of variational encoders stacked on top of each other. The latent variables are merged to form the decoder initial hidden state.}
+    \label{05:fig:HVTOD-full}
+\end{figure}
+The proposed HVTOD architecture is based on the LAVA framework (see~\ref{02:sec:lava}) with the modification that the latent variables are modeled by a set of stacked VAEs.
+The overall model architecture is depicted in Figure~\ref{05:fig:vrnn_method}.
+In the input we have a set of dialogues $\mathcal{D}$ where each dialogue $d$ with $n$ turns consists is represented as a sequence of altering system and user utterances $d = (s_1,u_1,...,s_n,u_n)$.
+Similarly to LAVA, our model encodes the context $C^t = (s_1,u_1,...,s_t,u_t)$ with RNN-based utterance encoder to obtain a hidden representation of the context $h_0 = RNN_{\varphi_{enc}^u} (C^t)$.
+The obtained representation $h_0$ is subsequently used as the input to a hierarchical system of $L$ variational autoencoders.
+The autoencoders are stacked on top of each other, therefore we refer to $l-th$ VAE as VAE on level $l$ or sometimes just \emph{layer l}.
+Formally, each level $l$ computes parameters of posterior distribution $q(z_l|C^t)$ to sample the latent variable as follows:
+\begin{equation}
+\begin{split}    
+    \mathbf{h}_l = e_l(\mathbf{h}_{l-1}) \\
+    \mathbf{z}_l~\mathtt{\sim}~p(\mathbf{z}_l|C^t) = q_l(\mathbf{h}_l) \\
+\end{split}
+\end{equation}
+where $e_l, A_l$ are trainable matrices.
+In other words, each latent variable $z_l$ on level $l$ is sampled from a  distribution conditioned on context and preceding VAE layers $q(z_l|C^t,h_1,...,h_{l-1})$.
+We use Gumbel-softmax distribution to obtain discrete vectors similar to the previous section.
+To form the output, we aggregate the information on each layer in an output variable $g_l$ as follows:
+\begin{equation}
+\mathbf{g}_l = D_l(z_l) + \alpha \cdot \mathbf{g}_{l+1}, \alpha_l \in [0, 1]
+\end{equation}
+Where $\alpha_l$ is a scaling coefficient increased during training. All $\alpha_l$ are set to 1 in the trained network.
+The output from the bottom hidden layer $g_1$ is used to generate the response $s_{t+1}$  using RNN decoder parametrized by $\varphi^s_{dec}$.
+The output probability is 
+\subsection{HVTOD training}
+In the LAVA framework, there are multiple stages of training.
+Here we want to focus on the unsupervised pretraining with auto-encoding objective.
+However, we also evaluate the model performance in supervised setting to understand the behavior better.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/HVTOD-fadein-noN.pdf}
+    \caption{Our hierarchical variational model during training. At this stage, the first layer is used completely, the second layer is being fade in with increasing coefficient $\alpha$ while the last layer is not used yet so it is effectively disconnected from the computation graph.}
+    \label{05:fig:HVTOD-fadein}
+\end{figure}
+\subsubsection{Auto-encoding}
+For the auto-encoding pretraining we take utterance $x$ as input and follow the traditional approach to VAE training.
+We minimize the Evidence Lower Bound objective (ELBo) which we extend to reflect multiple levels of VAEs.
+The full minimalization objective is therefore:
+\begin{equation}
+    \mathbb{L} = \mathbb{E}_{q(z_1|X^1),...,q(z_L|X^L)}[log~p(x|z_1,...z_L)] - \mathlarger{\mathlarger{\sum}}_{l=0}^L~D_{KL}[q(z_l|X^l)||p(z)]
+\end{equation}
+Where $X^L = x,z_1,...,z_{L-1}$.
+
+\subsubsection{Unsupervised dialogue generation}
+We are interested in the task of dialogue response generation when no labels are available.
+For this, we employ the same mechanism as with auto-encoding but we train the model to predict the next response instead of reconstructing it.
+
+\subsubsection{Fine-tuning}
+We assume that the pretraining task helps to learn the network to create useful representations that can contribute to additional stages of training.
+To confirm this we employ the second stage of training in which we use supervision in the form of belief state labels which we include in the input.
+While in the autoencoding (AE) stage the model simply learns to reconstruct the input utterance, during finetuning (FT) the model takes dialogue context and predicts a system response.
+FT stage utilizes the decoder pretrained in the AE stage and the encoder part is trained from scratch.
+
+\subsubsection{Data}
+We use MultiWOZ 2.1 (See~\ref{02:sec:data-desc}) for training and evaluation.
+We delexicalize the utterances during training.
+\subsubsection{Training specifics}
+It's challenging to successfully train network with multiple VAEs. 
+To simplify the training process we include the layers one by one.
+In the beginning, only the bottom layer is trained, and later more layers are added subsequently.
+to achieve this, we introduce \emph{fade-in coefficient} $\alpha$ that is being annealed from $0 \rightarrow 1$ over a predetermined number of steps and serves to smoothly incorporate new layer during training.
+This process is depicted in Figure~\ref{05:fig:HVTOD-fadein}.
+
+Furthermore, we experiment with additional training objectives.
+First, we introduce placeholder predictions.
+Since we work with delexicalized data, we can train the network to predict which placeholders are present in the utterance.
+We include this additional pseudo-supervision in the form of so-called \emph{placeholder loss} $\mathbb{L}_{pl}$ which is computed simply as binary cross-entropy for each placeholder prediction.
+
+\subsubsection{Technical Details}
+For training the model we use a single GPU Nvidia A30.
+We train the model for 100 epochs while we observe a decline in the validation loss.
+The learning rate is set to $10^{-3}$.
+We use discrete latent variables of dimension 20 to represent latent dialogue actions.
+To get a fair comparison, we adjust the number of latent variables used according to the number of layers in the model hierarchy.
+We adjust the number in a way that each configuration has effectively the same dimension of the latent space.
+In the supervised variant of training, we represent belief state as a set of one-hot discrete vectors corresponding to specific slots.
+
+\section{Experiments}
+We are interested in evaluating two aspects of the proposed model.
+First, we explore how the multi-layer architecture contributes to the overall performance.
+Next, we evaluate the properties of learned latent variables.
+
+\subsection{HVTOD performance}
+We evaluate the performance of HVTOD with a different number of layers and with or without the placeholder loss for dialogue response generation in unsupervised (Table~\ref{05:tab:hvtod-unsup}) and supervised (Tanle~\ref{05:tab:hvtod-ft}) setting.
+All variants are first pretrained with an autoencoding objective.
+We also evaluate the model quality after pretraining in Table~\ref{05:tab:hvtod-ae}.
+
+Note that when we increase the number of layers, we decrease the dimension of the latent space accordingly.
+Therefore, all the compared models have the same number of parameters.
+
+\paragraph{Autoencoding}
+We can see that in the autoencoding setting (Table~\ref{05:tab:hvtod-ae}), the increased number of layers helps to improve the performance w.r.t. both dialogue success and BLEU.
+Moreover, the dialogue success is also improved by including our additional placeholder loss.
+
+\begin{table}[]
+    \centering
+    \begin{tabular}{c|c|c|c}
+    \toprule
+    \textbf{no layers}& \textbf{placeholder loss}& \textbf{Success} & \textbf{BLEU} \\
+    \midrule
+         1 & \textcolor{red}{\xmark} & 0.46 $\pm$ 0.02 & 55.39 $\pm$ 1.43 \\
+         1 & \textcolor{green}{\cmark} & 0.58 $\pm$ 0.03 & 55.86 $\pm$ 1.17 \\
+         2 & \textcolor{red}{\xmark} & 0.50 $\pm$ 0.02 & 59.07 $\pm$ 1.31 \\
+         2 & \textcolor{green}{\cmark} & 0.62 $\pm$ 0.01 & 62.42 $\pm$ 1.16 \\
+         3 & \textcolor{red}{\xmark} & 0.53 $\pm$ 0.02 & 58.84 $\pm$ 1.46 \\
+         3 & \textcolor{green}{\cmark} & \textbf{0.62} $\pm$ 0.01 & \textbf{64.50} $\pm$ 0.96 \\
+    \bottomrule
+    \end{tabular}
+    \caption{The results of HVTOD architecture after pretraining with unsupervised autoencoding objective. We provide means and standard error intervals computed over five runs. Note that dialogue success in this case just indicates the reconstruction quality but the model cannot be used for response dialogue generation since it's only trained on autoencoding.}
+    \label{05:tab:hvtod-ae}
+\end{table}
+
+\begin{table}[]
+    \centering
+    \begin{tabular}{c|c|c|c}
+    \toprule
+    \textbf{no layers}& \textbf{placeholder loss} & \textbf{Success-unsup} & \textbf{BLEU-unsup} \\
+    \midrule
+         1 & \textcolor{red}{\xmark} & 0.20 $\pm$ 0.06 & 15.36 $\pm$ 0.90 \\
+         1 & \textcolor{green}{\cmark} & 0.34 $\pm$ 0.06 & 16.43 $\pm$ 0.62 \\
+         2 & \textcolor{red}{\xmark} & 0.32 $\pm$ 0.07 & 16.39 $\pm$ 0.67  \\
+         2 & \textcolor{green}{\cmark} & 0.33 $\pm$ 0.07 & 16.31 $\pm$ 0.45 \\
+         3 & \textcolor{red}{\xmark} & 0.35 $\pm$ 0.03 &  16.67 $\pm$ 0.48 \\
+         3 & \textcolor{green}{\cmark} & 0.35 $\pm$ 0.02 & 16.92 $\pm$ 0.84 \\
+    \bottomrule
+    \end{tabular}
+    \caption{The results of HVTOD architecture after finetuning on dialogue response generation in an unsupervised setting, i.e. without belief state labels as inputs. We provide means and standard error intervals computed over five runs.}
+    \label{05:tab:hvtod-unsup}
+\end{table}
+
+\paragraph{Response generation}
+For the unsupervised response generation (Table~\ref{05:tab:hvtod-unsup}), we observe benefits of using the placeholder loss when only one-level hierarchy is used.
+Surprisingly, we don't observe similar effect when more layers are employed.
+Nevertheless, there are performance gains when using placeholder loss in the supervised setting (Table~\ref{05:tab:hvtod-ft}).
+This behavior shows that unsupervised dialogue response generation doesn't benefit from placeholder loss when more layers are employed.
+This suggests that one of the layers in a multi-layer hierarchy is able to capture information that can be gained from the placeholder loss.
+
+\subsection{Latent space inspection}
+We inspect the structure of the learned latent space by transforming the variables using the t-SNE algorithm~\cite{van2008visualizing} into 2-dimensional latent space and plotting them colored by their assignment to respective domains.
+For autoencoding (Figure~\ref{05:fig:ae-layers}) we see that the placeholder loss shapes the latent space to form more spread homogenous clusters, specifically on layer 1.
+Same influence is even more visible when we visualize latent spaces after training the model for dialogue response generation (Figure~\ref{05:fig:ft-layers}).
+Although the influence on latent space shape is clear, there is no significant difference in the final performance of the respective models.
+We also observe, that although each layer contains useful information, there is some overlap between the layers.
+This suggests, that it might be useful to enforce disentanglement of the latent variables in some way.
+
+\begin{table}[]
+    \centering
+    \begin{tabular}{c|c|c|c}
+    \toprule
+    \textbf{no layers}& \textbf{placeholder loss} &  \textbf{Success-ft} & \textbf{BLEU-ft} \\
+    \midrule
+         1 & \textcolor{red}{\xmark} & 0.44 $\pm$ 0.08 & 17.37 $\pm$ 0.53 \\
+         1 & \textcolor{green}{\cmark} & 0.52 $\pm$ 0.07 & 18.62 $\pm$ 0.52 \\
+         2 & \textcolor{red}{\xmark} & 0.51 $\pm$ 0.03 & 19.17 $\pm$ 0.26 \\
+         2 & \textcolor{green}{\cmark} & 0.55 $\pm$ 0.04 & 19.74 $\pm$ 0.36 \\
+         3 & \textcolor{red}{\xmark} & 0.52 $\pm$ 0.04 & 19.36 $\pm$ 0.72 \\
+         3 & \textcolor{green}{\cmark} & 0.55 $\pm$ 0.04 & 19.63 $\pm$ 0.41 \\
+    \bottomrule
+    \end{tabular}
+    \caption{The results of HVTOD architecture after finetuning on dialogue response generation using belief state labels as inputs. We provide means and standard error intervals computed over five runs}
+    \label{05:tab:hvtod-ft}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\subfloat[level 1]{\label{sfig:a}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-0-nll.png}}\hfill
+\subfloat[level 2]{\label{sfig:a}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-1-nll.png}}\hfill
+\subfloat[level 3]{\label{sfig:a}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-2-nll.png}}\\
+\subfloat[level 1 + ph loss]{\label{sfig:b}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-0-bce.png}}\hfill
+\subfloat[level 2 + ph loss]{\label{sfig:b}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-1-bce.png}}\hfill
+\subfloat[level 3 + ph loss]{\label{sfig:b}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-2-bce.png}}\\
+\caption{Visualization of t-SNE projections of latent variables after the autoencoding stage, sorted left-to-right. In the bottom row we have version using the additional placeholder loss. The colors correspond to respective domains.}
+\label{05:fig:ae-layers}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\subfloat[level 1]{\label{sfig:a}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-0-nll.png}}\hfill
+\subfloat[level 2]{\label{sfig:a}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-1-nll.png}}\hfill
+\subfloat[level 3]{\label{sfig:a}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-2-nll.png}}\\
+\subfloat[level 1 + ph loss]{\label{sfig:b}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-0-bce.png}}\hfill
+\subfloat[level 2 + ph loss]{\label{sfig:b}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-1-bce.png}}\hfill
+\subfloat[level 3 + ph loss]{\label{sfig:b}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-2-bce.png}}\\
+\caption{Visualization of t-SNE projections of latent variables after training for unsupervised dialogue response generation, sorted left-to-right. In the bottom row we have version using the additional placeholder loss. The colors correspond to respective domains.}
+\label{05:fig:ft-layers}
+\end{figure}
+

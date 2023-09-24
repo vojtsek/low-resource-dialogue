@@ -2,12 +2,20 @@
 \chapter{Background}%
 \label{chap:background}
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Before we introduce our work and delve into discussions, we would like to establish the common theoretical background of the concepts we are using in this work.
+Some of the concepts are well known, some less but we consider it important to have this reference point.
+We aim to be concise here and discuss only the most relevant points.
+First, we briefly describe the basic concepts and foundational models that are used in this work, we link to literature when needed.
+Next, we introduce methods from related areas of research upon which we build.
+In the end, we introduce the data and evaluation metrics that we are working with.
+
 \section{Key concepts}
-\label{backgound:basics}
-In this chapter, we first introduce some key concepts necessary for understanding this work and establish common ground.
-Some of the concepts are well-known in the community, however, we still consider it suitable to mention them here and provide the reader with references to literature for detailed descriptions.
+\label{02:sec:basics}
+In this section, we first introduce some key concepts necessary for understanding this work and establish common ground.
+Some of the concepts are well-known in the community, however, we still consider it appropriate to mention them here and provide the reader with references to the literature for detailed descriptions.
 
 \subsection{Dialogue System implementations}
+\label{02:ds-background}
 \begin{table*}[t]
 \small
 \setlength\fboxsep{2pt}
@@ -26,7 +34,7 @@ Some of the concepts are well-known in the community, however, we still consider
         \caption{Example of task-oriented dialogue in the restaurant reservation domain. Utterance representations as dialogue acts are depicted on the right. Intents are highlighted in orange, slot names in blue and respective values in green. Note that not all dialogue acts include slots and values}
     \label{fig:das}
 \end{table*}
-First we describe various approaches to the construction of dialogue systems pipelines and provide some insights about approaches to modeling of the underlying processes.
+First, we describe various approaches to the construction of dialogue systems pipelines and provide some insights about approaches to modeling of the underlying processes.
 Because of the varying use cases of Dialogue Systems (DS), the architectures may vary a lot.
 We thus introduce a classification of dialogue systems that reflects the expected capabilities.
 There are multiple approaches to defining a dialogue system taxonomy in the literature.
@@ -46,7 +54,7 @@ Here we introduce the widely used classification scheme \cite{jurafsky2000speech
 
 Another way of classifying the dialogues considers their domain of operation.
 \textbf{Single-domain} systems are able to work only in one topic area, e.g. public transport or restaurant information, whereas \textbf{multi-domain} systems are able to handle multiple domains.
-These types of systems aren't able to give meaningful answers outside of the domains that they're trained on.
+These types of systems are not able to give meaningful answers outside of the domains that they're trained on.
 A dialogue system is considered \textbf{open-domain} if it's able to have a conversation not limited to a predefined set of domains.
 In practice, this is achievable only to some extent since the knowledge base of the program is always limited.
 However, with internet access and smart information retrieval methods, the systems are able to cover tens of different domains.
@@ -57,8 +65,14 @@ We can see a task-oriented dialogue as a slot-filling task.
 That means we have a predefined set of semantic \textit{slots} that need to be filled with the right \textit{values}.
 Each utterance in the task-oriented dialogue is considered an action that potentially changes the state of the conversation.
 Such actions can be represented using \textit{Dialogue Acts (DA)}\cite{core1997coding}.
-DA is a tuple consisting of user \textit{intent} (overall meaning of the sentence) and optionally also \textit{slot} and the corresponding \textit{value}.
+To define the Dialogue Act, we first need to introduce the concept of \emph{slots} and \emph{intents}.
+In this case, slot refers to a semantic concept (e.g. entity) that can be instantiated by a given value.
+Intent describes the user's intention expressed by a respective utterance.
+In other words, intent represents what the user wants, what is his wish.
+Slots describe attributes of this wish and ground it to an ontology.
+DA is a tuple consisting of \textit{intent} and optionally also \textit{slot} and the corresponding \textit{value}.
 In case multiple slot values are present, all are considered to have the same intent.
+
 An example dialogue with respective DA representation is depicted in Table \ref{fig:das}.
 Most dialogue system modules for limited domains can be implemented by designing a set of rules and templates.
 Such systems can yield satisfying results in some use cases, nevertheless, they are inflexible and generally not considered promising from the research point of view.
@@ -76,11 +90,11 @@ We shortly discuss the responsibilities of each component:
 \begin{itemize}
     \item \textbf{Natural Language Understanding (NLU)} The purpose of NLU is to extract the meaning of input utterances in natural language and transform it into a structured representation, i.e. dialogue acts.
     Basically, the NLU module has three subtasks.
-    It has to determine the domain of the utterance, detect the user intent and capture any slot values, if present.
+    (1) It has to determine the domain of the utterance, (2) detect the user intent and (3) capture any slot values, if present.
     \item \textbf{Dialogue State Tracking (DST)} Dialogue state is used to keep track of the dialogue history, effectively providing the necessary context.
     Dialogue State Trackers are used to update the state with correct values after each turn.
     \item \textbf{Dialogue Policy} The core component of the DS is the dialogue policy.
-    Its responsibility is to make the decision on which action should the system take at each turn.
+    Its responsibility is to decide which action the system should take at each turn.
     In other words. the responsibility of Dialogue Policy is to guide the dialogue to follow the desired path.
     Dialogue policy together with the DST component are sometimes called \emph{Dialogue Manager}.
     \item \textbf{Natural Language Generation (NLG)} When the decision on a system action is made, the system needs to verbalize the action.
@@ -90,13 +104,28 @@ We shortly discuss the responsibilities of each component:
 The module-based approach is advantageous thanks to its good level of explainability.
 In case of low performance, we can track the respective modules' outputs and find the source of problems.
 On the other hand, error accumulation makes it difficult to recover from errors that were made by the modules early on in the pipeline.
-Another disadvantage is the way how these systems are trained.
+Another disadvantage is the way these systems are trained \cite{li-etal-2017-end}
 Each component requires specific data annotation, thus it can be difficult and costly to obtain a dataset suitable for training all of the components.
 Also, the system design itself is more complicated since it requires the implementation of multiple models.
-Because of the aforementioned drawbacks, a lot of current research works focusing on dialogue modeling end-to-end i.e. using systems that do not consist of explicit components or are able to be trained jointly.
+Because of the aforementioned drawbacks, a lot of current research works focus on dialogue modeling end-to-end i.e. using systems that do not consist of explicit components or are able to be trained jointly.
+
+\subsection{Neural Networks}
+\label{background:nns}
+\todo{describe}\cite{GoodBengCour16}
+\paragraph{Neural Networks for text processing}
+Neural Networks are widely used across various fields and Natural Language Processing is one of the most prominent.
+However, it is not straightforward how to represent words in NN.
+A simple one-hot vector or bag of words representation is not sufficient as they throw away a lot of useful information about the relations between words, their position etc.
+Traditional statistical N-gram models \cite{jurafsky2000speech} address some of the issues, but again discard some positional information and are inherently limited by context size (N-gram length).
+A breakthrough in this field which allowed for successful NN applications dates back to the works \citep{mikolov2010recurrent} and \citep{mikolov2013distributed} which build on the principle of word distributionality and introduced the concept of \emph{word embeddings}.
+Word embeddings are multi-dimensional real vectors that capture important information about each word that occurs in some particular input corpora.
+When input to an NN, word embeddings accurately represent the word and arguably capture the meaning.
+This principle was later improved by the introduction of large-scale pretrained neural language models s.a. ELMo~\cite{peters-etal-2018-deep} and BERT~\cite{devlin2019} which can create contextualized high-dimensional representations.
+We introduce these principles in more detail in Section~\ref{background:plms}
 
 \subsection{Recurrent Neural Networks (RNNs)}
-Recurrent Neural Networks are a type of neural network that is well-suited for processing sequential data. Sequential data is data that is ordered in time, such as text or audio.
+\label{background:rnns}
+Recurrent Neural Networks are a type of neural network that is well-suited for processing sequential data\cite{GoodBengCour16}. Sequential data is data that is ordered in time, such as text or audio.
 RNNs are able to learn long-range dependencies between different parts of the input sequence, which makes them well-suited for tasks such as machine translation, text summarization, and question answering.
 The motivation for RNNs comes from the fact that human language is sequential by nature and therefore sequential dependencies need to be handled.
 
@@ -110,9 +139,9 @@ The computation of output sequence $\mathbf{y} = \{y_0, ..., y_n\}$ from an inpu
     \item For time step $t$, first hidden state $h_t$ is obtained using the formula $h_t = f(W_hh_{t-1} + W_ix_t)$. Then, the output is computed as $y_t = W_oh_t$
 \end{enumerate}
 Note, that the output sequence has the same length as the input sequence which is useful for sequence tagging problems.
-However, RNNs can also be used for sequence classification in which case only the last hidden state is considered or the encoder-decoder setup can be used in which one network is used to encode the sequence and second one is used to generate the output which can therefore be of different length.
+However, RNNs can also be used for sequence classification in which case only the last hidden state is considered or the encoder-decoder setup can be used in which one network is used to encode the sequence and the second one is used to generate the output which can therefore be of different length.
 
-\paragraph{RNN improvements}
+\paragraph{RNN cell improvements}
 Vanilla RNNs are difficult to train and often fail to memorize long-term dependencies correctly.
 Therefore, several extensions were proposed such as LSTM \cite{hochreiter1997} or GRU \cite{cho-etal-2014-properties}
 These more complex types of RNNs are able to learn long-range dependencies more effectively.
@@ -130,15 +159,26 @@ The encoder-decoder RNN is very useful for text-generation tasks like summarizat
 However, it's very difficult to train RNN on longer sequences, therefore improvements were proposed \cite{bahdanau2014neural,luong-etal-2015-effective} that allow the decoder network to attend to the input sequence and therefore bypass the need to memorize all the information in the hidden state.
 
 \subsection{Transformer}
+\label{background:trafo}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/transfo-arch.png}
+    \caption{The Transformer architecture as proposed by \citep{vaswani2017attention}}
+    \label{fig:trafo}
+\end{figure}
 The Transformer architecture is another neural network architecture capable of processing sequential data.
 It was first proposed in \citet{vaswani2017attention}.
-Unlike RNNs, the Transformer architecture doesn't work with a hidden state that is being passed forward in time.
+Unlike RNNs, the Transformer architecture does not work with a hidden state that is being passed forward in time.
 Instead, the architecture is based solely on the attention mechanism, which allows the model to learn long-range dependencies between different parts of the input sequence.
-
-The attention mechanism works by allowing the model to focus on different parts of the input sequence when producing the output sequence.
+The high-level equation describing the self-attention mechanism is formulated as follows:
+\begin{equation*}
+    Att(Q,K,V) = softmax(\frac{QK^T}{\sqrt{d_k}}V)
+\end{equation*}
+where $Q$, $K$ and $V$ are trainable square weight matrices corresponding to \emph{queries}, \emph{keys} and \emph{values} and with dimension $d_q$, $d_k$, $d_v$ respectively.
+The attention mechanism allows the model to focus on different parts of the input sequence when producing the output sequence.
 For example, if the model is translating a sentence from English to German, the attention mechanism can allow the model to focus on the English words that are most relevant to the German words that need to be produced.
 
-The original Transformer architecture is composed of an encoder and a decoder.
+The original Transformer architecture is composed of an encoder and a decoder and is depicted in Figure~\ref{fig:trafo}.
 The encoder takes the input sequence and produces a sequence of hidden representations.
 The decoder then takes these hidden representations and produces the output sequence.
 The attention mechanism is used at both the encoder and decoder to allow the model to use different parts of the input sequence when producing the output sequence.
@@ -151,12 +191,12 @@ The decoder also includes an attention component that allows the model to attend
 This allows the model to learn how to generate the output sequence in a way that is consistent both with the input sequence and the prefix generated so far.
 
 The Transformer architecture has been shown to achieve state-of-the-art results on a variety of natural language processing tasks. 
-Moreover, the Transformer architecture was used as a base for many models pretrained on large natural language corpora, allowing efficient transfer of the learned information to downstream tasks and thus revolutionizing the NLP field.
+Moreover, the Transformer architecture was used as a base for many models pre-trained on large natural language corpora, allowing efficient transfer of the learned information to downstream tasks and thus revolutionizing the NLP field.
 
 \section{Pretrained Language Models (PLMs)}
 \label{background:plms}
 The appearance of PLMs marked a new era in NLP.
-Although Language Modeling with neural networks has been in the community focus for some time with transforming works such as  \citet{mikolov2010recurrent,mikolov2013distributed} it wasn't until ELMo \cite{peters-etal-2018-deep} and ULMFiT \cite{howard-ruder-2018-universal}that we were able to create PLMs that could be finetuned for a variety of tasks with comparably low data requirements.
+Although Language Modeling with neural networks has been in the community focus for some time with transforming works such as  \citet{mikolov2010recurrent,mikolov2013distributed} it was not until RNN-based models such as ELMo \cite{peters-etal-2018-deep} and ULMFiT \cite{howard-ruder-2018-universal} were proposed that we were able to create PLMs that could be finetuned for a variety of tasks with comparably low data requirements.
 
 Shortly after ELMo, models based on the Transformer architecture started to appear such as BERT for efficient language encoding \cite{devlin2019} or GPT for generation \cite{radford2018improving}.
 BERT introduced a novel approach to Transformer usage by employing only the encoder part of the original Transformer architecture.
@@ -165,13 +205,13 @@ Additionally, BERT is trained to estimate the probability that two input sentenc
 These pretraining techniques make BERT great at encoding natural language inputs into useful representations.
 GPT on the other hand consists only of Transformer decoder blocks.
 It is trained for next token prediction, so it is capable of autoregressive Language Modeling.
-Therefore GPT is a perfect candidate for a base model to be finetuned on language generation tasks including machine translation, summarization etc.
+Therefore GPT is a perfect candidate for a base model to be finetuned on language generation tasks including data-to-text, summarization etc.
 
 
 Both BERT and GPT showed great potential for finetuning on downstream tasks and established themselves as strong baselines for many NLP tasks and benchmarks.
 They are often referred to as \emph{foundational} models because of their abilities of language understanding and generation and the potential to apply these abilities to various tasks.
 From a certain point of view, the usability of PLMs lies in the fact that they are able to create useful and contextual representations of input words and phrases, often called \emph{(word) embeddings}.
-This ability has been observed in the word2vec model \cite{mikolov2013distributed} and improved by ELMo \cite{peters-etal-2018-deep}, BERT \cite{devlin2019}, SBERT \cite{reimers2019sentence} and others.
+This ability has been observed in the word2vec model \cite{mikolov2013distributed} and improved by ELMo~\cite{peters-etal-2018-deep}, BERT~\cite{devlin2019}, SBERT~\cite{reimers2019sentence} and others.
 
 Many model architectures based on Transformer blocks followed both for encoders \cite{liu2019roberta,reimers2019sentence}; decoders \cite{radford2019language,brown2020language} or even sequence-to-sequence \cite{raffel2020exploring,lewis-etal-2020-bart}.
 These models were largely adopted by the NLP community.
@@ -181,8 +221,9 @@ These models were largely adopted by the NLP community.
 The foundational models changed the NLP paradigm but still need substantial in-domain data in order to achieve good performance on some tasks.
 Moreover, finetuning those larger models requires more computational resources, therefore more lightweight methods to adapt the models to downstream tasks were proposed s.a. Transformer Adapters \cite{pfeiffer2020AdapterHub}.
 However, as researchers started to scale up the models with GPT-2 and GPT-3 leading the efforts \cite{radford2019language,brown2020language}, new abilities started to emerge \cite{wei2022emergent}.
-With model sizes exceeding billions of parameters, the large pre-trained Transformer decoders are able to perform many tasks that they weren't explicitly trained for \cite{brown2020language}.
+With model sizes exceeding billions of parameters, the large pre-trained Transformer decoders are able to perform many tasks that they were not explicitly trained for \cite{brown2020language}.
 Such large models are capable of performing tasks like summarization, translation, question answering, or even reasoning and arithmetics to some extent without any task-specific training.
+However, it is unclear how many examples of the abovementioned tasks were actually seen during the training phase of these models.
 Those tasks can be presented to the LLMs purely in the form of textual task descriptions in the inference time.
 This approach of \emph{in-context learning} is frequently used with great success \cite{min2022rethinking,dong2022survey}.
 The textual input for LLMs is frequently referred to as a \emph{prompt}.
@@ -207,9 +248,11 @@ These datasets allow tuning the models either using reinforcement learning or su
 The in-context learning approach has great advantages because it makes it possible to obtain great performance from LLMs by simply formulating the task and desired output structure in the LLM input (i.e. prompt).
 Although this approach might be very efficient for some tasks, especially those that are well described in the corpora available to the LLM during training \cite{wei2022emergent}, some more specific tasks might yield better results after finetuning of the model \cite{tu-etal-2022-prompt}.
 However, the LLM finetuning process is quite demanding in terms of computational resources, therefore alternative approaches were proposed s.a. LoRA \cite{hu2021lora} or Transformer Adapters \cite{pfeiffer2020AdapterHub}.
+These approaches make LLM finetuning much more accessible.
+In general, both finetuning and in-context learning can offer great performance and can be beneficial in certain situations~\cite{mosbach-etal-2023-shot}.
 
 \section{Variational autoencoders}
-\label{background:vae}
+\label{02:sec:vae}
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.46\textwidth]{images/VAE.png}
@@ -217,7 +260,7 @@ However, the LLM finetuning process is quite demanding in terms of computational
     \label{fig:vae}
 \end{figure}
 Neural network training is a process during which the network learns to create internal representations of data in order to accomplish a given task.
-In case of autoencoders, the task is to encode an input $\mathbf{x}$ in a way that allows for its reconstruction into the original form.
+In the case of autoencoders, the task is to encode an input $\mathbf{x}$ in a way that allows for its reconstruction into the original form.
 The autoencoder model consists of an encoder function $\varphi^{enc}$, which encodes an input $\mathbf{x}$ into a latent representation $\mathbf{z}$, and a decoder $\varphi^{dec}$, which models the conditional re-generation probability $p(\mathbf{x}|\mathbf{z})$.
 In case of sequence autoencoders, both the encoder and decoder can be realized with an RNN.
 However, vanilla autoencoders often fail to extract global semantic features of natural language sequences \cite{bowman2015generating}; therefore, adjustments need to be made in order to obtain better representations.
@@ -231,25 +274,25 @@ Typically, the modeled distributions are Gaussian and the prior is the standard 
 We can realize the function modules in VAE using neural networks, however, there is a drawback regarding the implementation of sampling.
 The sampling operation is not differentiable and therefore cannot be trained using standard approaches.
 A solution to this problem is to use the \textit{reparameterization trick} \cite{kingma2013auto}.
-The reparameterization trick exploitsexploitsexploitsexploits the fact that a random variable under certain conditional distribution can be expressed as a deterministic transformation of some other variable with independent marginal distribution.
+The reparameterization trick exploits the fact that a random variable under certain conditional distribution can be expressed as a deterministic transformation of some other variable with independent marginal distribution.
 Distributions that allow us to do such a transformation include \textit{Gaussian, Logistic} or \textit{Gumbel}.
 
-\subsection{VAE latent space discretization}
-\label{background:vae_discrete}
+\subsubsection{VAE latent space discretization}
+\label{02:sec:vae_discrete}
 Although VAE training yields robust representations that are also more interpretable thanks to the regularized latent space, in some cases, we require the latent representations to be discrete.
 The motivation is mainly to improve interpretability and possibly uncover underlying processes in sequential tasks.
 It is problematic to incorporate discrete variables into neural network models, because the widely used backpropagation algorithm requires smooth differentiable functions in order to propagate the gradients correctly.
 \citet{van2017neural} propose a vector quantization technique to discretize the latent variables in VAEs.
-Another approach is to use the Gumbel-softmax distribution \cite{jang2016categorical} that enables together with the reparameterization trick (Section \ref{04:to-unsup}) to work with categorical variables while not breaking the gradient flow in the network.
+Another approach is to use the Gumbel-softmax distribution \cite{jang2016categorical} that enables together with the reparameterization trick (Section \ref{02:sec:vae}) to work with categorical variables while not breaking the gradient flow in the network.
 
 \subsection{Variational Recurrent Neural Networks}
-\label{background:vrnn}
+\label{02:sec:vrnn}
 The VRNN model \cite{chung2015recurrent} can be seen intuitively as a recurrent network with a VAE in every timestep.
 It extends the VAE model to a sequence of observations generated from a series of hidden latent variables $\mathbf{z}$.
 Formally, we want to estimate the joint probability distribution of a sequence of observed and corresponding latent variables $p(\mathbf{x}, \mathbf{z}) = p(\mathbf{x}|\mathbf{z})p(\mathbf{z})$.
 The conditional distribution $p(\mathbf{x}|\mathbf{z})$ is parameterized with a neural network.
 However, we still need to estimate the posterior $p(\mathbf{z}|\mathbf{x})$ in order to connect the latent variables with the observations.
-The VAE uses a variational approximation $q(\mathbf{z}|\mathbf{x})$ that allows maximizing the lower bound of the log-likelihood of the data:
+The VAE uses a variational approximation $q(\mathbf{z}|\mathbf{x})$ that allows maximizing the evidence lower bound (ELBo) of the log-likelihood of the data:
 \begin{equation}
 \begin{split}
     \log~p(\mathbf{x}) \ge -\mathrm{KL}(q(\mathbf{z}|\mathbf{x})||p(\mathbf{z}))\\ + \mathbb{E}_{q(\mathbf{z}|\mathbf{x})}[\log~p(\mathbf{x}|\mathbf{z})]
@@ -267,7 +310,7 @@ In each time step, we obtain the distribution parameters as follows:
     \mathbf{\theta}_{p}~=~\varphi_{prior}(\mathbf{h}^t)
 \end{gathered}
 \end{equation}
-where $\varphi_{enc}$ is the encoder and $\theta_q, \theta_p$ are parameters of the respective distributions (see Section \ref{sec:method_latent}).
+where $\varphi_{enc}$ is the encoder and $\theta_q, \theta_p$ are parameters of the respective distributions.
 With distribution parameters available, we can sample the latent variable and predict the output:
 \begin{equation}
 \label{eq:x_infer}
@@ -286,8 +329,29 @@ The update of the hidden state $\mathbf{h}^t$ is as follows:
 \end{equation}
 where $[.,.]$ is concatenation, $\varphi_z(.)$ is a feature extractor and $\text{RNN}()$ is a step transition function of a recurrent neural network, in our case an LSTM \cite{hochreiter1997}.
 
+\subsection{Latent Action Spaces via Variational Auto-encoding - LAVA}
+\label{02:sec:lava}
+The LAVA framework~\cite{lubis-etal-2020-lava} focuses on learning latent variables in a way that they store dialogue-related actions.
+To achieve this, they employ VAE-based model architecture.
+The architecture consists of RNN utterance encoder, VAE module and RNN decoder.
+They train the model in multiple stages and different variants.
+Specifically, they first pretrain the encoder module using an autoencoding objective.
+Then they use the pretrained decoder and train additional encoding module for next response prediction.
+In the end they use reinforcement learning to further tune the model parameters.
+Formally, the first pretrain the an encoder-decoder network with an autoencdoing objective version of ELBo parameterized by $\phi$.
+\begin{equation}
+    \mathbb{L}_{ae}(\phi) = \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})}[\log~p_{\phi}(\mathbf{x}|\mathbf{z})] -\mathrm{KL}(q_{\phi}(\mathbf{z}|\mathbf{x})||p(\mathbf{z}))
+\end{equation}
+where $\mathbf{x}$ represents dialogue utterance.
+Then they train the response generation network parameterized by $\theta$ using the lite ELBo objective~\cite{lubis-etal-2020-lava}.
+\begin{equation}
+    \mathbb{L}_{lite}(\theta) = \mathbb{E}_{q_{\theta}(\mathbf{z}|\mathbf{c})}[\log~p_{\theta}(\mathbf{x}|\mathbf{z})] - \beta\mathrm{KL}(q_{\theta}(\mathbf{z}|\mathbf{c})||p(\mathbf{z}))
+\end{equation}
+where $\mathbf{c}$ is a sequence of utterances representing the dialogue context.
+For the second step, the decoder network $p_{\theta}$ is initialized by pretrained $p_{\phi}$.
+
 \section{Memory Networks}
-\label{background:mem_nn}
+\label{02:sec:mem_nn}
 \begin{figure}[t]
     \centering
     \includegraphics[width=\textwidth]{images/e2e_mem_nn.png}
@@ -343,6 +407,7 @@ In the multi-layer version, each layer $k$ has distinct embedding matrices $E^k_
 The multi-layer processing is sometimes also referred to as \emph{multi-hop} where a \emph{hop} refers to processing by one layer.
 
 \subsection{Mem2Seq model}
+\label{02:sec:mem2seq}
 The Mem2Seq model \cite{madotto-etal-2018-mem2seq} is a task-oriented dialogue model that builds on top of the end-to-end architecture introduced in \citet{sukhbaatar2015end}.
 The architecture is described in Figure \ref{fig:mem2seq}.
 The model consists of encoder and decoder parts.
@@ -376,11 +441,14 @@ Slots represent the attributes that instantiate the dialogue act.
 Each domain is associated with a certain set of intents, and each intent can be combined with multiple slots. A slot, however, can be used by multiple intents as well.
 We provide statistics about the dialogue datasets we use in this work in Table \ref{02:tab:data_stats} and some samples in Tables \ref{02:tab:mw_example} and \ref{02:tab:smd_example}.
 \end{enumerate} 
+
 \subsection{Datasets description}
+\label{02:sec:data-desc}
 \paragraph{MultiWOZ} (MW) is an established task-oriented dataset introduced by \cite{budzianowski-etal-2018-multiwoz}. It's been released in several versions, the standard most commonly used nowadays are MultiWOZ 2.1 and MultiWOZ 2.2.
 MultiWOZ 2.2 is an improved version of the original dataset by (1) fixing some annotation errors, inconsistencies, and ontology issues, (2) adding slot span annotations for utterances.
 MultiWOZ contains more than 10,000 annotated dialogues and spans several domains.
 The data were gathered via a crowd-sourcing Wizard-of-Oz scheme which is described in \cite{wen-etal-2017-wizard-of-oz}.
+As MW is used most in our work, we provide further information of the data distribution in Figure~\ref{02:fig:mw-dist} and sample of the data in Table~\ref{02:tab:mw_example}.
 
 \paragraph{DSTC2} \cite{henderson_robust_2014} was introduced as a part of a challenge to improve state tracking within dialogue systems. It contains over 3,000 dialogues covering a single domain around restaurant reservations. The dialogue corpus was collected using Amazon Mechanical Turk with a POMDP-based spoken dialogue system. It is the only human-machine dataset in our collection.
 
@@ -391,10 +459,30 @@ The data were gathered via a crowd-sourcing Wizard-of-Oz scheme which is describ
 \paragraph{ATIS} (AT) \cite{hemphill_atis_1990} contains utterances taken from conversations about flight searches and reservations. \footnote{There are multiple ATIS data versions available. We used one from \url{https://www.kaggle.com/siddhadev/atis-dataset-from-ms-cntk}.}
 \paragraph{Cambridge SLU} (CS) \cite{henderson2012discriminative} resembles the CamRest 676 dataset but is larger and focuses only other user part of the conversations.
 
-\paragraph{Stanford Multidomain Dialogues} (SMD) \cite{eric-etal-2017-key} contains concise dialogues between a driver and an in-car virtual assistant about appointments, navigation, etc.
+\paragraph{Stanford Multidomain Dialogues} (SMD) \cite{eric-etal-2017-key} contains concise dialogues between a driver and an in-car virtual assistant about appointments, navigation and weather.
 The dataset assumes interaction with the database or external APIs, however, the information is provided with each dialogue in the form of relevant Knowledge Base entries.
+We provide an example from the data in Table~\ref{02:tab:smd_example}.
 
-\begin{table}[t]
+\subsection{Dataset limitations}
+\label{02:sec:data-limits}
+Although the number of dialogue datasets is quite big and there is arguably a lot of variance w.r.t. size, data collection approach etc. there are some limitations that are inherently present with this type of data.
+There are 2 main purposes that we want the data to use for -- training and evaluation.
+Both these aspects are influenced by the static nature of the data.
+Dialogue is a dynamic process that requires interaction.
+For a specific conversation that represents certain information exchange there exist hundreds of alternatives with different phrasing, length, or turn ordering.
+All of this is impossible to capture in a static dataset, therefore dialogue modeling should somehow take this into consideration.
+A similar issue stems from the fact that under a specific dialogue context, there are multiple valid responses, not only w.r.t the phrasing but also considering dialogue acts.
+Consequently, model evaluation with these data tends to penalize generated responses that are meaningful and relevant but do not correspond to the ground truth found in the data.
+
+Another consideration regards the focus of these datasets.
+In this work, we almost exclusively work with \emph{task oriented} datasets.
+Therefore the instances contain some kind of structured annotation, most frequently dialogue state.
+While this addresses the above-mentioned issues to some extent, the conversations usually lack variability and do not exhibit user behavior like repetitions, small talk, clarifications, hesitation etc.
+Therefore there is a substantial gap w.r.t. real-world data distribution.
+The other type of dialogue datasets on the other hand tries to exhibit these properties, however lack any kind of structure.
+Recently, some efforts were made to join these two approaches \cite{sun-etal-2021-adding}.
+
+\begin{table}[h]
     \centering\footnotesize
     \begin{tabular}{l@{\hspace{0.8em}}r@{\hspace{0.3em}}r@{\hspace{0.3em}}r@{\hspace{0.3em}}r@{\hspace{0.3em}}r@{\hspace{0.3em}}r@{\hspace{2em}}r}
         \toprule
@@ -420,10 +508,11 @@ The dataset assumes interaction with the database or external APIs, however, the
          \textbf{User} & \texttt{I need to book a hotel in the {\color{cyan!80!yellow!80!black!100 }east} that has { \color{orange!50!yellow!90!black!100!}4 stars.}} \\
          \textbf{System} & \texttt{I can help you with that. What is your price range?} \\
          \textbf{State} & \texttt{restaurant \{\}, ..., hotel \{"area": "{\color{cyan!80!yellow!80!black!100 }east}", "stars": "{\color{orange!50!yellow!90!black!100!}4}" \}} \\
-         \textbf{User} & \texttt{That doesn't matter as long as it has {\color{cyan!80!yellow!80!black!100 }free wifi} and {\color{orange!50!yellow!90!black!100!}parking}.}\\
+         \textbf{User} & \texttt{That does not matter as long as it has {\color{cyan!80!yellow!80!black!100 }free wifi} and {\color{orange!50!yellow!90!black!100!}parking}.}\\
          \textbf{System} & \texttt{If you'd like something cheap, I recommend the Allenbell.} \\
          \textbf{State} & \texttt{restaurant \{\}, ..., hotel \{"area": "east", "stars": "4",}\\
          & \texttt{"wifi": {\color{cyan!80!yellow!80!black!100}yes}", "parking": "{\color{orange!50!yellow!90!black!100!}yes}"\}} \\
+         & \texttt{...} \\
          \bottomrule
     \end{tabular}
     \caption{A simplified example taken from the MultiWOZ corpus}
@@ -456,10 +545,17 @@ The dataset assumes interaction with the database or external APIs, however, the
     \caption{A simplified example taken from the SMD corpus together with }
     \label{02:tab:smd_example}
 \end{table}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{images/multiwoz-distribution.png}
+    \caption{The distribution of respective domains in the MultiWOZ dialogue dataset, showing how many of the dialogues contain the respective domain.}
+    \label{02:fig:mw-dist}
+\end{figure}
 
 
 \section{Evaluation metrics}
-\label{02:sec:eval_metrics}
+\label
+{02:sec:eval_metrics}
 Here we provide a set of commonly used metrics to evaluate the quality of dialogue modeling and response generation.
 We also use some less common metrics for specific tasks.
 Those metrics are described together with experiments in respective sections of this work.
