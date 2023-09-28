@@ -104,6 +104,9 @@
     unicode=true,
 }
 
+% hack to fix citing -- default to citep, not citet
+\renewcommand{\cite}[1]{\citep{#1}}
+
 \input{acronyms}
 
 % Czech babel conflicts with cline, hacky fix (http://tex.stackexchange.com/questions/111999/slovak-and-czech-babel-gives-problems-with-cmidrule-and-cline):
