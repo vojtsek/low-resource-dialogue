@@ -55,7 +55,7 @@ More precisely, the unified dataset ontology contains all the possible domains, 
 \subsection{Details of the merging approach}
 Here we present details on how me merged the data into common format, including the handling of different ontologies.
 %Then we discuss improvement of the  dialogues consistency.
-Quantitative statistics of the final dataset are shown in the rightmost column of Table~\ref{tab:data_stats}.
+Quantitative statistics of the final dataset are shown in Table~\ref{02:tab:data_stats}.
 Full technical documentation can be found in the data repository.\footnote{\url{https://github.com/ufal/diaser}}
 Here we list an overview of all the required merging steps:
 
@@ -84,7 +84,7 @@ For example \textit{start-time} can take the value “sooner than that” or the
 This is a problem if we assume to have a self-contained ontology that captures all the possible values from the corpus.
 
 
-\begin{table}[t]
+\begin{table}[tp]
     \centering\footnotesize
     \begin{tabular}{l>{\hspace{-3mm}}r>{\hspace{-2mm}}rrr>{\hspace{-2mm}}r}
         \toprule
@@ -111,7 +111,7 @@ This is a problem if we assume to have a self-contained ontology that captures a
     \label{tab:intents}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[tp]
     \centering\footnotesize
     \begin{tabular}{l>{\hspace{-2mm}}rrrrr}
         \toprule
@@ -139,7 +139,7 @@ This is a problem if we assume to have a self-contained ontology that captures a
 \end{table}
 
 \section{Experiments and results}
-\begin{table*}
+\begin{table*}[tp]
     \centering \small
     \begin{tabular}{ccc >{\hspace{1em}} ccc >{\hspace{1em}} ccc}
       \toprule
@@ -190,10 +190,10 @@ This is a problem if we assume to have a self-contained ontology that captures a
       \bottomrule
   \end{tabular}
   \caption{Performance of the AuGPT model trained and evaluated on various subsets of the unified dataset.}
-  \label{tab:exp-results}
+  \label{tab:exp-results-diaser}
 \end{table*}
 
-\begin{table*}
+\begin{table*}[tp]
     \centering \small
     \begin{tabular}{cccccc}
       \toprule
@@ -214,5 +214,5 @@ This is a problem if we assume to have a self-contained ontology that captures a
       \bottomrule
   \end{tabular}
   \caption{Performance of the AuGPT model trained and evaluated on various subsets of the unified dataset.}
-  \label{tab:exp-results}
+  \label{tab:exp-results-seed}
 \end{table*}

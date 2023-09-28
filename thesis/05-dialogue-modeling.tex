@@ -8,7 +8,7 @@ One of the biggest challenges is to model task-oriented dialogue that requires i
 This aspect puts a hard constraint on the dialogue system architecture -- it requires some kind of explicit representation that allows one to communicate with external systems.
 It's challenging to achieve this in a fully unsupervised setting, however, we explore some of the approaches in this chapter.
 First, we discuss the challenges of unsupervised task-oriented dialogue modeling in more detail in Section \ref{05:sec:to-unsup}.
-Next, we propose our architecture that uses latent representations and explore its abilities and performance in Section \ref{05:sec:latent-models}.
+Next, we propose our architecture that uses latent representations and explore its abilities and performance in Section \ref{05:sec:vrnn-model}.
 Finally, we discuss the usage of Pretrained Language Models as dialogue models and try to answer the question if the usage of these models is able to close the gap between unsupervised and supervised systems.
 
 \section{Challenges in TOD modeling with less supervision}
@@ -39,13 +39,13 @@ Therefore, the model can learn to construct the database queries ad-hoc using sp
 A turn-level annotation of database queries would represent a similar amount of annotation as is used in supervised training, and thus would not lead to our desired setting, where the model is trained without labeled data.
 To support database access while avoiding costly turn-level annotation, we follow \citet{bordes2016learning} and 
 insert sparse database queries and results directly into the training data, forming special dialogue turns.
-Specifically, we identify turns that require database results, e.g.\ to inform about entity attributes or a number of matching entities, and insert a query-result pair in front of those turns (see Table~\ref{table:example}). We argue that this is the minimal level of supervision required to successfully operate a task-oriented system with database access; it is significantly lower than the full dialogue-state supervision used by most systems.
+Specifically, we identify turns that require database results, e.g.\ to inform about entity attributes or a number of matching entities, and insert a query-result pair in front of those turns (see Table~\ref{05:tab:example}). We argue that this is the minimal level of supervision required to successfully operate a task-oriented system with database access; it is significantly lower than the full dialogue-state supervision used by most systems.
 In addition, this kind of information can be available in real-world scenarios (e.g., call center transaction logs).
 In practice, we observe that database queries are only inserted for 24\% turns on average.
 Per-dataset query counts are 36\%, 23\% and 11\% for CamRest676, MultiWOZ and SMD respectively.
 Note that this approach still covers the task of an explicit state tracker since the necessary entity values are provided when needed.
 To maintain consistency, database query results can be stored and used in follow-up questions.
-\begin{table*}[t]
+\begin{table*}[tp]
     \centering\scriptsize
     \begin{tabular}{crp{0.6\linewidth}}
         \toprule
@@ -79,6 +79,7 @@ To maintain consistency, database query results can be stored and used in follow
 \end{figure}
 
 \subsection{VRNN model description}
+\label{05:sec:vrnn-model}
 We use the VRNN model introduced in Chapter \ref{02:sec:vrnn} and extend it to fit the task-oriented setup.
 Our model's architecture is depicted in Figure \ref{05:fig:vrnn_method}.
 We employ a turn-level RNN that summarizes the context to its hidden state.
@@ -109,7 +110,7 @@ During inference, we take always the item with assigned maximum probability w.r.
 
 \subsection{VRNN Experiments}
 
-\begin{table}[t]
+\begin{table}[tp]
     \centering\small
     \begin{tabular}{l|c|cc}
       \toprule
@@ -159,7 +160,7 @@ Since our approach is the first to be evaluated in a task-oriented setting with 
 However, note that these scores are not directly comparable.
 \footnote{The training is sensitive to some parameters, such-as the \nobreak{Gumbel-softmax} temperature, but otherwise the model trains easily using conventional optimization methods.}
 
-\begin{table}[ht]
+\begin{table}[tp]
     \centering\small
     \begin{tabular}{l|c|rrrr|rrrr}
       \toprule
@@ -188,7 +189,7 @@ However, note that these scores are not directly comparable.
   We measure MI only for the models that use latent variables explicitly. The \emph{db} column indicates systems that use database information. $^{*}$Note that the supervised state-of-the-art scores are not directly comparable, as the systems use full turn-level supervision. Systems listed: CamRest676 \cite{peng2021soloist};  MultiWOZ \cite{lin2020mintl}.}
   \label{05:automatic_metrics_1}
 \end{table}
-\begin{table}[ht]
+\begin{table}[tp]
     \centering\small
     \begin{tabular}{l|c|rrr}
       \toprule
@@ -216,7 +217,7 @@ However, note that these scores are not directly comparable.
   \label{05:automatic_metrics_2}
 \end{table}
 \subsubsection{Response quality}
-To evaluate the quality of individual responses, we compute BLEU score \cite{papineni2002} and perplexity on the test set (see Tables~\ref{05:automatic_metrics_1},\ref{05:automatic_metrics_2 }).
+To evaluate the quality of individual responses, we compute BLEU score \cite{papineni2002} and perplexity on the test set (see Tables~\ref{05:automatic_metrics_1},\ref{05:automatic_metrics_2}).
 
 Our architecture performs substantially better than (V)HRED, which commonly fails to pick up the necessary knowledge, especially on larger datasets.
 The attention-based versions perform better on BLEU, but lose slightly on perplexity.
@@ -235,7 +236,7 @@ As expected, only the models including database turns are able to predict correc
 A relatively common error is informing about wrong slots, e.g.\ the model provides a phone number instead of an address or, even more frequently, provides wrong slot values (cf.~Table~\ref{05:tab:example}).
 %An example of such a situation is highlighted in Table~\ref{tab:example}.
 
-\begin{table}[t]
+\begin{table}[tp]
     \centering\small
     \begin{tabular}{lcc}
       \toprule
@@ -285,7 +286,7 @@ However, the scores  are promising considering the minimal supervision of our tr
 \paragraph{Matching database entities}
 \label{sec:emr}
 To evaluate the accuracy of the offered entities, we measure the Entity Match Rate (EMR), i.e. the ratio of generated responses with correct entities over all responses that mention some entity.
-Table~\ref{tab:automatic_metrics} shows  the results.
+Table~\ref{05:automatic_metrics_1} shows  the results.
 We observe that the model performance without the database information is poor.
 However, including the database information improves the performance substantially, especially in the case of CamRest676 data.
 The MultiWOZ data is much more complex -- it contains more slots and multiple domains that can also be combined in an individual dialogue.
@@ -299,8 +300,8 @@ The content of the query is not taken into account in this case, as it is alread
 We hypothesize that this discrepancy can be caused by different dialogue structures among theses two datasets. The dialogues in CamRest676 usually contain just zero or one query during a dialogue, so our model might generate more queries than necessary.
 
 \subsection{Latent Variable Interpretation}
-\label{sec:latents}
-\begin{table}[h]
+\label{05:sec:latents}
+\begin{table}[tp]
     \centering\small
     \begin{tabular}{l|ccc}
       \toprule
@@ -377,7 +378,7 @@ We then apply this mapping to predict actions on the test set (the \textit{-manu
 Note that in this approach, we only allow assigning an action to a whole vector, unlike in the case of decision tree classifier that can take individual components into account.
 As the results show, this approach works well, despite the above limitation.
 
-\begin{table}[t]
+\begin{table}[tp]
     \centering\small
     \begin{tabular}{l|c|c|c}
       \toprule
@@ -507,7 +508,7 @@ Therefore, all the compared models have the same number of parameters.
 We can see that in the autoencoding setting (Table~\ref{05:tab:hvtod-ae}), the increased number of layers helps to improve the performance w.r.t. both dialogue success and BLEU.
 Moreover, the dialogue success is also improved by including our additional placeholder loss.
 
-\begin{table}[]
+\begin{table}[tp]
     \centering
     \begin{tabular}{c|c|c|c}
     \toprule
@@ -525,7 +526,7 @@ Moreover, the dialogue success is also improved by including our additional plac
     \label{05:tab:hvtod-ae}
 \end{table}
 
-\begin{table}[]
+\begin{table}[]tp
     \centering
     \begin{tabular}{c|c|c|c}
     \toprule
@@ -558,7 +559,7 @@ Although the influence on latent space shape is clear, there is no significant d
 We also observe, that although each layer contains useful information, there is some overlap between the layers.
 This suggests, that it might be useful to enforce disentanglement of the latent variables in some way.
 
-\begin{table}[]
+\begin{table}[tp]
     \centering
     \begin{tabular}{c|c|c|c}
     \toprule
@@ -578,24 +579,24 @@ This suggests, that it might be useful to enforce disentanglement of the latent 
 
 \begin{figure}[h]
 \centering
-\subfloat[level 1]{\label{sfig:a}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-0-nll.png}}\hfill
-\subfloat[level 2]{\label{sfig:a}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-1-nll.png}}\hfill
-\subfloat[level 3]{\label{sfig:a}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-2-nll.png}}\\
-\subfloat[level 1 + ph loss]{\label{sfig:b}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-0-bce.png}}\hfill
-\subfloat[level 2 + ph loss]{\label{sfig:b}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-1-bce.png}}\hfill
-\subfloat[level 3 + ph loss]{\label{sfig:b}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-2-bce.png}}\\
+\subfloat[level 1]{\label{sfig:a0}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-0-nll.png}}\hfill
+\subfloat[level 2]{\label{sfig:a1}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-1-nll.png}}\hfill
+\subfloat[level 3]{\label{sfig:a2}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-2-nll.png}}\\
+\subfloat[level 1 + ph loss]{\label{sfig:b0}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-0-bce.png}}\hfill
+\subfloat[level 2 + ph loss]{\label{sfig:b1}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-1-bce.png}}\hfill
+\subfloat[level 3 + ph loss]{\label{sfig:b2}\includegraphics[width=.33\textwidth]{images/lava-tsne/ae-lvl-2-bce.png}}\\
 \caption{Visualization of t-SNE projections of latent variables after the autoencoding stage, sorted left-to-right. In the bottom row we have version using the additional placeholder loss. The colors correspond to respective domains.}
 \label{05:fig:ae-layers}
 \end{figure}
 
 \begin{figure}[h]
 \centering
-\subfloat[level 1]{\label{sfig:a}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-0-nll.png}}\hfill
-\subfloat[level 2]{\label{sfig:a}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-1-nll.png}}\hfill
-\subfloat[level 3]{\label{sfig:a}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-2-nll.png}}\\
-\subfloat[level 1 + ph loss]{\label{sfig:b}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-0-bce.png}}\hfill
-\subfloat[level 2 + ph loss]{\label{sfig:b}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-1-bce.png}}\hfill
-\subfloat[level 3 + ph loss]{\label{sfig:b}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-2-bce.png}}\\
+\subfloat[level 1]{\label{sfig:c0}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-0-nll.png}}\hfill
+\subfloat[level 2]{\label{sfig:c1}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-1-nll.png}}\hfill
+\subfloat[level 3]{\label{sfig:c2}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-2-nll.png}}\\
+\subfloat[level 1 + ph loss]{\label{sfig:d0}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-0-bce.png}}\hfill
+\subfloat[level 2 + ph loss]{\label{sfig:d1}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-1-bce.png}}\hfill
+\subfloat[level 3 + ph loss]{\label{sfig:d2}\includegraphics[width=.33\textwidth]{images/lava-tsne/ft-lvl-2-bce.png}}\\
 \caption{Visualization of t-SNE projections of latent variables after training for unsupervised dialogue response generation, sorted left-to-right. In the bottom row we have version using the additional placeholder loss. The colors correspond to respective domains.}
 \label{05:fig:ft-layers}
 \end{figure}

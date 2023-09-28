@@ -106,8 +106,8 @@ See the example in Table~\ref{04:tab:ner_example}.
         \textbf{O} & \textbf{O} & \textbf{O} & \textbf{O} & \textbf{O} & \textbf{B} & \textbf{I}\\
     \bottomrule
     \end{tabular}
-    \label{04:tab:ner_example}
     \caption{An example of BIO tagging to identify named entities.}
+    \label{04:tab:ner_example}
 \end{table}
 It fits our requirements well because the task is universal, and the named entities definition is not specific to any particular domain.
 
@@ -286,10 +286,10 @@ We model the slot tagging task as sequence tagging, using a convolutional neural
 The output layer of the tagger network gives softmax probability distributions over possible tags.
 
 \paragraph{Increasing recall} To further increase recall, we add an inference-time rule -- if the most probable predicted tag is `O' (i.e., no slot) and the second most probable tag has a probability higher than a preset threshold $T_{\text{tag}}$, the second tag is chosen as a prediction instead.
-As we discuss in Section \ref{sec:results}, this threshold is crucial for achieving substantial recall improvement.
+As we discuss in Section \ref{04:sec:discovery_results}, this threshold is crucial for achieving substantial recall improvement.
 
 \paragraph{Tagging model robustness} 
-We only use 10\% of the original in-domain training set (with labels from Section~\ref{sec:getting-labels}) to train the slot tagger model.
+We only use 10\% of the original in-domain training set (with labels from Section~\ref{04:sec:tagging_concepts}) to train the slot tagger model.
 The rest of the training set is used for a grid search to determine model hyperparameters (hidden layer size, dropout rate, and $T_{\text{tag}}$ threshold). We choose the parameters that yield the best F1 score when compared against the automatic slot discovery results (i.e., no manual annotation is needed here; the aim is a good generalization and improved robustness of the resulting model).
 
 

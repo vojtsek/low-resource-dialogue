@@ -18,7 +18,7 @@ However, we still consider it appropriate to mention them here and provide the r
 
 \subsection{Dialogue System implementations}
 \label{02:ds-background}
-\begin{table*}[t]
+\begin{table*}[tp]
 \small
 \setlength\fboxsep{2pt}
         \centering
@@ -173,7 +173,7 @@ Therefore, improvements were proposed \cite{bahdanau2014neural,luong-etal-2015-e
 
 \subsection{Transformer}
 \label{background:trafo}
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.9\textwidth]{images/transfo-arch.png}
     \caption{The Transformer architecture as proposed by \citep{vaswani2017attention}. We can see the encoder (left) and decoder (right) stacks and their interconnection.}
@@ -472,7 +472,7 @@ It is a meta-information that emerges from the respective utterance and qualifie
 Dialogue acts can be represented using \emph{Domains}, \emph{Intents}, and \emph{Slots} as described in Section~\ref{02:ds-background}.
 The slots can also be further categorized.
 Typically, we define \emph{inform} and \emph{request} slots (Table~\ref{02:tab:inf-req}). Inform slots correspond to information provided by the user and inform about constraints the user has, while request slots communicate the kind of information that the user wants to obtain.
-\begin{table}
+\begin{table}[tp]
     \centering
     \begin{tabular}{l|l}
     \toprule
@@ -540,7 +540,7 @@ Therefore, there is a substantial gap with respect to real-world data distributi
 On the other hand, the other type of dialogue datasets tries to exhibit these properties but lacks any structure.
 Recently, some efforts were made to join these two approaches \cite{sun-etal-2021-adding}.
 
-\begin{table}[h]
+\begin{table}[tp]
     \centering\footnotesize
     \begin{tabular}{l@{\hspace{0.8em}}r@{\hspace{0.3em}}r@{\hspace{0.3em}}r@{\hspace{0.3em}}r@{\hspace{0.3em}}r@{\hspace{0.3em}}r@{\hspace{2em}}r}
         \toprule
@@ -559,7 +559,7 @@ Recently, some efforts were made to join these two approaches \cite{sun-etal-202
     \label{02:tab:data_stats}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[tp]
     \centering
     \begin{tabular}{l|l}
     \toprule
@@ -578,7 +578,7 @@ Recently, some efforts were made to join these two approaches \cite{sun-etal-202
 \end{table}
 
 
-\begin{table}[h]
+\begin{table}[tp]
     \centering
     \begin{tabular}{l|l}
     \toprule
@@ -603,7 +603,7 @@ Recently, some efforts were made to join these two approaches \cite{sun-etal-202
     \caption{A simplified example taken from the SMD corpus together with utterance-level annotations. Compared to MultiWOZ, some of the slot values are open, such as "avoid all heavy traffic"}
     \label{02:tab:smd_example}
 \end{table}
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\textwidth]{images/multiwoz-distribution.png}
     \caption{The distribution of respective domains in the MultiWOZ dialogue dataset, showing how many of the dialogues contain the respective domain.}

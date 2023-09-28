@@ -7,7 +7,6 @@ Unlike in chapter~\ref{chap:background}, here we introduce some of the less wide
 The purpose of this section is to put our work in context, offer a comparison, and provide a broader intuition about what our ideas are based on.
 
 \section{Modular dialogue architectures}
-\todo{more recent works?}
 \label{relwork:modular}
 The traditional dialogue system implementation, especially for task-oriented dialogues, is based on modular architecture.
 The modular system consists of several components connected to form a pipeline.
@@ -21,6 +20,8 @@ The slot-value filling can be approached as a sequence tagging problem.
 Many approaches have been proposed to tackle this issue, ranging from SVM \cite{shi2016recurrent} and HMM \cite{surendran2006dialog} based taggers to various neural models \cite{adel2016comparing, zhang2017position, mesnil2014using}.
 It is reasonable to model them jointly because of the similar nature of these three sub-tasks.
 Modeling the intent detection together with slot filling proved to be beneficial for the model performance \cite{zhang2017position, liu2016attention, xu2013convolutional}.
+Slightly different approach was introduces in \citet{DBLP:conf/aaai/LiangTCY20} who introduce end-to-end trainable systems that receives module-level supervision and hence can be seen as a modular architecture.
+Some of the newer approaches allow to switch between tasks with tree-based system~\cite{xie2022converse}.
 
 \subsection{Dialogue State Tracking (DST)} 
 \label{relwork:DST}
@@ -29,6 +30,7 @@ However, the situation is usually more complicated.
 We must consider a distribution of slot value probabilities, and the update rules can be rather complex.
 \citet{vzilka2013comparison} compares different data-driven models for dialogue state tracking.
 Neural networks have also been used to model the distributions \cite{mrkvsic2016neural, zhong2018global} and deal with multiple domain handling \cite{rastogi2017scalable}.
+Some recent works explore the usage of language models for dialogue state tracking~\cite{lee-etal-2021-dialogue, hu2022context}
 
 \subsection{Dialogue Policy}
 \label{relwork:policy}
@@ -36,7 +38,8 @@ The policy decision can thus be framed as a classification task \cite{gavsic2013
 Learning the policy just from the offline data might not produce robust policy due to low variability in the data.
 Therefore, many works model the dialogue as a partially observable Markov decision process \cite{gavsic2010gaussian, thomson2010bayesian}.
 Reinforcement learning techniques are then applied to learn the policy and incorporate human feedback \cite{peng2017composite, su2016line}.
-
+Some approaches also try to model the actions in latent space and tune them via RL~\cite{lubis-etal-2022-dialogue}.
+Again, new line of works uses language models and prompting methods such as~\citep{zhang2023sgp}.
 \subsection{Natural Language Generation (NLG)}
 NLG is often realized with a set of handcrafted templates that are selected heuristically \cite{rudnicky_creating_1999}.
 The variability of the generated utterances is limited, and the scalability is poor.
