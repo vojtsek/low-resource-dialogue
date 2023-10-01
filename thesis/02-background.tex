@@ -114,7 +114,32 @@ Another disadvantage is the way these systems are trained \cite{li-etal-2017-end
 Each component requires specific data annotation.
 Thus, obtaining a dataset suitable for training all components can be difficult and costly.
 Also, the system design itself is more complicated since it requires the implementation of multiple models.
-Because of the aforementioned drawbacks, a lot of current research works focus on dialogue modeling end-to-end i.e., using systems that do not consist of explicit components or can be trained jointly.
+Because of the aforementioned drawbacks, many current research works focus on dialogue modeling end-to-end, i.e., using systems without explicit components that can be trained jointly.
+
+\subsubsection{Modeling TOD without supervision}
+\label{02:no-super}
+Here, we introduce some of the challenges concerning TOD modeling in conditions without external structured supervision.
+We discuss every step in the pipeline (Section~\ref{02:sec:basics}) separately.
+
+\paragraph{Natural Language Understanding (NLU)}
+Recall that the purpose of the NLU component in a traditional dialogue pipeline is to extract the meaning from input utterances in natural language and represent it in a structured way.
+Doing this unsupervised is challenging because we do not have the labeled data for training and, moreover, do not know the structure itself in the first place.
+However, there are some possible ways to approach this problem.
+Works focus on automated annotation schema induction (\ref{sec:relwork-unsup}).
+Another way is to let the model handle NLU implicitly, i.e., effectively omitting the NLU step.
+
+\paragraph{Action Selection}
+One of the tasks of the dialogue manager is to select the next system action in a given situation.
+Most implemented systems implicitly perform this task, i.e., there is no explicit representation of the system action, just a surface realization of it (in the form of verbalized utterance).
+The reason for this option is that it requires less supervised labels, which might be hard and costly to obtain.
+However, modeling the information about system action can benefit the overall performance~\cite{DBLP:conf/aaai/LiangTCY20}.
+We explore the possibility of implicitly learning this information by introducing a network bottleneck in Chapter~\ref{chap:modeling}.
+
+\paragraph{Handling external interfaces}
+Task-oriented dialogue systems must provide accurate and complete information based on user requests, which requires interaction with external interfaces such as databases or some structured knowledge base.
+To communicate with such external entities, we typically need to design some representation with a predetermined structure so we can construct API queries, etc.
+This can be troublesome in a setting where no supervision in the form of labels is present.
+Without a known structure, it is very challenging to design the communication protocol with external sources of information.
 
 \subsection{Neural Networks}
 \label{background:nns}
