@@ -67,22 +67,15 @@ Thus, the annotation process is significantly easier.
 
 In recent years, the NLP world has witnessed the great success of attention-based models (Transformers) \cite{vaswani2017attention} and their usage as pre-trained language models \cite{devlin-etal-2019-bert}.
 In dialogue systems, these models also show prominent results in the open-domain setting \cite{DBLP:journals/corr/abs-1901-08149} or for dialogue state tracking \cite{chao2019bert}.
-The pretrained models are naturally utilizable for transfer learning, which proved useful in dialogue domain adaptation task \cite{shalyminov-etal-2019-shot}.
+The pre-trained models are naturally utilizable for transfer learning, which proved useful in dialogue domain adaptation task \cite{shalyminov-etal-2019-shot}.
 Recently, attention-based architecture was proposed that models latent dialogue actions \cite{bao2019plato}.
 
-Task-oriented dialogue modeling with the use of pretrained language models was researched by \citet{zhang2019dialogpt} or \citet{peng-etal-2021-soloist}, who followed the ideas of text-based state encoding and 2-stage generation proposed in the Sequicity model \cite{lei2018sequicity}.
+Task-oriented dialogue modeling with the use of pre-trained language models was researched by \citet{zhang2019dialogpt} or \citet{peng-etal-2021-soloist}, who followed the ideas of text-based state encoding and 2-stage generation proposed in the Sequicity model \cite{lei2018sequicity}.
 This approach first uses a text-based model to decode the structured belief state.
-The belief state is later used to retrieve db information optionally and finally, the model is called once more, conditioned on the belief state and retrieved information to generate a response.
-Several other improvements were then proposed to the architecture that either improve contrastive state training \cite{kulhanek-etal-2021-augpt} or redefine state tracking as generation of belief state differences \cite{lin-etal-2020-mintl}.
+The belief state is later used to retrieve db information optionally, and finally, the model is called once more, conditioned on the belief state and retrieved information to generate a response.
+Several other improvements were proposed to the architecture that either improve contrastive state training \cite{kulhanek-etal-2021-augpt} or redefine state tracking as generation of belief state differences \cite{lin-etal-2020-mintl}.
 Others also proposed combining the purely generative models and retrieval-based approaches\cite{pandey-etal-2018-exemplar,cai-etal-2019-retrieval,nekvinda-dusek-2022-aargh}.
-The above-mentioned works finetuned the model on the in-domain data, contrasting with the pure in-context learning approach we apply in Chapter~\ref{chap:llms}.
-
-% \label{relwork:llm-dialogue}
-% The Transformer architecture \cite{vaswani2017attention} enabled training larger and more capable language models.
-% The research on their few-shot and zero-shot abilities probably dates back to the GPT-2 and GPT-3 models \cite{radford2019language,brown2020language}, which are scaled versions of the Transformer decoder.
-% Many followed this path of training large Transformer decoders \cite{zhang2022opt,black2022gpt}, yielding models of sizes up to hundreds of billions parameters big \cite{zhao_survey_2023}.
-% There are also models that leverage the whole original Transformer architecture (encoder and decoder) such as T5 \cite{2020t5}.
-% Recently, we've seen research focusing on training smaller architectures with similar capabilities and thus making the usage of LLMs available to the general public \cite{touvron2023llama}.
+The above-mentioned works fine-tuned the model on the in-domain data, contrasting with the pure in-context learning approach we apply in Chapter~\ref{chap:llms}.
 
 \subsection{Instruction Tuning for Large Language Models}
 Here, we follow up on the introduction to Large Language Models (LLMs) in Section~\ref{background:plms}.
@@ -105,7 +98,7 @@ Recently, \citet{shi2018auto} proposed an intent detection model using sentence 
 They have applied their method successfully for the task of intent detection.
 
 Using semantic relations to perform language understanding in the unsupervised setting was proposed by \citet{heck2012exploiting}.
-Here, the authors use the Semantic Web \cite{berners2001semantic}, which is a triple-based database of entity relations.
+Here, the authors use the Semantic Web \cite{berners2001semantic}, a triple-based entity relations database.
 Their approach relies heavily on structured web pages for the target domain.
 They exploit the structure to obtain semantic annotations in an unsupervised setting.
 
@@ -113,14 +106,14 @@ They exploit the structure to obtain semantic annotations in an unsupervised set
 \citet{chen2014leveraging} combine the paradigms of semantic frame parsing with distributional semantics to perform unsupervised semantic slot induction.
 The authors further improve their model in \citet{chen2015jointly} where they select the most prominent slot candidates using lexical knowledge graphs.
 However, both approaches only output a ranking of potential slot candidates based on frames.
-Since frame annotation is very fine-grained, this produces a huge number of candidates, requiring their manual merging  %of frame labels 
+Since frame annotation is very fine-grained, this produces many candidates, requiring their manual merging  %of frame labels 
 into slots for any practical use.
 In contrast, we determine domain-relevant slots automatically.
-\citet{coope_span-convert_2020} focus on a few-shot setting and perform span extraction of slot values using pretrained models in Chapter~\ref{chap:data_analysis}.
-Another direction of research focuses on zero-shot slot filling.  \citet{bapna2017towards}'s recurrent-neural-network-based slot tagger is pretrained on multiple domains and takes a textual description of the target slot on the input in addition to the user utterance. This way, adapting to a new domain only involves providing new slot descriptions.
+\citet{coope_span-convert_2020} focus on a few-shot setting and perform span extraction of slot values using pre-trained models in Chapter~\ref{chap:data_analysis}.
+Another direction of research focuses on zero-shot slot filling.  \citet{bapna2017towards}'s recurrent-neural-network-based slot tagger is pre-trained on multiple domains and takes a textual description of the target slot on the input in addition to the user utterance. This way, adapting to a new domain only involves providing new slot descriptions.
 Further works extend this idea with more complex architectures \cite{shah2019robust,liu2020coach}.
-An interesting follow-up work was presented in \citet{yu-etal-2022-unsupervised} which discovered dialogue schema slot candidates by analyzing attention spans of pretrained LMs and clustering the spans with the DBSCAN algorithm.
-Recently, \citet{qiu2022structure} proposed an alternative way to dialogue slot discovery by using pretrained sequence tagging models based on BERT taggers.
+An interesting follow-up work was presented in \citet{yu-etal-2022-unsupervised} which discovered dialogue schema slot candidates by analyzing attention spans of pre-trained LMs and clustering the spans with the DBSCAN algorithm.
+Recently, \citet{qiu2022structure} proposed an alternative way to dialogue slot discovery by using pre-trained sequence tagging models based on BERT taggers.
 
 \subsection{Dialogue structure discovery}
 \citet{brychcin2016unsupervised} focused on modeling the dialogue as a Markov decision process using HMMs.
@@ -153,7 +146,7 @@ Based on this idea, other works followed \citep{shalyminov-etal-2019-shot, huang
 One of the first neural network based models focusing on learning dialogue from a few in-domain examples was the Hybrid Code Networks  \cite{williams-etal-2017-hybrid}, a trainable system based on recurrent neural networks with partially handcrafted components.
 Another approach was proposed in \citet{zhao-eskenazi-2018-zero}, which used latent action representations to transfer domain knowledge.
 Latent actions were also used in \citet{huang2020mala} or \citet{shalyminov-etal-2019-data}.
-More recent approaches use the Transformer architecture and pretrained language models \cite{shalyminov_fast_2020} to leverage these models' abilities obtained during large-scale pretraining.
+More recent approaches use the Transformer architecture and pre-trained language models \cite{shalyminov_fast_2020} to leverage these models' abilities obtained during large-scale pre-training.
 Another example is \citet{madotto2020language} or
 \citet{hu-etal-2022-context}, which used LLMs and in-context learning to perform belief state tracking.
 They did not use instruction-tuned models and formulated the task as an SQL query generation.

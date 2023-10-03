@@ -4,40 +4,40 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \label{07:sec:intro}
-As we have described in the previous chapter, pretrained Language Models perform very well in the end-to-end dialogue modeling.
-Despite the success, using the widely used approach of finetuning pretrained LM on a particular dataset still does not guarantee easy transferability of the learned knowledge.
+As described in the previous chapter, pre-trained Language Models perform very well in end-to-end dialogue modeling.
+Despite the success, using the widely used approach of fine-tuning pre-trained LM on a particular dataset still does not guarantee easy transferability of the learned knowledge.
 This might change if we use more powerful tools, such as 
-Large Language Models (LLMs), which increased the model size by order of magnitute compare to the previous generation of pretrained LMs.
+Large Language Models (LLMs) increased the model size by an order of magnitude compared to the previous generation of pre-trained LMs.
 Undeniable, LLMs have transformed the NLP field,
 showing outstanding performance across many NLP benchmarks such as Winograd Challenge \cite{levesque2012winograd} or GLUE \cite{wang2018glue}.
-Instruction finetuning of LLMs proved to be able to align the model outputs with human preferences \cite{ouyang2022training,supernaturalinstructions} and improved the LLMs' communication capabilities substantially.
+Instruction fine-tuning of LLMs can align the model outputs with human preferences \cite{ouyang2022training,supernaturalinstructions} and improve the LLMs' communication capabilities substantially.
 
-State-of-the-art LLMs are not only good at understanding user needs but also capable of providing relevant answers.
-Consequently, we have seen many chatbot applications both inside and outside academia (ChatGPT\footnote{\url{https://openai.com/blog/chatgpt}}, Claude\footnote{\url{https://www.anthropic.com/index/introducing-claude}}or BARD\footnote{\url{https://blog.google/technology/ai/bard-google-ai-search-updates/}}) which build upon the raw power of instruction-finetuned LLMs.
+State-of-the-art LLMs are good at understanding user needs and capable of providing relevant answers.
+Consequently, we have seen many chatbot applications both inside and outside academia (ChatGPT\footnote{\url{https://openai.com/blog/chatgpt}}, Claude\footnote{\url{https://www.anthropic.com/index/introducing-claude}}or BARD\footnote{\url{https://blog.google/technology/ai/bard-google-ai-search-updates/}}) which build upon the raw power of instruction-fine-tuned LLMs.
 
 \section{Motivation}
-Given the millions of daily interactions with LLM-based chatbots, it appears that the models are able to handle users' needs to their satisfaction, at least to some extent.
+Given the millions of daily interactions with LLM-based chatbots, the models can handle users' needs satisfactorily, at least to some extent.
 However, these chatbots are tuned using unstructured open-domain conversations.
-We aim to evaluate these systems with respect to task-oriented dialogues, where the system has to follow a predetermined structure and handle external sources of information, such as APIs or databases.
-We raise the question to what extent LLMs are capable of handling these applications off-the-shelf, i.e.\ without finetuning.
-This approach, also frequently referred to as \emph{in-context learning} is a common way hoe to work with LLMs and offers competitive performance.
+We aim to evaluate these systems concerning task-oriented dialogues, where the system has to follow a predetermined structure and handle external sources of information, such as APIs or databases.
+We raise the question of to what extent LLMs can handle these applications off-the-shelf, i.e., without fine-tuning.
+This approach, frequently referred to as \emph{in-context learning}, is a common way to work with LLMs and offers competitive performance.
 We choose to evaluate LLM performance in the task-oriented dialogue (TOD) setting,
 as it requires precise information handling for communicating with external APIs.
-Moreover, TOD systems output in-domain information which has a predetermined structure and lends itself well to evaluation, thanks to pre-existing annotated data sets.
-We avoid finetuning techniques and focus on zero-shot or few-shot settings using in-context learning, as this approach has lower hardware requirements and barrier of entry and better flexibility or even performance in certain tasks \cite{su2022selective}.
+Moreover, TOD systems output in-domain information with a predetermined structure and lend itself well to evaluation, thanks to pre-existing annotated data sets.
+We avoid fine-tuning techniques and focus on zero-shot or few-shot settings using in-context learning, as this approach has lower hardware requirements and barrier of entry and better flexibility or even performance in certain tasks \cite{su2022selective}.
 It is important to note, that we cannot exclude the possibility that some of the models were exposed to our selected datasets during training.
-However, we find it important to evaluate this setting as the real-world use cases might largely rely on this approach.
+However, evaluating this setting is important as the real-world use cases might largely rely on this approach.
 \todo{reference to discussion}
 
-In this chapter, we introduce an LLM-based TOD conversation pipeline and evaluate its performance with respect to commonly used task-oriented metrics such as Joint Goal Accuracy, Slot F1, and Dialogue Success \cite{rastogi_multi-task_2018,budzianowski_multiwoz_2018}.
-Our pipeline resembles other approaches based on LMs \cite{peng-etal-2021-soloist,yang2021ubar}, using state tracking and response generation as two main, separate steps, while keeping the role of a dialogue policy implicit.
-However, instead of finetuning LMs, it intentionally relies almost exclusively on the usage of pretrained LLMs as-is, so we can test their out-of-the-box capabilities.
+In this chapter, we introduce an LLM-based TOD conversation pipeline and evaluate its performance concerning commonly used task-oriented metrics such as Joint Goal Accuracy, Slot F1, and Dialogue Success \cite{rastogi_multi-task_2018,budzianowski_multiwoz_2018}.
+Our pipeline resembles other approaches based on LMs \cite{peng-etal-2021-soloist,yang2021ubar}, using state tracking and response generation as two main, separate steps while keeping the role of a dialogue policy implicit.
+However, instead of fine-tuning LMs, it intentionally relies almost exclusively on using pre-trained LLMs as-is so we can test their out-of-the-box capabilities.
 The dialogue context and domain description are introduced to the model only by including them in the input prompt.
 In the zero-shot setting, the model receives a domain description only; in the few-shot setting, it additionally uses a few retrieved examples (see Section~\ref{07:sec:method} for details).
 
-In our experiments, we find that LLMs are not very good at state tracking and their performance falls behind state-of-the-art, task-specific trackers.
-However, if provided with correct belief states, some of them yield interesting response generation performance, comparable to earlier finetuned state-of-the-art models.
-Moreover, in our human evaluation experiments we show that LLMs are generally good with human interactions and their performance cannot be assesed only on the basis of automatic evaluations.
+Our experiments show that LLMs are not very good at state tracking, and their performance falls behind state-of-the-art, task-specific trackers.
+However, if provided with correct belief states, some yield interesting response generation performance comparable to earlier fine-tuned state-of-the-art models.
+Moreover, our human evaluation experiments show that LLMs are generally good with human interactions, and their performance cannot be assessed only based on automatic evaluations.
 
 \section{Method}
 \label{07:sec:method}
@@ -45,31 +45,28 @@ Moreover, in our human evaluation experiments we show that LLMs are generally go
     \centering
     \includegraphics[width=\textwidth]{images/llm-chatbot-v3.pdf}
     \caption{A detailed description of our proposed pipeline. (0) As a preprocessing step, we encode a subset of the training set that will be used to retrieve few-shot examples.
-    Given the user input, we: (1) Detect the domain, retrieve relevant examples (in the few-shot setting) and construct an initial prompt. (2) Infer the belief state using LLM. Based on that, we retrieve database information and construct another prompt that includes both the state and database results. (3) We ask the LLM to provide a final response.}
+    Given the user input, we: (1) Detect the domain, retrieve relevant examples (in the few-shot setting), and construct an initial prompt. (2) Infer the belief state using LLM. Based on that, we retrieve database information and construct another prompt that includes the state and database results. (3) We ask the LLM to provide a final response.}
     \label{07:fig:overview_low_level}
 \end{figure}
 An overall description of the proposed pipeline is shown in Figure~\ref{07:fig:overview_low_level}.
-The system consists of a pretrained LLM and an (optional) context store in a vector database.
+The system consists of a pre-trained LLM and an (optional) context store in a vector database.
 We follow the 
 Three LLM calls are performed in each dialogue turn, with specific prompts (see Section~\ref{07:sec:prompts}).
-First, the LLM performs domain detection and state tracking (Section~\ref{07:sec:state-tracking}). The updated belief state informs a database query, whose results are used in the subsequent LLM-based response generation step.
-In the few-shot setting, the context store is used to store a limited number of examples from the training set, which are retrieved based on similarity with the conversation context and included in LLM prompts (see Section~\ref{07:sec:context-store}).
-
-%Retrieved examples are used to create a prompt for the LLM.
-%The prompt also includes dialogue history, current utterance and potentially current belief state and database results.
-%More technical details are included in Section \ref{sec:experiments}.
+First, the LLM performs domain detection and state tracking (Section~\ref{07:sec:state-tracking}). The updated belief state informs a database query, the results of which are used in the subsequent LLM-based response generation step.
+In the few-shot setting, the context store stores a limited number of examples from the training set, which are retrieved based on similarity with the conversation context and included in LLM prompts (see Section~\ref{07:sec:context-store}).
 
 
 \subsection{Prompt construction}
 \label{07:sec:prompts}
-We aim to compare the raw capabilities of the selected LLMs, therefore we do not focus on prompt engineering techniques and choose universal prompts used for all LLMs in this work.
+We aim to compare the raw capabilities of the selected LLMs.
+Therefore, we do not focus on prompt engineering techniques and choose universal prompts for all LLMs in this work.
 We choose simple, plain language statements as prompts, with no specific vocabulary, based only on a few preliminary tests.
 We define a single \textbf{domain detection prompt} (Table~\ref{07_tab:domain}) for all examples, plus a pair of prompts for each domain in the given dataset: a \textbf{state tracking prompt} (Table~\ref{07_tab:zero-shot-state}) and a \textbf{response prompt} (Table~\ref{07_tab:zero-shot-response}).
 
 The domain detection prompt includes a task description and two static examples of domain detection.
 In addition to general instructions, each state tracking prompt contains a domain description, a list of relevant slots, the dialogue history, and the current user utterance.
-The response prompts do not contain the per-domain slot list, but they include the current belief state and database results instead.
-In the few-shot setting, each tracking and response prompt additionally contains positive and negative examples retrieved from the context store (see Section~\ref{07:sec:context-store}).
+The response prompts do not contain the per-domain slot list but include the current belief state and database results instead.
+In the few-shot setting, each tracking and response prompt contains positive and negative examples retrieved from the context store (see Section~\ref{07:sec:context-store}).
 
 \begin{table}[tp]
     \centering\small
@@ -159,14 +156,14 @@ In the few-shot setting, each tracking and response prompt additionally contains
       & \texttt{do you have a location preference?} \\
       \bottomrule
   \end{tabular}
-  \caption{A zero-shot version of the prompt used for response prediction for MultiWOZ 2.2.
+  \caption{A zero-shot version of the prompt for response prediction for MultiWOZ 2.2.
   It contains {\color{cyan!80!yellow!80!black!100} task definition},  {\color{green!100!yellow!70!black!100!}domain description}, {\color{red!100!yellow!70!black!100!} dialogue history}, {\color{orange!50!yellow!90!black!100!} user utterance} and {\color{magenta!100!yellow!70!black!100!} belief state with db results}.}
   \label{07_tab:zero-shot-response}
 \end{table}
 \subsection{Domain Detection and State Tracking}
 \label{07:sec:state-tracking}
 
-We prompt the LM twice at each turn during state tracking: first, to detect the active domain, then to output slot values that changed or appeared in the current turn. We then use the outputs to update the accumulated global belief state.
+We prompt the LM twice at each turn during state tracking to detect the active domain and then to output slot values that changed or appeared in the current turn. We then use the outputs to update the accumulated global belief state.
 
 The two prompting steps are used since 
 we need the models to operate in a multi-domain setting, i.e., handle conversations spanning multiple domains.
@@ -181,18 +178,19 @@ For the few-shot variants, %the retrieved context provides additional informatio
 %, 
 we retrieve few-shot examples from the context store, limited to the active domain.\footnote{For this purpose, each conversation snippet contained in the context store comes from a single-domain conversation.}
 
-Our preliminary experiments showed that LLMs struggle to output all active slot values at every turn consistently.
+Our preliminary experiments showed that LLMs consistently struggle to output all active slot values at every turn.
 Therefore, we model only state updates, following the MinTL approach \cite{lin-etal-2020-mintl}.
 Here, the model only generates the slot-value pairs that have changed in the current turn.
 The global belief state is then accumulated using these turn-level updates.
 To obtain machine-readable outputs useful for database queries or API calls,
 we specify in the prompt that the model should provide JSON outputs, and any provided few-shot examples are formatted accordingly. 
 The current belief state is used to query the database for entries matching all user-specified slots in the active domain. Given the belief state and database results, the response generation is straightforward.
-The prompt for the LLM includes dialogue history, user utterance, belief state and database results (and retrieved examples in the few-shot setting) and requests the model to provide a fitting system response.
-We generate delexicalized responses \cite{wen-etal-2015-stochastic}, i.e., we replace slot values by placeholders, following prior work in end-to-end TOD modeling.
+The prompt for the LLM includes dialogue history, user utterance, belief state, and database results (and retrieved examples in the few-shot setting).
+It requests the model to provide a fitting system response.
+We generate delexicalized responses (see Section~\ref{02:delex}).
 %\OD{a funguje to tak doopravdy? nedela nam to problem s evaluaci, ze model negeneruje placeholdery, ale ty skutecne hodnoty?}
-In addition to simplifying the task for the model, delexicalized outputs allow us to evaluate the success rate and compare to previous works.
-The prompt specifies that the model should provide entity values as delexicalized placeholders and any few-shot examples are constructed accordingly.
+In addition to simplifying the task for the model, delexicalized outputs allow us to evaluate the success rate and compare it to previous works.
+The prompt specifies that the model should provide entity values as delexicalized placeholders, and any few-shot examples are constructed accordingly.
 
 \subsection{Context Storage}
 \label{07:sec:context-store}
@@ -201,48 +199,48 @@ To apply this knowledge efficiently in our pipeline, we introduce a storage that
 This context storage is optional and is only required for the few-shot prompting variant.
 We use dialogue context taken from a fixed-length history window as the key to be encoded in the vector database.
 Once the relevant examples are retrieved, we include them in the prompt to guide the model better.
-Some of the LLMs rely on negative (counter-) examples as well \cite{supernaturalinstructions}, hence we take some of the retrieved belief state examples, corrupt them by replacing some of the correct slot values with random values, and present them as negative in the prompt.
+Some of the LLMs rely on negative (counter-) examples as well \cite{supernaturalinstructions}; we take some of the retrieved belief state examples, corrupt them by replacing some of the correct slot values with random values, and present them as negative in the prompt.
 
 \section{Experimental Setup}
 \label{07:sec:experiments}
 
-To obtain a broad overview of the current LLMs' capabilities, we compare several models, spanning different numbers of trainable parameters and different training methods. 
-We also experiment with four variants of the base setup, using either zero-shot or few-shot operations and using either predicted or oracle belief states.
+To obtain a broad overview of the current LLMs' capabilities, we compare several models spanning different numbers of trainable parameters and different training methods. 
+We also experiment with four variants of the base setup, using either zero-shot or few-shot operations and either predicted or oracle belief states.
 
 \subsection{Tested Models}
-We chose the following five instruction-finetuned models for our experiments, spanning different sizes (within the limitations of hardware available to us) and using freely available models as well as the paid ChatGPT API.
-We indicate the specific model variant (i.e., model size, given by the number of parameters) directly in the model name.
+We chose the following five instruction-tuned models for our experiments, spanning different sizes (within the limitations of hardware available) and using freely available models and the paid ChatGPT API.
+We directly indicate the specific model variant (i.e., model size, given by the number of parameters) in the model name.
 \label{07:sec:par:models}
 \begin{itemize}
     \item \textbf{Tk-Instruct-11B} \cite{supernaturalinstructions} is based on the T5 encoder-decoder architecture \cite{2020t5}. It was tuned on a dataset of over 5M task instances with instructions.
-    \item \textbf{ChatGPT} is a product introduced by OpenAI.\footnote{\url{https://openai.com/blog/chatgpt}} Although the exact training process and architectures were not published, it most probably uses a similar architecture and finetuning techniques as InstructGPT \cite{ouyang2022training}, with additional human feedback.
-    \item \textbf{Alpaca-LoRA-7B} is a version of the LLaMa model \cite{touvron2023llama} using the LoRA method \cite{hu2021lora} for finetuning on Stanford Alpaca project data \cite{alpaca}. LoRa keeps the base model parameters frozen, but adds additional smaller weight matrices to the model to transform its outputs.
-    \item \textbf{GPT-NeoXT-Chat-Base-20B} is based on the GPT-NeoX open-source language model \cite{black2022gpt} and finetuned with over 40M dialogue-style instructions.
-    \item \textbf{OPT-IML-30B} \cite{iyer2022opt} is based on the Transformer decoder OPT model \cite{zhang2022opt} and trained with a custom set of instructions, including the finetuning set from Tk-Instruct.
+    \item \textbf{ChatGPT} is a product introduced by OpenAI.\footnote{\url{https://openai.com/blog/chatgpt}} Although the exact training process and architectures were not published, it most probably uses a similar architecture and fine-tuning techniques as InstructGPT \cite{ouyang2022training}, with additional human feedback.
+    \item \textbf{Alpaca-LoRA-7B} is a version of the LLaMa model \cite{touvron2023llama} using the LoRA method \cite{hu2021lora} for fine-tuning on Stanford Alpaca project data \cite{alpaca}. LoRa keeps the base model parameters frozen but adds smaller weight matrices to transform its outputs.
+    \item \textbf{GPT-NeoXT-Chat-Base-20B} is based on the GPT-NeoX open-source language model \cite{black2022gpt} and fine-tuned with over 40M dialogue-style instructions.
+    \item \textbf{OPT-IML-30B} \cite{iyer2022opt} is based on the Transformer decoder OPT model \cite{zhang2022opt} and trained with a custom set of instructions, including the fine-tuning set from Tk-Instruct.
 \end{itemize}
 
 \subsection{Evaluated variants}
-We test four variants of our setup for each pair of model and dataset.
+We test four setup variants for each pair of model and dataset.
 Specifically, we use zero-shot (without examples) or few-shot (including examples) prompts (\emph{-zs-} vs. \emph{-fs-}) and either generated or oracle belief states (\emph{-gbs} vs. \emph{-obs}).
 For retrieval in the few-shot setting, we store just 10 examples per domain in the context store by default. We experiment with increasing this number in Section~\ref{07:sec:dialogue-performance}.
-Using oracle belief state allows us to focus on evaluating the LLM's ability to guide the dialogue.
+Using the oracle belief state allows us to focus on evaluating the LLM's ability to guide the dialogue.
 
 \subsection{Experiment Details}
 \label{subsec:exp-details}
-Due to the expensiveness of the LLM runs,\footnote{Hardware intensity for the freely available models and actual cost for ChatGPT.} we did not perform a grid search, but used a limited set of preliminary experiments to determine hyperparameters.
-Based on this, we used the context of two preceding  utterances (user + system) as the context store keys (cf.~Section~\ref{07:sec:context-store}).
-We retrieve two examples for few-shot prompts and make one corrupted variant from each of them for negative examples.
-To corrupt an example, we switch some of the slot values randomly, similarly to \citet{kulhanek-etal-2021-augpt}.
+Due to the expensiveness of the LLM runs,\footnote{Hardware intensity for the freely available models and actual cost for ChatGPT.}, we did not perform a grid search but used a limited set of preliminary experiments to determine hyperparameters.
+Based on this, we used the context of two preceding utterances (user + system) as the context store keys (cf.~Section~\ref{07:sec:context-store}).
+We retrieve two examples for few-shot prompts and make one corrupted variant for negative examples.
+To corrupt an example, we randomly switch some of the slot values, similarly to \citet{kulhanek-etal-2021-augpt}.
 In the context store, we encode few-shot examples using the multilingual embedding model provided by \citet{reimers-2020-multilingual-sentence-bert}\footnote{\url{https://huggingface.co/sentence-transformers/all-mpnet-base-v2}} and store them in the FAISS database \cite{johnson2019billion}.
 To perform the LLM calls, we use the Huggingface library\footnote{\url{https://huggingface.co}} and the OpenAI API.\footnote{\url{https://platform.openai.com}}
 
 \subsection{Evaluation Measures}
 
-We evaluate the system outputs on multiple levels, both using automatic metrics and human evaluation. Results are given in Sections~\ref{07:sec:results} and~\ref{07:sec:analysis}, respectively.
-For details about the used metrics, please see Section~\ref{02:sec:eval_metrics}.
+We evaluate the system outputs on multiple levels using automatic metrics and human evaluation. Results are given in Sections~\ref{07:sec:results} and~\ref{07:sec:analysis}, respectively.
+Please see Section~\ref{02:sec:eval_metrics} for details about the used metrics.
 \subsubsection*{Automatic Metrics}
-In automatic evaluation, we first follow the LLM calls being made and evaluate domain detection, state tracking as well as response generation. We also evaluate the overall dialogue-level performance.
-For \emph{domain detection}, we simply compute \textbf{detection accuracy}.
+In automatic evaluation, we first follow the LLM calls and evaluate domain detection, state tracking, and response generation. We also evaluate the overall dialogue-level performance.
+For \emph{domain detection}, we compute \textbf{detection accuracy}.
 For \emph{state tracking}, we compute \textbf{micro-F1} score and \textbf{Joint Goal Accuracy} (JGA).
 To evaluate \emph{response generation}, we follow related works and use \textbf{BLEU score}.
 The main \emph{overall measure} for evaluating a task-oriented dialogue is the dialogue \textbf{success rate} \cite{deriu_survey_2021}.
@@ -252,7 +250,7 @@ For human evaluation, we perform a small-scale in-house interaction study on Mul
 Since the MultiWOZ goal often involves tasks in multiple domains, we ask annotators to evaluate each domain in the dialogue distinctly.
 At the end of each dialogue, the annotators are asked to answer these questions:
 \begin{enumerate}
-    \item \emph{How many of the subdialogues/domains were handled successfully?} (corresponding to dialogue success)
+    \item \emph{How many of the sub dialogues/domains were handled successfully?} (corresponding to dialogue success)
     \item \emph{How many clarifications or corrections were needed?}
     \item \emph{Was all the provided information captured correctly?} (corresponding to JGA)
 \end{enumerate}
@@ -260,7 +258,7 @@ At the end of each dialogue, the annotators are asked to answer these questions:
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.49\textwidth]{images/domain-detections.png}
-    \caption{Domain detection accuracy with respect to different models for MultiWOZ 2.2 and SGD data wchich consist of 7 and 18 domains, respectively.}
+    \caption{Domain detection accuracy concerning different models for MultiWOZ 2.2 and SGD data, which consist of 7 and 18 domains, respectively.}
     \label{07:fig:domains}
 \end{figure}
 
@@ -272,14 +270,14 @@ At the end of each dialogue, the annotators are asked to answer these questions:
 \label{subsec:domain}
 We report the domain detection accuracy on MultiWOZ and SGD
 in Figure~\ref{07:fig:domains}.
-We observe that the domain detection accuracy varies quite a lot for various models and presumably influences the quality of the retrieved few-shot examples and appropriateness of the subsequent prompts.
-However, it is important to note that domain detection is turn-based, and arguably there are situations (e.g. providing an address, saying goodbye etc.) that are always handled in the same fashion, even though they formally belong to different domains.
+We observe that the domain detection accuracy varies quite a lot for various models and presumably influences the quality of the retrieved few-shot examples and the appropriateness of the subsequent prompts.
+However, it is important to note that domain detection is turn-based, and arguably, some situations (e.g., providing an address, saying goodbye, etc.) are always handled similarly, even though they belong to different domains.
 Therefore, not all the retrieved examples from misclassified domains necessarily contain unrelated contexts.
 To explore this, we measure the performance of all models in case an oracle domain is given to them (Figure \ref{fig:oracle_domains}).
-Interestingly, using the oracle domain did not improve performance, it even worsened in some cases.
-This suggests that the model-predicted domain is generally good enough, and additionally providing the domain information does not contribute to the final system performance.
+Interestingly, using the Oracle domain did not improve performance; it even worsened in some cases.
+This suggests that the model-predicted domain is generally good enough, and additionally, providing the domain information does not contribute to the final system performance.
 The negative influence on performance might be caused by forcing the system to filter out relevant examples.
-We observe that in multiple cases, the conversations snippets are domain-independent so the retrieval might perform better even with a wrongly selected domain.
+The conversation snippets are domain-independent in multiple cases so that the retrieval might perform better even with a wrongly selected domain.
 Forcing the ground truth domain examples in these cases can be potentially harmful.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -353,14 +351,14 @@ Forcing the ground truth domain examples in these cases can be potentially harmf
 \subsection{Belief State Tracking}
 \label{subsec:dst}
 The belief state tracking results overview is given in Tables \ref{tab:res_overall_1},\ref{tab:res_overall_2} (\emph{JGA} and \emph{Slot-F1}).
-There is a huge gap between the supervised models' performance and the LLM results.
+A huge gap exists between the supervised models' performance and the LLM results.
 Also compared to \citet{hu-etal-2022-context}, who used few-shot in-context learning and reported JGA 43.13\% with a comparable dataset size, our instruction-tuned LLMs fall short.
-However, the models we use are an order of magnitude smaller in general, and we also use fewer examples in the prompt.
+However, the models we use are generally an order of magnitude smaller, and we also use fewer examples in the prompt.
 We hypothesize that the performance could be further improved by careful model-specific prompt customization and perhaps task re-formulation; nevertheless, this is not the goal of this work.
 We intentionally focus on the universal framing of the task since we want to explore the general ability of the models to follow instructions.
 
-When comparing the results among the models, ChatGPT clearly outperforms the rest of the models by a large margin. 
-Interestingly, the few-shot vs.\ zero-shot setting does not seem to influence the results much, except for the GPT-NeoXT model.
+When comparing the results among the models, ChatGPT outperforms the rest of the models by a large margin. 
+Interestingly, the few-shot vs. zero-shot setting does not influence the results much, except for the GPT-NeoXT model.
 
 \subsection{Response Generation}
 \begin{table}[tp]
@@ -415,9 +413,9 @@ Interestingly, the few-shot vs.\ zero-shot setting does not seem to influence th
     \bottomrule
   \end{tabular}
   \caption{
-  Evaluation of the chosen LLMs with respect to widely used TOD measures on the SGD dataset. For each model, we provide multiple variants. We use either zero-shot or few-shot prompts (\emph{-zs-} vs. \emph{-fs-}) and either generated or oracle belief state (\emph{-gbs} vs. \emph{-obs}).
-  The few-shot variants use 10 examples per domain in the context storage, two of which are selected for the prompts.
-  To reduce cost, we did not  evaluate the paid ChatGPT model on SGD.
+  Evaluation of the chosen LLMs concerning widely used TOD measures on the SGD dataset. For each model, we provide multiple variants. We use either zero-shot or few-shot prompts (\emph{-zs-} vs. \emph{-fs-}) and either generated or oracle belief state (\emph{-gbs} vs. \emph{-obs}).
+  The few-shot variants use 10 examples per domain in the context storage, two selected for the prompts.
+  We did not evaluate the paid ChatGPT model on SGD to reduce cost.
   We also provide supervised state-of-the-art results to put the numbers in context: $^\ast$\citet{zhu2022convlab3}, $^\dagger$\citet{feng-etal-2021-sequence}, $^\clubsuit$\citet{sun2022mars}, $^\diamondsuit$\citet{huangrobustness}, $^\heartsuit$\citet{feng2023fantastic}. }
   \label{tab:res_overall_2}
 \end{table}
@@ -436,13 +434,13 @@ BLEU scores are low overall, far below the supervised state-of-the-art. Tk-Instr
 %The ultimate measure to evaluate a task-oriented dialogue model is dialogue success.
 Results for dialogue success are provided in Tables~\ref{tab:res_overall_1},\ref{tab:res_overall_2}, and there is again a large gap between LLMs and supervised custom models' performance.
 ChatGPT seems to outperform other models, similarly to state tracking (cf.~Section~\ref{subsec:dst}).
-However, for some cases, especially in the zero-shot setting, the difference is not that obvious.
+However, in some cases, especially in the zero-shot setting, the difference is not that obvious.
 In most cases, adding the retrieved few-shot examples helps.
-The contribution of retrieved examples is more obvious when we supply the oracle belief state, in which case it helps consistently for all the models.
+The contribution of retrieved examples is more obvious when we supply the oracle belief state, which helps consistently for all the models.
 
 We also explore the influence of context storage size on the dialogue success rate.
 The results are given in Figure~\ref{07:fig:shots}.
-It seems that the biggest improvement can be achieved by supplying just a few examples instead of zero-shot prompting, but increasing the size of the example pool for retrieval does not yield further performance gains.
+The biggest improvement can be achieved by supplying just a few examples instead of zero-shot prompting, but increasing the size of the example pool for retrieval does not yield further performance gains.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.49\textwidth]{images/shots.png}
@@ -452,9 +450,9 @@ It seems that the biggest improvement can be achieved by supplying just a few ex
 
 \subsection{Single-domain performance}
 We present a performance of the ChatGPT model when restricted to single-domain dialogues on MultiWOZ in Table~\ref{tab:single-domain}.
-The average performance is 0.76 which improves over the overall performance.
+The average performance is 0.76, which improves over the overall performance.
 This outcome is expected as single-domain dialogues are typically shorter and easier to manage.
-However, this observation can also give us interesting insights into the difficulty of particular domains which does not necessarily correlate with the number of slots or average dialogue length.
+However, this observation can also give us interesting insights into the difficulty of particular domains, which does not necessarily correlate with the number of slots or average dialogue length.
 \begin{table}[tp]
     \centering
     \begin{tabular}{lccccc}
@@ -470,47 +468,45 @@ However, this observation can also give us interesting insights into the difficu
 \section{Model Analysis}
 \label{07:sec:analysis}
 
-%It is important to understand the LLM's behavior not just quantitatively but more in-depth.
-%Therefore we perform human evaluation and detailed error analysis to obtain more insights.
-
 \subsection{Human Evaluation}
 \label{07:sec:human}
 We employed 6 annotators with a background in linguistics and NLP and let them interact with the two strongest models in terms of automatic metrics: ChatGPT and Tk-Instruct.
 The annotators were given randomly selected goals from the MultiWOZ 2.2 dataset and a minimal set of essential instructions on how to proceed.
 We present the results in Table~\ref{tab:human}.
-We can see that in a real interaction with a human user and allowing for clarification or correction, the models perform better compared to the rather strict automatic evaluation.
-Furthermore, the models are often successful in multiple subdialogues, even if a part of the whole dialogue fails.
-The experiment also confirms the superior performance of ChatGPT on both dialogue success and JGA.
-Not surprisingly given the above results, conversations with ChatGPT also required fewer clarification turns than with Tk-Instruct.
+We can see that in a real interaction with a human user and allowing for clarification or correction, the models perform better than the strict automatic evaluation.
+Furthermore, the models are often successful in multiple sub-dialogues, even if a part of the dialogue fails.
+The experiment also confirms the superior performance of ChatGPT on dialogue success and JGA.
+Not surprisingly, given the above results, conversations with ChatGPT also required fewer clarification turns than with Tk-Instruct.
 
 \subsection{Error Analysis}
 
-To understand the models' behavior better, we manually inspect a random sample of ca.~20 dialogues for each model, chosen from cases where the automatic success metric was not satisfied. 
-In general, we can split most of the erroneous behaviors into two distinct groups, which we call \emph{prompt-recoverable} and \emph{inherent}.
+To better understand the models' behavior, we manually inspect a random sample of ca.~20 dialogues for each model, chosen from cases where the automatic success metric was not satisfied. 
+In general, we can split most erroneous behaviors into two distinct groups, which we call \emph{prompt-recoverable} and \emph{inherent}.
 
 \paragraph{Prompt-recoverable errors} can be likely fixed by specific prompt engineering with some effort.
-These kind of errors happen with all of the tested models.
+These kinds of errors happen with all of the tested models.
 Examples of such errors are invalid structure of the generated dialogue state, copying slot values instead of using canonical values from the ontology, failure to delexicalize some of the values, etc.
-Most of these errors can be also fixed in postprocessing -- for example, we can employ more robust parsers or fuzzy matching of slot values.
+Most of these errors can also be fixed in postprocessing -- for example, we can employ more robust parsers or fuzzy matching of slot values.
 
 \paragraph{Inherent errors,} on the other hand, are likely not easily fixable by prompt modifications.
 They are not distributed evenly across the tested models and seem to constitute a more challenging problem.
 
 Perhaps the most important error, common to all the models, is hallucination, i.e., the models output responses not grounded in the context (such as offering entities that are not included in the database). This happens in about 10-20\% of the inspected dialogues.
-Some models (\emph{GPT-NeoXT, OPT-IML}) tend to generate more content then they are asked for.
+Some models (\emph{GPT-NeoXT, OPT-IML}) tend to generate more content than requested.
 This happens in more than 50\% of their failed dialogues.
-In some cases, this means continuing the conversation for a few more turns (including hallucinating user turns), but the models also often generate unrelated text or even code snippets.
-With \emph{Tk-Instruct}, we observed that in ca.~10\% cases, it copies belief state from the example given in the prompt instead of generating a relevant one.
+This sometimes means continuing the conversation for a few more turns (including hallucinating user turns), but the models also often generate unrelated text or even code snippets.
+With \emph{Tk-Instruct}, we observed that in ca.~10\% cases, it copies the belief state from the example given in the prompt instead of generating a relevant one.
 Another issue is that the models tend to repeat their previous responses.
 
 \subsection{Limitations}
 One of the drawbacks of our work is the reproducibility.
-Closed models like ChatGPT are only available only via API and their behavior can change with time, making the experiments essentially impossible to reproduce.
+Closed models like ChatGPT are available only via API, and their behavior can change with time, making the experiments impossible to reproduce.
 To address this, we include more models for the evaluation.
-Another problem is that with the rapid development in this field of study, new and stronger LLMs appear with high frequency, making some of our results obsolete fast.
-However, our experiments aim to put the LLM performance in context and show that despite their great capabilities, the approach of in-context learning is unlikely to solve the task-oriented dialogues problematic in the near future.
+Another problem is the rapid development in this field of study.
+New and stronger LLMs frequently appear, quickly making some of our results obsolete.
+However, our experiments aim to put the LLM performance in context and show that despite their great capabilities, the approach of in-context learning is unlikely to solve the problem of task-oriented dialogues in the near future.
 
-It would be also desirable to focus more on prompt engineering techniques since the LLMs are arguably sensitive to the choice of the right prompt and this choice is model-specific.
+It would also be desirable to focus more on prompt engineering techniques since the LLMs are arguably sensitive to the choice of the right prompt, which is model-specific.
 Nevertheless, it is unlikely that solely tweaking the input prompt would affect the performance dramatically.
 
 \begin{table}[tp]
@@ -529,7 +525,7 @@ Nevertheless, it is unlikely that solely tweaking the input prompt would affect 
     
     
     \end{tabular}
-    \caption{Human evaluation results for ChatGPT and Tk-Instruct-11B models. We evaluate the conversation on subdialogue level i.e. each domain in the dialogue is evaluated separately. }
+    \caption{Human evaluation results for ChatGPT and Tk-Instruct-11B models. We evaluate the conversation on the sub-dialogue level i.e. each domain in the dialogue is evaluated separately. }
     \label{tab:human}
 \end{table}
 
@@ -567,7 +563,7 @@ Nevertheless, it is unlikely that solely tweaking the input prompt would affect 
         \textbf{Assistant} & \texttt{it will take you {\color{orange!50!yellow!90!black!100!}88 minutes} to get there. }\\
         \bottomrule
     \end{tabular}
-    \caption{A sample evaluation conversation between human and LLM-based agent. The sample includes a textual goal description that instucts the user. The slot values are lexicalized in the assistant's responses. Although the systems {\color{red!100!yellow!90!black!100!}fails initially} and the customer needs to ask repeatedly about the duration of travel, it is able to get the desired information in the end. The slot values are highlighted for both {\color{cyan!80!yellow!80!black!100 }informed} and {\color{orange!50!yellow!90!black!100!}requested} values.}
+    \caption{A sample evaluation conversation between human and LLM-based agent. The sample includes a textual goal description that instucts the user. The slot values are lexicalized in the assistant's responses. Although the systems {\color{red!100!yellow!90!black!100!}fails initially} and the customer needs to ask repeatedly about the duration of travel, it can get the desired information in the end. The slot values are highlighted for both {\color{cyan!80!yellow!80!black!100 }informed} and {\color{orange!50!yellow!90!black!100!}requested} values.}
     \label{07:tab:human-1}
 \end{table}
 
@@ -608,15 +604,15 @@ Nevertheless, it is unlikely that solely tweaking the input prompt would affect 
 \section{Discussion}
 
 We present an experimental evaluation of instruction-tuned LLMs applied to the established task of task-oriented dialogue modeling, with five LLMs evaluated on two datasets.
-We find that current LLMs have difficulties with respect to belief state tracking.
+We find that current LLMs have difficulties concerning belief state tracking.
 The LLM-based state trackers struggle even when provided with in-context few-shot examples.
-Some of the problems arise from the fact that the LLM might not provide correctly formatted outputs.
+Some problems arise because the LLM might not provide correctly formatted outputs.
 These errors might be accounted for by restricting the decoding techniques and robust parsing mechanisms.
 On the other hand, a non-trivial portion of errors come from hallucinated slot values that are not present in the conversation.
 This behavior is harder to address successfully.
 
-If provided with a correct belief state, the models can interact with the user quite well, provide useful information and fulfill the user's needs.
-While the performance does not match the supervised state of the art on the evaluated datasets, it is important to note that these models were not finetuned on in-domain data and work with just a domain description or a few examples (which again improve performance). 
-Moreover, few-shot examples improve the model performance as well as access to the oracle belief state.
+If provided with a correct belief state, the models can interact with the user well, provide useful information, and fulfill the user's needs.
+While the performance does not match the supervised state of the art on the evaluated datasets, it is important to note that these models were not fine-tuned on in-domain data and work with just a domain description or a few examples (which improves performance). 
+Moreover, few-shot examples improve the model performance and access to the oracle belief state.
 Therefore, carefully picking representative examples and combining the LLM with an in-domain belief tracker can be a viable choice for a task-oriented dialogue pipeline.
-Also, our evaluation experiments suggest, that LLM-based systems are surprisingly good in human interaction, surpassing the results suggested by the corpus-based automatic evaluation metrics.
+Also, our evaluation experiments suggest that LLM-based systems are surprisingly good in human interaction, surpassing the results suggested by the corpus-based automatic evaluation metrics.

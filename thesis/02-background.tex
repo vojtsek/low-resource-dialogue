@@ -16,134 +16,9 @@ In this section, we first introduce some key concepts necessary for understandin
 Some of the concepts are well-known in the community.
 However, we still consider it appropriate to mention them here and provide the reader with references to the literature for detailed descriptions.
 
-\subsection{Dialogue System implementations}
-\label{02:ds-background}
-\begin{table*}[tp]
-\small
-\setlength\fboxsep{2pt}
-        \centering
-        \begin{tabular}{rll}
-        \textbf{\texttt{USER:}} & \textit{\texttt{I would like a cheap restaurant.}} & \textbf{\texttt{\colorbox{pastelyellow}{inform}(\colorbox{lightblue}{price}=\colorbox{pastelgreen}{cheap})}} \\
-        \textbf{\texttt{SYSTEM:}} & \textit{\texttt{Golden plate is cheap.}} & \textbf{\texttt{\colorbox{pastelyellow}{inform}(\colorbox{lightblue}{name}=\colorbox{pastelgreen}{Golden plate})}} \\
-        \hdashline[1.5pt/2pt]
-        \textbf{\texttt{USER:}} & \textit{\texttt{What is the cuisine?}} & \textbf{\texttt{\colorbox{pastelyellow}{request}(\colorbox{lightblue}{cuisine})}} \\
-        \textbf{\texttt{SYSTEM:}} & \textit{\texttt{They serve chinese food.}} & \textbf{\texttt{\colorbox{pastelyellow}{inform}(\colorbox{lightblue}{cuisine}=\colorbox{pastelgreen}{chinese})}} \\
-        \hdashline[1.5pt/2pt]
-        \textbf{\texttt{USER:}} & \textit{\texttt{Sounds good. Bye!}} & \textbf{\texttt{\colorbox{pastelyellow}{goodbye}()}} \\
-        \textbf{\texttt{SYSTEM:}} & \textit{\texttt{Have a great day.}} & \textbf{\texttt{\colorbox{pastelyellow}{goodbye}()}} \\
-        \end{tabular}
-\normalsize
-        \caption{Example of task-oriented dialogue in the restaurant reservation domain. Utterance representations as dialogue acts are depicted on the right. Intents are highlighted in orange, slot names in blue, and respective values in green. Note that not all dialogue acts include slots and values}
-    \label{fig:das}
-\end{table*}
-First, we describe various approaches to constructing dialogue systems pipelines and provide insights about approaches to modeling the underlying processes.
-The architectures may vary greatly because of the varying use cases of Dialogue Systems (DS).
-We thus introduce a classification of dialogue systems that reflects the expected capabilities.
-There are multiple approaches to defining a dialogue system taxonomy in the literature.
-Here, we introduce the widely used classification scheme \cite{jurafsky2000speech}.
-\begin{enumerate}
-    \item \textbf{Question Answering (QA)} - Although sometimes not mentioned in the context of dialogue systems, the QA task can be seen as a simple conversation. A QA system's main task is to answer the user's questions.
-    The topics may vary; good understanding and knowledge representation are essential for this task.
-    The dialogues are usually quite simple and often consist of just one question and the respective answer.
-    \item \textbf{Task-oriented DS} - In this setting, the system's goal is to complete a task based on the user's instructions.
-    The successful completion may depend on several attributes the system has to learn from the user utterances.
-    The system is also allowed to ask for additional information if needed and typically works with some external source of information, such as a database.
-    Here, the dialogues are usually much more complex than in the QA setting, and dialogue context has to be considered.
-    \item \textbf{Chit-chat} - Sometimes, we might be interested in a system that can talk to the user casually and provide entertainment.
-    Such systems might be combined with task-oriented systems to serve as human-like virtual assistants or use the dialogue to advertise products, etc.
-    The context and knowledge base are also important, but in most cases, there is no well-defined task to be completed, so the evaluation is subjective.
-\end{enumerate}
-
-Another way of classifying the dialogues considers their domain of operation.
-\textbf{Single-domain} systems can work only in one topic area, e.g. public transport or restaurant information, whereas \textbf{multi-domain} systems can handle multiple domains.
-These types of systems cannot give meaningful answers outside the domains they're trained on.
-A dialogue system is considered \textbf{open-domain} if it can have a conversation not limited to a predefined set of domains.
-In practice, this is achievable only to some extent since the knowledge base of the program is always limited.
-However, the systems can cover many domains with internet access and smart information retrieval methods.
-
-Here, we focus on the task-oriented DS and discuss it more deeply.
-From the domain perspective, task-oriented DS are usually single or multi-domain systems.
-Open-domain is not often the case, at least in the research community.
-We can see a task-oriented dialogue as a slot-filling task.
-Task-oriented dialogue systems are widely used for various applications, such as customer service, personal assistance, and information retrieval. These systems aim to assist users in accomplishing specific tasks by engaging in a natural language conversation. 
-That means we have a predefined set of semantic \textit{slots} that must be filled with the right \textit{values}.
-Each utterance in the task-oriented dialogue is considered an action that potentially changes the state of the conversation.
-Such actions can be represented using \textit{Dialogue Acts (DA)}\cite{core1997coding}.
-To define the Dialogue Act, we first must introduce the concept of \emph{slots} and \emph{intents}.
-To represent the meaning of user utterances, annotation based on \emph{slots} is commonly employed \cite{young_pomdp-based_2013}. Slots, which describe semantic concepts relevant to completing the task, serve as a means of capturing the user's desires as well as facilitating the system's communication with the user. Typical examples of slots include \emph{area}, \emph{price}, and \emph{address}, among others. By tracking slots and their values over the course of the dialogue, a dialogue system can maintain a \emph{dialogue state}, which allows it to plan the next actions \cite{williams2013dialog} effectively. The dialogue state represents explicitly all the important knowledge known to the system at a specific point in the dialogue. Consequently, it can be utilized to communicate with external sources of information and data, such as databases, structured knowledge bases, or various APIs, to provide users with accurate and relevant information.
-Intent describes the user's intention expressed by a respective utterance.
-In other words, intent represents what the user wants and what his wish is.
-Slots describe attributes of this wish and ground it to an ontology.
-
-DA is a tuple consisting of \textit{intent} and optionally also \textit{slot} and the corresponding \textit{value}.
-If multiple slot values are present, all are considered to have the same intent.
-
-An example dialogue with respective DA representation is depicted in Table \ref{fig:das}.
-Most dialogue system modules for limited domains can be implemented by designing a set of rules and templates.
-Such systems can yield satisfying results in some use cases.
-Nevertheless, they are inflexible and generally not considered promising from the research point of view.
-
-\subsubsection{Dialogue System Architectures}
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.80\textwidth]{images/pipeline.png}
-    \caption{Overall architecture of task-oriented dialogue system pipeline. The data flow is outlined with arrows. This work does not discuss ASR and TTS modules (depicted in gray) which are often included with the rest of the components.}
-    \label{fig:overall}
-\end{figure}
-A typical approach to task-oriented DS implementation is to create a modular system with several modules that handle the conversation flow together.
-An example of such architecture is depicted in Figure \ref{fig:overall}
-We shortly discuss the responsibilities of each component:
-\begin{itemize}
-    \item \textbf{Natural Language Understanding (NLU)} The purpose of NLU is to extract the meaning of input utterances in natural language and transform it into a structured representation, i.e., dialogue acts.
-    Basically, the NLU module has three subtasks.
-    (1) It has to determine the domain of the utterance, (2) detect the user intent, and (3) capture any slot values, if present.
-    \item \textbf{Dialogue State Tracking (DST)} Dialogue state keeps track of the dialogue history, effectively providing the necessary context.
-    Dialogue State Trackers are used to update the state with correct values after each turn.
-    \item \textbf{Dialogue Policy} The core component of the DS is the dialogue policy.
-    Its responsibility is to decide which action the system should take at each turn.
-    In other words, Dialogue Policy's responsibility is to guide the dialogue to follow the desired path.
-    Dialogue policy and the DST component are sometimes called \emph{Dialogue Manager}.
-    \item \textbf{Natural Language Generation (NLG)} When the decision on a system action is made, the system needs to verbalize the action.
-    In other words, we need to create an utterance in natural language that expresses the information in the system's underlying representation.
-\end{itemize}
-
-The module-based approach is advantageous thanks to its good level of explainability.
-In case of low performance, we can track the respective modules' outputs and find the source of problems.
-On the other hand, error accumulation makes it difficult to recover from errors made by the modules early on in the pipeline.
-Another disadvantage is the way these systems are trained \cite{li-etal-2017-end}
-Each component requires specific data annotation.
-Thus, obtaining a dataset suitable for training all components can be difficult and costly.
-Also, the system design itself is more complicated since it requires the implementation of multiple models.
-Because of the aforementioned drawbacks, many current research works focus on dialogue modeling end-to-end, i.e., using systems without explicit components that can be trained jointly.
-
-\subsubsection{Modeling TOD without supervision}
-\label{02:no-super}
-Here, we introduce some of the challenges concerning TOD modeling in conditions without external structured supervision.
-We discuss every step in the pipeline (Section~\ref{02:sec:basics}) separately.
-
-\paragraph{Natural Language Understanding (NLU)}
-Recall that the purpose of the NLU component in a traditional dialogue pipeline is to extract the meaning from input utterances in natural language and represent it in a structured way.
-Doing this unsupervised is challenging because we do not have the labeled data for training and, moreover, do not know the structure itself in the first place.
-However, there are some possible ways to approach this problem.
-Works focus on automated annotation schema induction (\ref{sec:relwork-unsup}).
-Another way is to let the model handle NLU implicitly, i.e., effectively omitting the NLU step.
-
-\paragraph{Action Selection}
-One of the tasks of the dialogue manager is to select the next system action in a given situation.
-Most implemented systems implicitly perform this task, i.e., there is no explicit representation of the system action, just a surface realization of it (in the form of verbalized utterance).
-The reason for this option is that it requires less supervised labels, which might be hard and costly to obtain.
-However, modeling the information about system action can benefit the overall performance~\cite{DBLP:conf/aaai/LiangTCY20}.
-We explore the possibility of implicitly learning this information by introducing a network bottleneck in Chapter~\ref{chap:modeling}.
-
-\paragraph{Handling external interfaces}
-Task-oriented dialogue systems must provide accurate and complete information based on user requests, which requires interaction with external interfaces such as databases or some structured knowledge base.
-To communicate with such external entities, we typically need to design some representation with a predetermined structure so we can construct API queries, etc.
-This can be troublesome in a setting where no supervision in the form of labels is present.
-Without a known structure, it is very challenging to design the communication protocol with external sources of information.
-
 \subsection{Neural Networks}
 \label{background:nns}
-The nature of many Natural Language Processing (NLP) tasks is statistical in a way that we can identify patterns seen in data and aim to model the underlying processes.
+The nature of many Natural Language Processing (NLP) tasks is statistical in that we can identify patterns seen in data and aim to model the underlying processes.
 Therefore, statistical methods in NLP have been extensively used for decades~\cite{manning99foundations}, with varying success.
 Although many modeling approaches with various degrees of complexity have been proposed, currently, Neural Network models dominate the field.
 Neural architectures are well-known statistical models \cite{GoodBengCour16} that can learn complex data distributions from the presented training data.
@@ -155,14 +30,14 @@ However, it is not straightforward how to represent words in NN.
 A simple one-hot vector or bag of words representation is insufficient as it throws away a lot of useful information about the relations between words, their position, etc.
 Traditional statistical N-gram models \cite{jurafsky2000speech} address some of the issues but again discard some positional information and are inherently limited by context size (N-gram length).
 A breakthrough in this field, which allowed for successful NN applications, dates back to the works \citep{mikolov2010recurrent} and \citep{mikolov2013distributed}, which build on the principle of word distributional hypothesis and introduced the concept of \emph{word embeddings}.
-Word embeddings are multi-dimensional real vectors that capture important information about each word that occurs in some particular input corpora.
+Word embeddings are multi-dimensional real vectors that capture important information about each word in some particular input corpora.
 When input to an NN, word embeddings accurately represent the word and arguably capture the meaning.
-This principle was later improved by introducing large-scale pretrained neural language models such as ELMo~\cite{peters-etal-2018-deep} and BERT~\cite{devlin2019}, which can create contextualized high-dimensional representations.
+This principle was later improved by introducing large-scale pre-trained neural language models such as ELMo~\cite{peters-etal-2018-deep} and BERT~\cite{devlin2019}, which can create contextualized high-dimensional representations.
 We introduce these principles in more detail in Section~\ref{background:plms}
 
 \subsection{Recurrent Neural Networks (RNNs)}
 \label{background:rnns}
-Recurrent Neural Networks are a type of neural network that is well-suited for processing sequential data\cite{GoodBengCour16}. Sequential data is ordered in time, such as text or audio.
+Recurrent Neural Networks are a type of neural network well-suited for processing sequential data\cite{GoodBengCour16}. Sequential data is ordered in time, such as text or audio.
 RNNs can learn long-range dependencies between different parts of the input sequence, which makes them well-suited for tasks such as machine translation, text summarization, and question answering.
 The motivation for RNNs comes from human language being sequential by nature; therefore, sequential dependencies must be handled.
 
@@ -176,7 +51,8 @@ The computation of output sequence $\mathbf{y} = \{y_0, ..., y_n\}$ from an inpu
     \item For time step $t$, first hidden state $h_t$ is obtained using the formula $h_t = f(W_hh_{t-1} + W_ix_t)$. Then, the output is computed as $y_t = W_oh_t$
 \end{enumerate}
 Note that the output sequence has the same length as the input sequence, which is useful for sequence tagging problems.
-However, RNNs can also be used for sequence classification, in which case only the last hidden state is considered, or the encoder-decoder setup can be used in which one network is used to encode the sequence and the second one is used to generate the output which can therefore be of different length.
+However, RNNs can also be used for sequence classification, in which case only the last hidden state is considered, or the encoder-decoder setup can be used in which one network is used to encode the sequence.
+The second one generates the output, which can be of different lengths.
 
 \paragraph{RNN cell improvements}
 Vanilla RNNs are difficult to train and often fail to memorize long-term dependencies correctly.
@@ -189,11 +65,11 @@ NLP models often employ \emph{bidirectional} RNNs to improve modeling capabiliti
 \paragraph{Training RNNs}
 RNNs are trained using a technique called Backpropagation Through Time \cite{werbos1990backpropagation}.
 Backpropagation Through Time is a method for training neural networks that deal with sequential data.
-The basic idea is to break the sequence into a number of time steps and then train the network on each time step individually.
+The basic idea is to break the sequence into several time steps and then train the network on each time step individually.
 
 \paragraph{Encoder-Decoder RNNs with attention}
 The encoder-decoder RNN is useful for text-generation tasks like summarization or machine translation.
-However, it is very difficult to train RNN on longer sequences.
+However, it isn't easy to train RNN on longer sequences.
 Therefore, improvements were proposed \cite{bahdanau2014neural,luong-etal-2015-effective} that allow the decoder network to attend to the input sequence and bypass the need to memorize all the information in the hidden state.
 
 \subsection{Transformer}
@@ -220,9 +96,9 @@ The original Transformer architecture comprises an encoder and a decoder, depict
 The encoder takes the input sequence and produces a sequence of hidden representations.
 The decoder then takes these hidden representations and produces the output sequence.
 The attention mechanism is used at both the encoder and decoder to allow the model to use different parts of the input sequence when producing the output sequence.
-Depending on the use case, the decoding process might be performed both as autoregressive or non-autoregressive.
+The decoding process might be autoregressive or non-autoregressive, depending on the use case.
 
-Both the encoder and decoder are basically a stack of self-attention layers.
+Both the encoder and decoder are a stack of self-attention layers.
 Each self-attention layer takes the hidden representations from the previous layer and produces a new set of hidden representations.
 
 The decoder also includes an attention component that allows the model to attend to the output sequence generated so far when producing the next token.
@@ -231,22 +107,22 @@ This allows the model to learn how to generate the output sequence consistently 
 The Transformer architecture has been shown to achieve state-of-the-art results on various natural language processing tasks. 
 Moreover, the Transformer architecture was used as a base for many models pre-trained on large natural language corpora, allowing efficient transfer of the learned information to downstream tasks and thus revolutionizing the NLP field.
 
-\section{Pretrained Language Models (PLMs)}
+\section{pre-trained Language Models (PLMs)}
 \label{background:plms}
 The appearance of PLMs marked a new era in NLP.
-Although Language Modeling with neural networks has been in the community focus for some time with transforming works such as  \citet{mikolov2010recurrent,mikolov2013distributed}, it was not until RNN-based models such as ELMo \cite{peters-etal-2018-deep} and ULMFiT \cite{howard-ruder-2018-universal} were proposed that we were able to create PLMs that could be finetuned for a variety of tasks with comparably low data requirements.
+Although Language Modeling with neural networks has been in the community focus for some time with transforming works such as  \citet{mikolov2010recurrent,mikolov2013distributed}, it was not until RNN-based models such as ELMo \cite{peters-etal-2018-deep} and ULMFiT \cite{howard-ruder-2018-universal} were proposed that we were able to create PLMs that could be fine-tuned for a variety of tasks with comparably low data requirements.
 
 Shortly after ELMo, models based on the Transformer architecture started to appear, such as BERT for efficient language encoding \cite{devlin2019} or GPT for generation \cite{radford2018improving}.
 BERT introduced a novel approach to Transformer usage by employing only the encoder part of the original Transformer architecture.
-Importantly, BERT pretraining introduced the task of Masked Language Modeling, randomly masking some of the input tokens and reconstructing them correctly at the output.
+Importantly, BERT pre-training introduced the task of Masked Language Modeling, randomly masking some of the input tokens and reconstructing them correctly at the output.
 Additionally, BERT is trained to estimate the probability that two input sentences follow each other.
-These pretraining techniques make BERT great at encoding natural language inputs into useful representations.
+These pre-training techniques make BERT great at encoding natural language inputs into useful representations.
 GPT, on the other hand, consists only of Transformer decoder blocks.
 It is trained for next token prediction and can perform autoregressive Language Modeling.
-Therefore, GPT is a perfect candidate for a base model to be finetuned on language generation tasks, including data-to-text, summarization, etc.
+Therefore, GPT is a perfect candidate for a base model to be fine-tuned on language generation tasks, including data-to-text, summarization, etc.
 
 
-Both BERT and GPT showed great potential for finetuning downstream tasks and established themselves as strong baselines for many NLP tasks and benchmarks.
+Both BERT and GPT showed great potential for fine-tuning downstream tasks and established themselves as strong baselines for many NLP tasks and benchmarks.
 They are often referred to as \emph{foundational} models because of their language understanding and generation abilities and the potential to apply these abilities to various tasks.
 From a certain point of view, the usability of PLMs lies in the ability to create useful and contextual representations of input words and phrases, often called \emph{(word) embeddings}.
 This ability has been observed in the word2vec model \cite{mikolov2013distributed} and improved by ELMo~\cite{peters-etal-2018-deep}, BERT~\cite{devlin2019}, SBERT~\cite{reimers2019sentence} and others.
@@ -257,7 +133,7 @@ The NLP community largely adopted these models.
 
 \subsection{Large Language Models (LLMs)}
 The foundational models changed the NLP paradigm but still need substantial in-domain data to perform some tasks well.
-Moreover, finetuning those larger models requires more computational resources.
+Moreover, fine-tuning those larger models requires more computational resources.
 Therefore, more lightweight methods were proposed to adapt the models to downstream tasks, such as Transformer Adapters \cite{pfeiffer2020AdapterHub}.
 However, as researchers started to scale up the models with GPT-2 and GPT-3 leading the efforts \cite{radford2019language,brown2020language}, new abilities emerged \cite{wei2022emergent}.
 With model sizes exceeding billions of parameters, the large pre-trained Transformer decoders can perform many tasks that they were not explicitly trained for \cite{brown2020language}.
@@ -281,15 +157,15 @@ Consequently, even rather inexperienced users can instruct the model to accompli
 For this purpose, reinforcement learning techniques were explored \cite{ziegler2019fine,ouyang2022training}.
 Although these techniques proved to be quite effective, the process is still very demanding in collecting user feedback.
 Consequently, several datasets were proposed \cite{supernaturalinstructions,black2022gpt} that contain tasks like summarization, reasoning, etc. formulated using instructions in natural language and desired outputs.
-These datasets allow tuning of the models using reinforcement learning or supervised finetuning methods.
+These datasets allow tuning of the models using reinforcement learning or supervised fine-tuning methods.
 
-\paragraph{Prompt engineering vs. LLM finetuning}
+\paragraph{Prompt engineering vs. LLM fine-tuning}
 The in-context learning approach has great advantages because it makes it possible to obtain great performance from LLMs by simply formulating the task and desired output structure in the LLM input (i.e. prompt).
-Although this approach might be very efficient for some tasks, especially those that are well described in the corpora available to the LLM during training \cite{wei2022emergent}, some more specific tasks might yield better results after finetuning of the model \cite{tu-etal-2022-prompt}.
-However, the LLM finetuning process is quite demanding in terms of computational resources.
+Although this approach might be very efficient for some tasks, especially those that are well described in the corpora available to the LLM during training \cite{wei2022emergent}, some more specific tasks might yield better results after fine-tuning of the model \cite{tu-etal-2022-prompt}.
+However, the LLM fine-tuning process is quite demanding in terms of computational resources.
 Therefore, alternative approaches were proposed, such as LoRA \cite{hu2021lora} or Transformer Adapters \cite{pfeiffer2020AdapterHub}.
-These approaches make LLM finetuning much more accessible.
-In general, both finetuning and in-context learning can offer great performance and be beneficial in certain situations~\cite{mosbach-etal-2023-shot}.
+These approaches make LLM fine-tuning much more accessible.
+In general, both fine-tuning and in-context learning can offer great performance and be beneficial in certain situations~\cite{mosbach-etal-2023-shot}.
 
 \section{Variational autoencoders}
 \label{02:sec:vae}
@@ -393,8 +269,8 @@ The LAVA framework~\cite{lubis-etal-2020-lava} focuses on learning latent variab
 To achieve this, they employ VAE-based model architecture.
 The architecture comprises an RNN utterance encoder, VAE module, and RNN decoder.
 They train the model in multiple stages and different variants.
-Specifically, they first pretrain the encoder module using an autoencoding objective.
-Then, they use the pretrained decoder and train an additional encoding module for the next response prediction.
+Specifically, they first pre-train the encoder module using an autoencoding objective.
+Then, they use the pre-trained decoder and train an additional encoding module for the next response prediction.
 In the end, they use reinforcement learning to tune the model parameters further.
 Formally, the authors first train an encoder-decoder network with an autoencoding objective version of ELBo parameterized by $\phi$.
 \begin{equation}
@@ -406,7 +282,7 @@ Then, they train the response generation network parameterized by $\theta$ using
     \mathbb{L}_{lite}(\theta) = \mathbb{E}_{q_{\theta}(\mathbf{z}|\mathbf{c})}[\log~p_{\theta}(\mathbf{x}|\mathbf{z})] - \beta\mathrm{KL}(q_{\theta}(\mathbf{z}|\mathbf{c})||p(\mathbf{z}))
 \end{equation}
 where $\mathbf{c}$ is a sequence of utterances representing the dialogue context.
-For the second step, the decoder network $p_{\theta}$ is initialized by pretrained $p_{\phi}$.
+For the second step, the decoder network $p_{\theta}$ is initialized by pre-trained $p_{\phi}$.
 
 \section{Memory Networks}
 \label{02:sec:mem_nn}
@@ -440,14 +316,15 @@ When given text input, such a basic model can save each text memory into a new m
 Therefore, old memories are not updated, and new inputs are stored sequentially.
 The most interesting components of this simple text model are $O$ and $R$.
 The $O$ module scores the saved memory vectors given text input $x$ and subsequently retrieves $k$ supporting entries with the highest scores from the memory.
-To produce a response, the $R$ module takes the input $x$ and $k$ retrieved memories and generates an output either by copying one of the memories or truly generating new outputs, for example, with an auto-regressive RNN decoder. 
+To produce a response, the $R$ module takes the input $x$ and $k$ retrieved memories.
+It generates an output by copying one of the memories or creating new outputs, for example, with an auto-regressive RNN decoder. 
 
 \subsection{Multi-hop end-to-end MemNN}
 The MemNN architecture's disadvantage is that it requires supervision at each layer during training, as pointed out by \citet{sukhbaatar2015end}.
 In this work, the authors address this problem and present a fully end-to-end trainable memory network model, which we call \emph{e2eMemNN}.
 In the e2e MemNN, we input a set of vectors $x$ to be stored in the memory and a query $q$.
 Each input $x_i$ is then embedded with two distinct embedding functions $E_m$ and $E_c$ to obtain a memory entry $m_i$ and corresponding output embedding $c_i$, respectively.
-The query $q$ is then embedded as well with the different function $E_q$ to obtain query embedding $u$.
+The query $q$ is then embedded with the different function $E_q$ to obtain query embedding $u$.
 
 \begin{figure}[t]
     \centering
@@ -458,7 +335,7 @@ The query $q$ is then embedded as well with the different function $E_q$ to obta
 
 Upon embedding the inputs, a memory distribution $p$ is computed as a match between $u$ and each memory $m_i$ as $softmax (u^Tm_i)$.
 The memory distribution $p$ is then used to create an output $o$ computed as a weighted sum over the output embeddings $\sum_i p_ic_i$.
-The output $o$ is then used to produce the final answer, which can be a categorical label or textual response generated with an auto-regressive model.
+The output $o$ is then used to produce the final answer, a categorical label or textual response generated with an auto-regressive model.
 
 The authors also introduce a multi-layer version of this model.
 In the multi-layer version, each layer $k$ has distinct embedding matrices $E^k_m$ and $E^k_c$. The output $o_k$ from layer $k$ is used to form input query embedding $u_{k+1}$ to the layer $k+1$: $u_{k+1} = u_k + o_k$.
@@ -480,6 +357,156 @@ Otherwise, the next token is chosen according to the memory distribution.
 In other words, the model uses the RNN state at each generation step to decide whether to copy something from memory (conversation history + knowledge base info) or generate an arbitrary new token from vocabulary distribution.
 This way, the model can use information from the past effectively.
 
+\section{Dialogue System implementations}
+\label{02:ds-background}
+\begin{table*}[tp]
+\small
+\setlength\fboxsep{2pt}
+        \centering
+        \begin{tabular}{rll}
+        \textbf{\texttt{USER:}} & \textit{\texttt{I would like a cheap restaurant.}} & \textbf{\texttt{\colorbox{pastelyellow}{inform}(\colorbox{lightblue}{price}=\colorbox{pastelgreen}{cheap})}} \\
+        \textbf{\texttt{SYSTEM:}} & \textit{\texttt{Golden plate is cheap.}} & \textbf{\texttt{\colorbox{pastelyellow}{inform}(\colorbox{lightblue}{name}=\colorbox{pastelgreen}{Golden plate})}} \\
+        \hdashline[1.5pt/2pt]
+        \textbf{\texttt{USER:}} & \textit{\texttt{What is the cuisine?}} & \textbf{\texttt{\colorbox{pastelyellow}{request}(\colorbox{lightblue}{cuisine})}} \\
+        \textbf{\texttt{SYSTEM:}} & \textit{\texttt{They serve chinese food.}} & \textbf{\texttt{\colorbox{pastelyellow}{inform}(\colorbox{lightblue}{cuisine}=\colorbox{pastelgreen}{chinese})}} \\
+        \hdashline[1.5pt/2pt]
+        \textbf{\texttt{USER:}} & \textit{\texttt{Sounds good. Bye!}} & \textbf{\texttt{\colorbox{pastelyellow}{goodbye}()}} \\
+        \textbf{\texttt{SYSTEM:}} & \textit{\texttt{Have a great day.}} & \textbf{\texttt{\colorbox{pastelyellow}{goodbye}()}} \\
+        \end{tabular}
+\normalsize
+        \caption{Example of task-oriented dialogue in the restaurant reservation domain. Utterance representations as dialogue acts are depicted on the right. Intents are highlighted in orange, slot names in blue, and respective values in green. Note that not all dialogue acts include slots and values}
+    \label{fig:das}
+\end{table*}
+First, we describe various approaches to constructing dialogue systems pipelines and provide insights about approaches to modeling the underlying processes.
+The architectures may vary greatly because of the varying use cases of Dialogue Systems (DS).
+We thus introduce a classification of dialogue systems that reflects the expected capabilities.
+There are multiple approaches to defining a dialogue system taxonomy in the literature.
+Here, we introduce the widely used classification scheme \cite{jurafsky2000speech}.
+\begin{enumerate}
+    \item \textbf{Question Answering (QA)} - Although sometimes not mentioned in the context of dialogue systems, the QA task can be seen as a simple conversation. A QA system's main task is to answer the user's questions.
+    The topics may vary; good understanding and knowledge representation are essential for this task.
+    The dialogues are usually quite simple and often consist of just one question and the respective answer.
+    \item \textbf{Task-oriented DS} - In this setting, the system's goal is to complete a task based on the user's instructions.
+    The successful completion may depend on several attributes the system has to learn from the user utterances.
+    The system is also allowed to ask for additional information if needed and typically works with some external source of information, such as a database.
+    Here, the dialogues are usually much more complex than in the QA setting, and dialogue context has to be considered.
+    \item \textbf{Chit-chat} - Sometimes, we might be interested in a system that can talk to the user casually and provide entertainment.
+    Such systems might be combined with task-oriented systems to serve as human-like virtual assistants or use the dialogue to advertise products, etc.
+    The context and knowledge base are also important, but in most cases, there is no well-defined task to be completed, so the evaluation is subjective.
+\end{enumerate}
+
+Another way of classifying the dialogues considers their domain of operation.
+\textbf{Single-domain} systems can work only in one topic area, e.g. public transport or restaurant information, whereas \textbf{multi-domain} systems can handle multiple domains.
+These types of systems cannot give meaningful answers outside the domains they're trained on.
+A dialogue system is considered \textbf{open-domain} if it can have a conversation not limited to a predefined set of domains.
+In practice, this is achievable only to some extent since the knowledge base of the program is always limited.
+However, the systems can cover many domains with internet access and smart information retrieval methods.
+
+Here, we focus on the task-oriented DS and discuss it more deeply.
+From the domain perspective, task-oriented DS are usually single or multi-domain systems.
+Open-domain is not often the case, at least in the research community.
+We can see a task-oriented dialogue as a slot-filling task.
+Task-oriented dialogue systems are widely used for various applications, such as customer service, personal assistance, and information retrieval. These systems aim to assist users in accomplishing specific tasks by engaging in a natural language conversation. 
+That means we have a predefined set of semantic \textit{slots} that must be filled with the right \textit{values}.
+Each utterance in the task-oriented dialogue is considered an action that potentially changes the state of the conversation.
+Such actions can be represented using \textit{Dialogue Acts (DA)}\cite{core1997coding}.
+To define the Dialogue Act, we first must introduce the concept of \emph{slots} and \emph{intents}.
+To represent the meaning of user utterances, annotation based on \emph{slots} is commonly employed \cite{young_pomdp-based_2013}. Slots, which describe semantic concepts relevant to completing the task, serve as a means of capturing the user's desires as well as facilitating the system's communication with the user. Typical examples of slots include \emph{area}, \emph{price}, and \emph{address}, among others. By tracking slots and their values throughout the dialogue, a dialogue system can maintain a \emph{dialogue state}, allowing it to plan the next actions \cite{williams2013dialog} effectively. The dialogue state represents explicitly all the important knowledge known to the system at a specific point in the dialogue. Consequently, it can be utilized to communicate with external sources of information and data, such as databases, structured knowledge bases, or various APIs, to provide users with accurate and relevant information.
+Intent describes the user's intention expressed by a respective utterance.
+In other words, intent represents what the user wants and what his wish is.
+Slots describe attributes of this wish and ground it to an ontology.
+
+DA is a tuple consisting of \textit{intent} and optionally also \textit{slot} and the corresponding \textit{value}.
+If multiple slot values are present, all are considered to have the same intent.
+
+An example dialogue with respective DA representation is depicted in Table \ref{fig:das}.
+Most dialogue system modules for limited domains can be implemented by designing a set of rules and templates.
+Such systems can yield satisfying results in some use cases.
+Nevertheless, they are inflexible and generally not considered promising from the research point of view.
+
+\subsection{Dialogue System Architectures}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.80\textwidth]{images/pipeline.png}
+    \caption{Overall architecture of task-oriented dialogue system pipeline. The data flow is outlined with arrows. This work does not discuss ASR and TTS modules (depicted in gray), often included with the rest of the components.}
+    \label{fig:overall}
+\end{figure}
+A typical approach to task-oriented DS implementation is to create a modular system with several modules that handle the conversation flow together.
+An example of such architecture is depicted in Figure \ref{fig:overall}
+We shortly discuss the responsibilities of each component:
+\begin{itemize}
+    \item \textbf{Natural Language Understanding (NLU)} The purpose of NLU is to extract the meaning of input utterances in natural language and transform it into a structured representation, i.e., dialogue acts.
+    Basically, the NLU module has three subtasks.
+    (1) It has to determine the domain of the utterance, (2) detect the user intent, and (3) capture any slot values, if present.
+    \item \textbf{Dialogue State Tracking (DST)} Dialogue state keeps track of the dialogue history, effectively providing the necessary context.
+    Dialogue State Trackers update the state with correct values after each turn.
+    \item \textbf{Dialogue Policy} The core component of the DS is the dialogue policy.
+    Its responsibility is to decide which action the system should take at each turn.
+    In other words, Dialogue Policy's responsibility is to guide the dialogue to follow the desired path.
+    Dialogue policy and the DST component are sometimes called \emph{Dialogue Manager}.
+    \item \textbf{Natural Language Generation (NLG)} When the decision on a system action is made, the system needs to verbalize the action.
+    In other words, we need to create an utterance in natural language that expresses the information in the system's underlying representation.
+\end{itemize}
+
+The module-based approach is advantageous thanks to its good level of explainability.
+In case of low performance, we can track the respective modules' outputs and find the source of problems.
+On the other hand, error accumulation makes it difficult to recover from errors made by the modules early on in the pipeline.
+Another disadvantage is the way these systems are trained \cite{li-etal-2017-end}
+Each component requires specific data annotation.
+Thus, obtaining a dataset suitable for training all components can be difficult and costly.
+Also, the system design itself is more complicated since it requires the implementation of multiple models.
+Because of the drawbacks, many current research works focus on dialogue modeling end-to-end, i.e., using systems without explicit components that can be trained jointly.
+\label{02:delex}
+One of the commonly used concepts in end-to-end dialogue modeling is that of \emph{delexicalization} \cite{wen-etal-2015-stochastic}
+When using delexicalization, the slot values in the text of the utterances are replaced by placeholders.
+This addresses the problem of data sparsity because the model can learn just the important concepts and doesn't have to remember full ontology or use the correct values.
+Also, delexicalized values are better suited for interaction with external interfaces - we can fill (lexicalize) them later in a deterministic way to prevent the model from hallucinating incorrect values.
+However, delexicalization also suffers from several drawbacks.
+First, it is not straightforward to perform and requires ontology knowledge.
+Second, the inverted lexicalization process is sometimes difficult to implement and might require complex rules.
+
+\subsection{Modeling TOD without supervision}
+\label{02:no-super}
+Here, we introduce some challenges concerning TOD modeling without external structured supervision.
+We discuss every step in the pipeline (Section~\ref{02:sec:basics}) separately.
+
+\paragraph{Natural Language Understanding (NLU)}
+Recall that the purpose of the NLU component in a traditional dialogue pipeline is to extract the meaning from input utterances in natural language and represent it in a structured way.
+Doing this unsupervised is challenging because we do not have the labeled data for training and do not know the structure itself in the first place.
+However, there are some possible ways to approach this problem.
+Works focus on automated annotation schema induction (\ref{sec:relwork-unsup}).
+Another way is to let the model handle NLU implicitly, i.e., effectively omitting the NLU step.
+
+\paragraph{Action Selection}
+One of the tasks of the dialogue manager is to select the next system action in a given situation.
+Most implemented systems implicitly perform this task, i.e., there is no explicit representation of the system action, just a surface realization (verbalized utterance).
+The reason for this option is that it requires less supervised labels, which might be hard and costly to obtain.
+However, modeling the information about system action can benefit the overall performance~\cite{DBLP:conf/aaai/LiangTCY20}.
+We explore the possibility of implicitly learning this information by introducing a network bottleneck in Chapter~\ref{chap:modeling}.
+
+\paragraph{Handling external interfaces}
+Task-oriented dialogue systems must provide accurate and complete information based on user requests, which requires interaction with external interfaces such as databases or some structured knowledge base.
+To communicate with such external entities, we typically need to design some representation with a predetermined structure so we can construct API queries, etc.
+This can be troublesome in a setting where no supervision in the form of labels is present.
+Without a known structure, it is very challenging to design the communication protocol with external sources of information.
+
+\subsection{Modeling a dialogue with Language Models (LMs)}
+\label{background:2stage-lm-modeling}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{images/augpt.png}
+    \caption{An explanation of two-stage LM-based dialogue model as described in \citep{kulhanek-etal-2021-augpt}}
+    \label{fig:augpt-2-stage}
+\end{figure}
+The pre-trained LMs can generate fluent and natural-sounding text and work with structured data.
+It is desirable to leverage these properties for end-to-end dialogue modeling.
+However, it's not a straightforward application.
+Task-oriented dialogues require interaction with external interfaces, so there is a need to have some intermediate structured representation 
+to allow this interaction.
+A common approach (depicted in Figure~\ref{fig:augpt-2-stage}), pioneered in \citep{lei2018sequicity}, proposes to split the generation into two steps: (1) belief state generation and (2) response generation.
+This allows us first to decode a structured representation that can be used to interact with external interfaces and extend the context.
+In the subsequent step, the model has all the needed information in the input and can generate the final response.
+
 \section{Datasets}
 \label{02:sec:input-data-desc}
 We describe some of the most prominent datasets we use for our experiments.
@@ -487,7 +514,7 @@ Most of them are largely used in the dialogue community and provide common bench
 All these datasets have several task-oriented dialogue properties in common that define the conversation according to \cite{young_pomdp-based_2013}:
 \begin{enumerate}
 \item \textbf{Domain(s)} define the topic (or range of topics) which are mentioned in the dialogue. There can be several domains per dialogue.
-\item \textbf{Task} -- the users in each dialogue are attempting to reach a certain goal (such as booking a restaurant or finding a tourist attraction).
+\item \textbf{Task} -- the users in each dialogue attempt to reach a certain goal (such as booking a restaurant or finding a tourist attraction).
 \item \textbf{Turns} We consider \emph{turn-taking} dialogues, i.e.\ the participating sides exchange utterances alternately.
 One such utterance exchange is called a dialogue turn.
 Utterance is considered the linguistic realization of the speaker's thoughts and will. It can be spoken or written. 
@@ -501,7 +528,7 @@ Typically, we define \emph{inform} and \emph{request} slots (Table~\ref{02:tab:i
     \centering
     \begin{tabular}{l|l}
     \toprule
-         \textbf{User} & \texttt{I am looking for a {\color{cyan!80!yellow!80!black!100 }chinese} restaurant} \\
+         \textbf{User} & \texttt{I am looking for a {\color{cyan!80!yellow!80!black!100 } Chinese} restaurant} \\
          \textbf{System} & \texttt{The Golden Dragon is a nice place in the South} \\
          \textbf{User} & \texttt{Please, give me their {\color{orange!50!yellow!90!black!100!}phone number} and {\color{orange!50!yellow!90!black!100!}address}} \\
          \bottomrule
@@ -509,7 +536,7 @@ Typically, we define \emph{inform} and \emph{request} slots (Table~\ref{02:tab:i
     \caption{An illustration of the difference between {\color{cyan!80!yellow!80!black!100 }\textbf{inform}} and {\color{orange!50!yellow!90!black!100!}\textbf{request}} slots.}
     \label{02:tab:inf-req}
 \end{table}
-The intent represents the user intention, i.e., the sub-goal that the user wants to achieve with a particular utterance.
+The intent represents the user's intention, i.e., the sub-goal that the user wants to achieve with a particular utterance.
 For an example of dialogue act annotation, we refer to Figure~\ref{fig:das} in Section~\ref{02:ds-background}.
 Slots represent the attributes that instantiate the dialogue act.
 Each domain is associated with certain intents; each intent can be combined with multiple slots. A slot, however, can be used by multiple intents as well.
@@ -523,7 +550,7 @@ It has been released in several versions; the standard most commonly used nowada
 MultiWOZ 2.2 is an improved version of the original dataset by (1) fixing some annotation errors, inconsistencies, and ontology issues and (2) adding slot span annotations for utterances.
 MultiWOZ contains over 10,000 annotated dialogues and spans multiple domains - restaurant and hotel reservations, tourist attraction search, taxi and train reservations.
 While some of the dialogues use only a single domain, most of them are multi-domain.
-For example, after finding a restaurant, the user also asks for a hotel to stay at and orders a taxi.
+For example, after finding a restaurant, the user also asks for a hotel and orders a taxi.
 This makes the dataset more relevant to real-world use cases.
 
 The data were gathered via a crowd-sourcing Wizard-of-Oz scheme described in \cite{wen-etal-2017-wizard-of-oz}.
@@ -533,7 +560,7 @@ As MW is used most in our work, we provide further information on the data distr
 
 \paragraph{CamRest676} (\textbf{CR}) \cite{wen2016network} is another crowd-sourced dialogue corpus gathered via the Wizard-of-Oz scheme. CamRest, with its 676 conversations, is the smallest of the datasets used in this work, and it is also a single-domain dataset focused on helping users to find a restaurant in Cambridge, UK. 
 
-\paragraph{Schema-guided dialogue} (\textbf{SGD}) is a large (more than 20,000 dialogues) multi-domain (around 20 domains covered) dataset containing in total 45 API services based on a pre-defined schema. First, the data was collected via a simulator that interacts with the API services, and then the dialogues were paraphrased using crowd-sourcing. \\
+\paragraph{Schema-guided dialogue} (\textbf{SGD}) is a large (more than 20,000 dialogues) multi-domain (around 20 domains covered) dataset containing a total of 45 API services based on a pre-defined schema. First, the data was collected via a simulator that interacts with the API services, and then the dialogues were paraphrased using crowd-sourcing. \\
 
 \paragraph{ATIS} (\textbf{AT}) \cite{hemphill_atis_1990} contains utterances taken from conversations about flight searches and reservations. \footnote{There are multiple ATIS data versions available. We used one from \url{https://www.kaggle.com/siddhadev/atis-dataset-from-ms-cntk}.}
 
@@ -551,9 +578,9 @@ Although the number of dialogue datasets is quite big, and there is arguably a l
 We want the data to be used for two main purposes: training and evaluation.
 Both these aspects are influenced by the static nature of the data.
 Dialogue is a dynamic process that requires interaction.
-Hundreds of alternatives exist for a specific conversation that represents a certain information exchange with different phrasing, length, or turn ordering.
+Hundreds of alternatives exist for a conversation representing a certain information exchange with different phrasing, length, or turn ordering.
 All of this is impossible to capture in a static dataset.
-Therefore, dialogue modeling should somehow take this into consideration.
+Therefore, dialogue modeling should somehow consider this.
 A similar issue stems from the fact that there are multiple valid responses under a specific dialogue context, not only with respect to the phrasing but also considering dialogue acts.
 Consequently, model evaluation with these data tends to penalize generated responses that are meaningful and relevant but do not correspond to the ground truth found in the data.
 
@@ -625,7 +652,7 @@ Recently, some efforts were made to join these two approaches \cite{sun-etal-202
           & \texttt{]} \\
           \bottomrule
     \end{tabular}
-    \caption{A simplified example taken from the SMD corpus together with utterance-level annotations. Compared to MultiWOZ, some of the slot values are open, such as "avoid all heavy traffic"}
+    \caption{A simplified example taken from the SMD corpus with utterance-level annotations. Compared to MultiWOZ, some of the slot values are open, such as "avoid all heavy traffic"}
     \label{02:tab:smd_example}
 \end{table}
 \begin{figure}[ht]
@@ -646,7 +673,7 @@ Those metrics are described together with experiments in respective sections of 
     \begin{itemize}
         \item \textbf{$F_1$ Score} (F-score, F-measure)~\cite{goutte2005probabilistic} is a widely used metric to evaluate binary classification.
     To measure F1 score, we first compute the number of occurrences of True Positives (TP), False Positives (FP), and False Negatives (FN).
-    Subsequently we can compute Precision (P) and Recall (R) in the following way:
+    Subsequently, we can compute Precision (P) and Recall (R) in the following way:
     \begin{equation*}
         P = \frac{TP}{TP + FP}; R = \frac{TP}{TP + FN}
     \end{equation*}
@@ -674,7 +701,7 @@ For MultiWOZ, we use the standard evaluation of dialogue success as the ratio of
 The SGD dataset does not include goal annotation but contains information about the requested slots. Therefore, we compute SGD success rate as the proportion of dialogues in which (1) the system captures all the informed slots correctly and (2) all the requested slots are provided.
 For more details about the inform and request slots, we refer the reader to Section~\ref{02:sec:input-data-desc}
     \item  \textbf{BLEU score} \cite{papineni-etal-2002-bleu} is largely used to evaluate response generation in machine translation, summarization, and other tasks, including dialogue generation.
-    Although it has some flaws \cite{callison-burch-etal-2006-evaluating} and was designed mainly for corpus-based evaluation, it is widely used so it is desirable to measure it for comparison with other works.
+    Although it has some flaws \cite{callison-burch-etal-2006-evaluating} and was designed mainly for corpus-based evaluation, it is widely used, so it is desirable to measure it for comparison with other works.
 \end{itemize}
 
 There are multiple different criteria for dialogue systems evaluation.
@@ -686,16 +713,16 @@ It is also common to measure \textbf{Dialogue success rate}.
 However, it is not straightforward how to define dialogue success robustly.
 Many systems use user simulators to allow the employment of reinforcement learning techniques.
 In such scenarios, the user behavior is model-based and can be non-deterministic. Therefore, defining success is challenging.
-Usually, it is based on evaluating user and system dialogue acts, which relies on good and extensive data annotation.
+Usually, it is based on evaluating user and system dialogue acts, which rely on good and extensive data annotation.
 
 \subsection{Human Evaluation}
 Due to the mentioned challenges, \textbf{human evaluation} remains the best way to evaluate dialogue systems.
-Human evaluation plays a crucial role in developing and refining dialogue systems. This is because automated tools or metrics often fail to capture the nuanced responses and language variations inherent in human communication. 
+Human evaluation plays a crucial role in developing and refining dialogue systems. Automated tools or metrics often fail to capture the nuanced responses and language variations inherent in human communication. 
 
 Dialogue systems, including chatbots and virtual assistants, are directly designed for human interaction, making their performances depend heavily on how effectively they can understand and respond.
 Therefore, assessing their capabilities requires a human-like understanding of the conversations.
 
-Moreover, human evaluation is important to measure aspects that go beyond the correctness of the system's responses. For instance, the engagingness of the conversation or the appropriateness of the system's tone requires human judgment. Also, human evaluators can better identify and evaluate cultural and social aspects than automated methods.
+Moreover, human evaluation is important to measure aspects beyond the correctness of the system's responses. For instance, the engagingness of the conversation or the appropriateness of the system's tone requires human judgment. Also, human evaluators can better identify and evaluate cultural and social aspects than automated methods.
 
 While human evaluations are more time-intensive and costlier than automated ones, they offer a more detailed, insightful, and accurate assessment of the dialogue system's performance.
 Therefore, they are crucial for improving these systems to make them more user-friendly and effective for human interaction.

@@ -8,14 +8,14 @@ This approach makes it challenging to transfer the learned knowledge since all t
 This concern can be addressed by using end-to-end trainable models that can potentially transfer the knowledge in one step and therefore can be adjusted to different domains and use cases more easily.
 In the field of task-oriented dialogue, end-to-end implementations are dominated with sequence-to-sequence architectures based on Language Models \ref{relwork:end-to-end}.
 The LM based approaches have taken over the benchmarks \footnote{\url{https://github.com/budzianowski/multiwoz\#trophy-benchmarks}}, demonstrating SoTA performance.
-However, all of these competitive models are finetuned on a single training set.
+However, all of these competitive models are fine-tuned on a single training set.
 In this chapter, we raise a question how well these models are able to transfer the obtained skill of leading the dialogue to other domains.
 In other words, we want to discover if the models really learn useful skills that can be beneficial in other domains or if the demonstrated behavior merely reproduces the patterns seen in the training portion of the data.
 
 \section{AuGPT Model Description}
 We choose AuGPT model introduced by \citet{kulhanek-etal-2021-augpt}.
 The architecture utilizes GPT-2 model~\cite{radford2019language} that is used for both belief state prediction and response generation, following the work described in Section~\ref{relwork:end-to-end}.
-GPT-2 is a pretrained language model based on Transformer decoder, therefore it is suitable for modeling sequences in natural language.
+GPT-2 is a pre-trained language model based on Transformer decoder, therefore it is suitable for modeling sequences in natural language.
 AuGPT directly builds on the \emph{small} version of the model, resulting in 124M parameter model.
 Additionally, AuGPT introduces multiple training improvements.
 Instead of using solely the cross-entropy loss for language modelling, AuGPT adds the following objectives:
@@ -197,7 +197,7 @@ This is a problem if we assume to have a self-contained ontology that captures a
     \centering \small
     \begin{tabular}{cccccc}
       \toprule
-       pretraining & finetuning & ft-ratio & \textbf{Slot-F1} & \textbf{JGA} & \textbf{BLEU} \\
+       pre-training & fine-tuning & ft-ratio & \textbf{Slot-F1} & \textbf{JGA} & \textbf{BLEU} \\
         \midrule
        -- & SGD & 100\% & 0.59 & 0.21 & 28.17 \\
        -- & SGD & 10\% & 0.47 & 0.15 & 20.13 \\
