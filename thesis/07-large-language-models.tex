@@ -12,7 +12,7 @@ Undeniable, LLMs have transformed the NLP field,
 showing outstanding performance across many NLP benchmarks such as Winograd Challenge \cite{levesque2012winograd} or GLUE \cite{wang2018glue}.
 Instruction fine-tuning of LLMs can align the model outputs with human preferences \cite{ouyang2022training,supernaturalinstructions} and improve the LLMs' communication capabilities substantially.
 
-State-of-the-art LLMs are good at understanding user needs and capable of providing relevant answers.
+State-of-the-art LLMs are good at understanding user needs and can provide relevant answers.
 Consequently, we have seen many chatbot applications both inside and outside academia (ChatGPT\footnote{\url{https://openai.com/blog/chatgpt}}, Claude\footnote{\url{https://www.anthropic.com/index/introducing-claude}}or BARD\footnote{\url{https://blog.google/technology/ai/bard-google-ai-search-updates/}}) which build upon the raw power of instruction-fine-tuned LLMs.
 
 \section{Motivation}
@@ -491,7 +491,7 @@ Most of these errors can also be fixed in postprocessing -- for example, we can 
 \paragraph{Inherent errors,} on the other hand, are likely not easily fixable by prompt modifications.
 They are not distributed evenly across the tested models and seem to constitute a more challenging problem.
 
-Perhaps the most important error, common to all the models, is hallucination, i.e., the models output responses not grounded in the context (such as offering entities that are not included in the database). This happens in about 10-20\% of the inspected dialogues.
+Perhaps the most important error, common to all the models, is hallucination, i.e., the model's output responses not grounded in the context (such as offering entities that are not included in the database). This happens in about 10-20\% of the inspected dialogues.
 Some models (\emph{GPT-NeoXT, OPT-IML}) tend to generate more content than requested.
 This happens in more than 50\% of their failed dialogues.
 This sometimes means continuing the conversation for a few more turns (including hallucinating user turns), but the models also often generate unrelated text or even code snippets.

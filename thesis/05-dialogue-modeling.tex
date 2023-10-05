@@ -19,10 +19,10 @@ There are multiple challenges to overcome when we try to model TOD without guida
 This chapter addresses the challenges of action selection and interface interaction.
 To enable the model to interact with external sources of information via API, we annotated points in the training dialogues where interaction with an external API is needed.
 Therefore, the model can learn to construct the database queries ad-hoc using special outputs.
-A turn-level annotation of database queries would represent a similar amount of annotation used in supervised training and thus would not lead to our desired setting, where the model is trained without labeled data.
+A turn-level annotation of database queries would represent a similar amount of annotation used in supervised training. It thus would not lead to our desired setting, where the model is trained without labeled data.
 To support database access while avoiding costly turn-level annotation, we follow \citet{bordes2016learning} and 
 insert sparse database queries and results into the training data, forming special dialogue turns.
-Specifically, we identify turns that require database results, e.g.\ to inform about entity attributes or a number of matching entities, and insert a query-result pair in front of those turns (see Table~\ref{05:tab:example}). We argue that this is the minimal level of supervision required to operate a task-oriented system with database access successfully; it is significantly lower than the full dialogue-state supervision used by most systems.
+Specifically, we identify turns that require database results, e.g.\ to inform about entity attributes or the count of matching entities, and insert a query-result pair in front of those turns (see Table~\ref{05:tab:example}). We argue that this is the minimal level of supervision required to operate a task-oriented system with database access successfully; it is significantly lower than the full dialogue-state supervision used by most systems.
 Moreover, this kind of supervision is readily available in a realistic setting (such as using call center recordings and agent activity logs).
 In practice, database queries are only inserted for 24\% turns on average.
 Per-dataset query counts are 36\%, 23\%, and 11\% for CamRest676, MultiWOZ, and SMD, respectively.
@@ -53,7 +53,7 @@ Database query results can be stored and used in follow-up questions to maintain
 \end{table*}
 
 \section{Task-Oriented dialogue with TO-VRNN}
-The VRNN model architecture is designed to model sequences of observations coupled with latent states.
+The VRNN model architecture (see Section~\ref{02:sec:vrnn}) is designed to model sequences of observations coupled with latent states.
 It's a generative model that can learn the conditional generative distribution of observations given the state.
 Moreover, although VRNN does not require a fixed set of states, it can be adjusted to model discrete states.
 The VRNN is great for modeling the discrete decision processes behind conversation exchanges, thanks to the above-mentioned properties.
@@ -71,7 +71,7 @@ We extend the VRNN model introduced in Chapter \ref{02:sec:vrnn} to fit the task
 Figure \ref{05:fig:vrnn_method} depicts our model's architecture.
 Following the original VRNN architectures (Section~\ref{02:sec:vrnn}), we employ a turn-level RNN that summarizes the context in its hidden state.
 In each dialogue turn, we model user and system utterances with separate autoencoders to account for different user and system behaviors.
-This contrasts with the original model described in~\ref{02:sec:vrnn} which contains only one autoencoder in every time step.
+This contrasts with the original model described in~\ref{02:sec:vrnn}, which contains only one autoencoder in every time step.
 We can divide the processing of one turn into two stages.
 First, the user utterance, modeled with a standard vanilla autoencoder, is processed, and the last encoder hidden state $\varphi^u_{enc}(\mathbf{x}^t_u)$ provides the encoded representation used as an input for the next stage.
 
@@ -154,7 +154,8 @@ For the RNN components, we use a dropout probability of $0.3$.
 The total model size is 7,047,529 parameters.
 The training time is 3-8 hours using one GPU, depending on the dataset.
 The training is sensitive to some parameters, such as the \nobreak{Gumbel-softmax} temperature, but otherwise, the model trains easily using conventional optimization methods.
-
+To address the issue of posterior collapse (see Section~\ref{background:vae-problems}), we experiment with various approaches to KL annealing.
+In our experiments, we use a liner annealing schedule, increasing the $\beta$ annealing coefficient from 0 $\rightarrow$ 1.
 \paragraph{Metrics}
 We use common metrics described in Table~\ref{05:automatic_metrics}).
 To evaluate the quality of individual responses, we compute BLEU score and perplexity on the test set.
@@ -452,6 +453,8 @@ Since we are interested in latent representations, VAE architecture is a good op
 VAEs for hierarchical architecture were successfully applied in the computer vision domain \cite{vahdat2020nvae,li2020progressive}.
 We take inspiration from these works and apply the hierarchical variational autoencoder architecture to the dialogue domain.
 We hypothesize that this structure will allow the model to work with different levels of abstraction and thus represent the decision process more accurately and with greater detail.
+Note that there is no guarantee that the learned representations in different layers will also differ.
+We want to explore this question to see if the model can learn to leverage this structure by itself. 
 
 \subsection{HVTOD model architecture}
 \begin{figure}[h]
@@ -551,7 +554,7 @@ We adjust the number so that each configuration effectively has the same dimensi
 In the supervised training stage, we represent the belief state as a one-hot discrete vector corresponding to specific slots.
 
 \subsubsection{HVTOD performance}
-We evaluate the performance of HVTOD with a different number of layers and with or without the placeholder loss for dialogue response generation in unsupervised (Table~\ref{05:tab:hvtod-unsup}) and supervised (Tanle~\ref{05:tab:hvtod-ft}) setting.
+We evaluate the performance of HVTOD with a different number of layers and with or without the placeholder loss for dialogue response generation in unsupervised (Table~\ref{05:tab:hvtod-unsup}) and supervised (Table~\ref{05:tab:hvtod-ft}) setting.
 All variants are first trained with an autoencoding objective.
 We also evaluate the model quality after pre-training in Table~\ref{05:tab:hvtod-ae}.
 
@@ -559,10 +562,15 @@ Note that when we increase the number of layers, we decrease the dimension of th
 Therefore, all the compared models have the same number of parameters.
 
 \paragraph{Autoencoding}
-We can see that in the autoencoding setting (Table~\ref{05:tab:hvtod-ae}), the increased number of layers helps improve the performance concerning dialogue success and BLEU.
+We can see that in the autoencoding setting (Table~\ref{05:tab:hvtod-ae}), the increased number of layers helps to improve the performance concerning dialogue success and BLEU.
 Moreover, the dialogue success is also improved by including our additional placeholder loss.
 
-\begin{table}[]tp
+\paragraph{Supervised fine-tuning}
+The results of supervised fine-tuning are given in Table~\ref{05:tab:hvtod-ft}.
+This way, we achieve much higher scores, as expected.
+Also, we can see that the placeholder loss contributes to the overall model performance as does the number of used layers.
+
+\begin{table}[tp]
     \centering
     \begin{tabular}{c|c|c|c}
     \toprule
@@ -580,7 +588,7 @@ Moreover, the dialogue success is also improved by including our additional plac
     \label{05:tab:hvtod-unsup}
 \end{table}
 
-\paragraph{Response generation}
+\paragraph{Unsupervised response generation}
 For the unsupervised response generation (Table~\ref{05:tab:hvtod-unsup}), we observe the benefits of using the placeholder loss when only one-level hierarchy is used.
 Surprisingly, we don't observe a similar effect when more layers are employed.
 Nevertheless, there are performance gains when using placeholder loss in the supervised setting (Table~\ref{05:tab:hvtod-ft}).
@@ -660,3 +668,8 @@ This suggests that it might be useful to enforce disentanglement of the latent v
 \label{05:fig:ft-layers}
 \end{figure}
 
+\subsection{Conclusion}
+In this section, we introduced HVTOD, a hierarchical variational model for task-oriented dialogue.
+We wanted to assess the contributions of hierarchical structure to the overall model performance.
+Although the layer representations are not guaranteed to be distinct, we show that the model can leverage the benefits introduced by hierarchical structure since the variant with more layers outperforms the baseline (1-layer) variant with the same number of parameters.
+The visualizations of latent spaces also uncover that the learned representations are structurally different.

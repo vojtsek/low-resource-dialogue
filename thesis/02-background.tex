@@ -162,13 +162,25 @@ These datasets allow tuning of the models using reinforcement learning or superv
 \paragraph{Prompt engineering vs. LLM fine-tuning}
 The in-context learning approach has great advantages because it makes it possible to obtain great performance from LLMs by simply formulating the task and desired output structure in the LLM input (i.e. prompt).
 Although this approach might be very efficient for some tasks, especially those that are well described in the corpora available to the LLM during training \cite{wei2022emergent}, some more specific tasks might yield better results after fine-tuning of the model \cite{tu-etal-2022-prompt}.
-However, the LLM fine-tuning process is quite demanding in terms of computational resources.
+However, the LLM fine-tuning process is quite demanding regarding computational resources.
 Therefore, alternative approaches were proposed, such as LoRA \cite{hu2021lora} or Transformer Adapters \cite{pfeiffer2020AdapterHub}.
 These approaches make LLM fine-tuning much more accessible.
-In general, both fine-tuning and in-context learning can offer great performance and be beneficial in certain situations~\cite{mosbach-etal-2023-shot}.
+In general, fine-tuning and in-context learning can offer great performance and be beneficial in certain situations~\cite{mosbach-etal-2023-shot}.
 
 \section{Variational autoencoders}
 \label{02:sec:vae}
+In neural network training, the network learns to create internal data representations to accomplish a given task.
+In the case of autoencoders, the task is to encode an input $\mathbf{x}$ in a way that allows for its reconstruction into the original form.
+The autoencoder model consists of an encoder function $\varphi^{enc}$, which encodes an input $\mathbf{x}$ into a latent representation $\mathbf{z}$, and a decoder $\varphi^{dec}$, which models the conditional re-generation probability $p(\mathbf{x}|\mathbf{z})$.
+In the case of sequence autoencoders, both the encoder and decoder can be realized with an RNN.
+However, vanilla autoencoders often fail to extract global semantic features of natural language sequences \cite{bowman2015generating}; therefore, adjustments must be made to obtain better representations.
+The technique proposed by \citet{kingma2013auto} uses the Variational Autoencoder (VAE) framework to tackle this issue.
+The architecture is modified so that $\varphi^{enc}$ represents a recognition model $q(\mathbf{z}|\mathbf{x})$ which parameterizes an approximate posterior distribution over $\mathbf{z}$.
+Figure~\ref{fig:vae-vs-ae} illustrates the differences.
+VAEs impose prior distribution on the latent variable $\mathbf{z}$, which acts as regularization during training and makes drawing samples from $q$ possible.
+Consequently, the VAE latent space is smooth because it is possible to interpolate between two points and obtain reasonable representations.
+The latent space structure is depicted schematically in Figure \ref{fig:vae}.
+The modeled distributions are typically Gaussian; the prior is the standard normal distribution $N(0, 1)$.
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.46\textwidth]{images/VAE.png}
@@ -181,24 +193,11 @@ In general, both fine-tuning and in-context learning can offer great performance
     \caption{Illustration of differences between the architectures of a vanilla autoencoder (a) and its variational version (b). The VAE encodes the input by predicting parameters of probabilistic distribution from which the data are drawn rather than encoding the data directly into a hidden representation, as done with the vanilla autoencoder.}
     \label{fig:vae-vs-ae}
 \end{figure}
-In neural network training, the network learns to create internal data representations to accomplish a given task.
-In the case of autoencoders, the task is to encode an input $\mathbf{x}$ in a way that allows for its reconstruction into the original form.
-The autoencoder model consists of an encoder function $\varphi^{enc}$, which encodes an input $\mathbf{x}$ into a latent representation $\mathbf{z}$, and a decoder $\varphi^{dec}$, which models the conditional re-generation probability $p(\mathbf{x}|\mathbf{z})$.
-In the case of sequence autoencoders, both the encoder and decoder can be realized with an RNN.
-However, vanilla autoencoders often fail to extract global semantic features of natural language sequences \cite{bowman2015generating}; therefore, adjustments must be made to obtain better representations.
-The technique proposed by \citet{kingma2013auto} uses the Variational Autoencoder (VAE) framework to tackle this issue.
-The architecture is modified so that $\varphi^{enc}$ represents a recognition model $q(\mathbf{z}|\mathbf{x})$ which parameterizes an approximate posterior distribution over $\mathbf{z}$.
-Figure~\ref{fig:vae-vs-ae} illustrates the differences.
-VAEs impose prior distribution on the latent variable $\mathbf{z}$, which acts as regularization during training and makes drawing samples from $q$ possible.
-Consequently, the VAE latent space is smooth because it is possible to interpolate between two points and obtain reasonable representations.
-The latent space structure is depicted schematically in Figure \ref{fig:vae}.
-The modeled distributions are typically Gaussian; the prior is the standard normal distribution $N(0, 1)$ in that case.
-
 We can realize the encoder and decoder modules in VAE using neural networks.
 However, there is a drawback regarding the implementation of sampling.
 The sampling operation is not differentiable and, therefore, cannot be trained using standard approaches.
 A solution to this problem is to use the \textit{reparameterization trick} \cite{kingma2013auto}.
-The reparameterization trick exploits the fact that a random variable under a certain conditional distribution can be expressed as a deterministic transformation of some other variable with an independent marginal distribution.
+The reparameterization trick exploits that a random variable under a certain conditional distribution can be expressed as a deterministic transformation of some other variable with an independent marginal distribution.
 Distributions that allow us to do such a transformation include \textit{Gaussian, Logistic} or \textit{Gumbel}~\cite{jang2016categorical}.
 
 \subsubsection{VAE latent space discretization}
@@ -214,7 +213,7 @@ Another approach is to use the Gumbel-softmax distribution \cite{jang2016categor
 \begin{figure}
     \centering
     \includegraphics{images/DVRNN.pdf}
-    \caption{A schematic architecture of the VRNN model. The input in time step $t$ is used as input to the variational autoencoder (black dotted line). The VAE prior is conditioned either on the previous hidden state (a) or previous latent variable $z_{t-1}$ (b) (red lines). To regenerate the output, the decoder from latent space is used (blue dashed line). Finally, the hidden state update is based on latent representation $z_t$, previous hidden state, and current input (solid black lines).}
+    \caption{A schematic architecture of the VRNN model. The input in time step $t$ is input to the variational autoencoder (black dotted line). The VAE prior is conditioned either on the previous hidden state (a) or previous latent variable $z_{t-1}$ (b) (red lines). To regenerate the output, the decoder from latent space is used (blue dashed line). Finally, the hidden state update is based on latent representation $z_t$, previous hidden state, and current input (solid black lines).}
     \label{fig:DVRNN}
 \end{figure}
 The VRNN model \cite{chung2015recurrent} exploits the idea of variational training to model sequences with latent states.
@@ -283,6 +282,19 @@ Then, they train the response generation network parameterized by $\theta$ using
 \end{equation}
 where $\mathbf{c}$ is a sequence of utterances representing the dialogue context.
 For the second step, the decoder network $p_{\theta}$ is initialized by pre-trained $p_{\phi}$.
+
+\subsection{Difficulties of the VAE training}
+\label{background:vae-problems}
+For text VAEs~\citep{bowman-etal-2016-generating}, the KL divergence term measured between the posterior and prior distributions often tends to zero.
+Consequently, the modeled latent space degrades, and the latent variables do not contain useful information.
+This phenomenon is called posterior collapse, where the model ignores the latent variables and solely focuses on the decoder for maximum likelihood estimation.
+To address this issue, several modifications were proposed.
+A common approach is to use \emph{warm-up} or \emph{annealing schedules}~\cite {fu-etal-2019-cyclical}.
+In this method, the weight of KL divergence in the loss function starts at zero and gradually increases to its maximum value over several epochs.
+This allows the decoder to learn useful information before the encoder starts learning the prior.
+Another method is called \emph{free bits}~\cite{li2019surprisingly}.
+This method decouples the optimization of the likelihood and the KL term.
+Each dimension in the latent space can use a fixed capacity (bits) to encode the data before the KL term is minimized.
 
 \section{Memory Networks}
 \label{02:sec:mem_nn}
@@ -548,7 +560,7 @@ We provide statistics about the dialogue datasets we use in this work in Table \
 \paragraph{MultiWOZ} (\textbf{MW}) is an established task-oriented dataset introduced by \cite{budzianowski-etal-2018-multiwoz}.
 It has been released in several versions; the standard most commonly used nowadays are MultiWOZ 2.1 and MultiWOZ 2.2.
 MultiWOZ 2.2 is an improved version of the original dataset by (1) fixing some annotation errors, inconsistencies, and ontology issues and (2) adding slot span annotations for utterances.
-MultiWOZ contains over 10,000 annotated dialogues and spans multiple domains - restaurant and hotel reservations, tourist attraction search, taxi and train reservations.
+MultiWOZ contains over 10,000 annotated dialogues and spans multiple domains - restaurant and hotel reservations, tourist attraction search, and taxi and train reservations.
 While some of the dialogues use only a single domain, most of them are multi-domain.
 For example, after finding a restaurant, the user also asks for a hotel and orders a taxi.
 This makes the dataset more relevant to real-world use cases.
@@ -664,8 +676,7 @@ Recently, some efforts were made to join these two approaches \cite{sun-etal-202
 
 
 \section{Evaluation metrics}
-\label
-{02:sec:eval_metrics}
+\label{02:sec:eval_metrics}
 Here, we provide a set of commonly used metrics to evaluate the quality of dialogue modeling and response generation.
 We also use some less common metrics for specific tasks.
 Those metrics are described together with experiments in respective sections of this work.
@@ -717,7 +728,7 @@ Usually, it is based on evaluating user and system dialogue acts, which rely on 
 
 \subsection{Human Evaluation}
 Due to the mentioned challenges, \textbf{human evaluation} remains the best way to evaluate dialogue systems.
-Human evaluation plays a crucial role in developing and refining dialogue systems. Automated tools or metrics often fail to capture the nuanced responses and language variations inherent in human communication. 
+Human evaluation plays a crucial role in developing and refining dialogue systems. Automated tools or metrics often fail to capture human communication's nuanced responses and language variations. 
 
 Dialogue systems, including chatbots and virtual assistants, are directly designed for human interaction, making their performances depend heavily on how effectively they can understand and respond.
 Therefore, assessing their capabilities requires a human-like understanding of the conversations.
