@@ -5,35 +5,37 @@
 
 \label{07:sec:intro}
 As described in the previous chapter, pre-trained Language Models perform very well in end-to-end dialogue modeling.
-Despite the success, using the widely used approach of fine-tuning pre-trained LM on a particular dataset still does not guarantee easy transferability of the learned knowledge.
-This might change if we use more powerful tools, such as 
+Despite this success, the widely used approach of fine-tuning pre-trained LM on a particular dataset still does not guarantee easy transferability of the learned knowledge.
 Large Language Models (LLMs) increased the model size by an order of magnitude compared to the previous generation of pre-trained LMs.
-Undeniable, LLMs have transformed the NLP field,
+Undeniably, LLMs have transformed the NLP field,
 showing outstanding performance across many NLP benchmarks such as Winograd Challenge \cite{levesque2012winograd} or GLUE \cite{wang2018glue}.
 Instruction fine-tuning of LLMs can align the model outputs with human preferences \cite{ouyang2022training,supernaturalinstructions} and improve the LLMs' communication capabilities substantially.
 
 State-of-the-art LLMs are good at understanding user needs and can provide relevant answers.
-Consequently, we have seen many chatbot applications both inside and outside academia (ChatGPT\footnote{\url{https://openai.com/blog/chatgpt}}, Claude\footnote{\url{https://www.anthropic.com/index/introducing-claude}}or BARD\footnote{\url{https://blog.google/technology/ai/bard-google-ai-search-updates/}}) which build upon the raw power of instruction-fine-tuned LLMs.
+Consequently, we have seen many chatbot applications both inside and outside academia (ChatGPT\footnote{\url{https://openai.com/blog/chatgpt}}, Claude\footnote{\url{https://www.anthropic.com/index/introducing-claude}} or BARD\footnote{\url{https://blog.google/technology/ai/bard-google-ai-search-updates/}}) which build upon the raw power of instruction-fine-tuned LLMs.
 
-\section{Motivation}
-Given the millions of daily interactions with LLM-based chatbots, the models can handle users' needs satisfactorily, at least to some extent.
-However, these chatbots are tuned using unstructured open-domain conversations.
-We aim to evaluate these systems concerning task-oriented dialogues, where the system has to follow a predetermined structure and handle external sources of information, such as APIs or databases.
-We raise the question of to what extent LLMs can handle these applications off-the-shelf, i.e., without fine-tuning.
-This approach, frequently referred to as \emph{in-context learning}, is a common way to work with LLMs and offers competitive performance.
-We choose to evaluate LLM performance in the task-oriented dialogue (TOD) setting,
-as it requires precise information handling for communicating with external APIs.
-Moreover, TOD systems output in-domain information with a predetermined structure and lend itself well to evaluation, thanks to pre-existing annotated data sets.
-We avoid fine-tuning techniques and focus on zero-shot or few-shot settings using in-context learning, as this approach has lower hardware requirements and barrier of entry and better flexibility or even performance in certain tasks \cite{su2022selective}.
-It is important to note, that we cannot exclude the possibility that some of the models were exposed to our selected datasets during training.
-However, evaluating this setting is important as the real-world use cases might largely rely on this approach.
-\todo{reference to discussion}
-
-In this chapter, we introduce an LLM-based TOD conversation pipeline and evaluate its performance concerning commonly used task-oriented metrics such as Joint Goal Accuracy, Slot F1, and Dialogue Success \cite{rastogi_multi-task_2018,budzianowski_multiwoz_2018}.
-Our pipeline resembles other approaches based on LMs \cite{peng-etal-2021-soloist,yang2021ubar}, using state tracking and response generation as two main, separate steps while keeping the role of a dialogue policy implicit.
+In this chapter, we explore the abilities of LLM to model task-oriented dialogue using in-context learning.
+We evaluate the performance regarding response generation and dialogue success.
+To obtain more insights, we also perform a human evaluation to test more real-world scenarios.
+We introduce an LLM-based TOD conversation pipeline and evaluate its performance concerning commonly used task-oriented metrics such as Joint Goal Accuracy, Slot F1, and Dialogue Success \cite{rastogi_multi-task_2018,budzianowski_multiwoz_2018}, see also Section~\ref{02:sec:eval_metrics}.
+Our pipeline resembles other approaches based on LMs \cite{peng-etal-2021-soloist,yang2021ubar}, using state tracking and response generation as two main, separate steps while keeping the role of a dialogue policy implicit (see also Sections~\ref{background:2stage-lm-modeling},\ref{06:augpt}).
 However, instead of fine-tuning LMs, it intentionally relies almost exclusively on using pre-trained LLMs as-is so we can test their out-of-the-box capabilities.
 The dialogue context and domain description are introduced to the model only by including them in the input prompt.
+We experiment with zero-shot and few-shot approaches (see Section~\ref{02:in-context}).
 In the zero-shot setting, the model receives a domain description only; in the few-shot setting, it additionally uses a few retrieved examples (see Section~\ref{07:sec:method} for details).
+This work was published at the SIGDial 2023 conference~\cite{hudecek-dusek-2023-large} and was extended in this chapter with more details and additional experiments.
+
+\section{Motivation}
+Given the millions of daily interactions with LLM-based chatbots, these models can handle users' needs satisfactorily, at least to some extent.
+However, these chatbots are tuned using unstructured open-domain conversations.
+We aim to evaluate these systems on task-oriented dialogues, where the system has to follow a predetermined structure and handle external sources of information, such as APIs or databases.
+We ask to what extent LLMs can handle these applications off-the-shelf, i.e., without fine-tuning.
+This approach, frequently referred to as \emph{in-context learning} or \emph{prompting}, is a common way to work with LLMs and offers competitive performance.
+Moreover, TOD systems output in-domain information with a predetermined structure and lend itself well to evaluation, thanks to pre-existing annotated data sets.
+We avoid fine-tuning techniques and focus on zero-shot or few-shot settings using in-context learning, as this approach has lower hardware requirements and barrier of entry and better flexibility or even performance in certain tasks \cite{su2022selective}.
+It is important to note that we cannot exclude the possibility that some models were exposed to our selected datasets during training~\citep{golchin2023time}.
+However, evaluating this setting is important as the real-world use cases might largely rely on this approach.
+
 
 Our experiments show that LLMs are not very good at state tracking, and their performance falls behind state-of-the-art, task-specific trackers.
 However, if provided with correct belief states, some yield interesting response generation performance comparable to earlier fine-tuned state-of-the-art models.
@@ -45,14 +47,14 @@ Moreover, our human evaluation experiments show that LLMs are generally good wit
     \centering
     \includegraphics[width=\textwidth]{images/llm-chatbot-v3.pdf}
     \caption{A detailed description of our proposed pipeline. (0) As a preprocessing step, we encode a subset of the training set that will be used to retrieve few-shot examples.
-    Given the user input, we: (1) Detect the domain, retrieve relevant examples (in the few-shot setting), and construct an initial prompt. (2) Infer the belief state using LLM. Based on that, we retrieve database information and construct another prompt that includes the state and database results. (3) We ask the LLM to provide a final response.}
+    Given a user input, we: (1) Detect the domain, retrieve relevant examples (in the few-shot setting), and construct an initial prompt. (2) Infer the belief state using LLM. Based on that, we retrieve database information and construct another prompt that includes the state and database results. (3) We ask the LLM to provide a final response.}
     \label{07:fig:overview_low_level}
 \end{figure}
 An overall description of the proposed pipeline is shown in Figure~\ref{07:fig:overview_low_level}.
 The system consists of a pre-trained LLM and an (optional) context store in a vector database.
-We follow the 
 Three LLM calls are performed in each dialogue turn, with specific prompts (see Section~\ref{07:sec:prompts}).
-First, the LLM performs domain detection and state tracking (Section~\ref{07:sec:state-tracking}). The updated belief state informs a database query, the results of which are used in the subsequent LLM-based response generation step.
+First, the LLM performs domain detection and state tracking (Section~\ref{07:sec:state-tracking}).
+The updated belief state informs a database query, the results of which are used in the subsequent LLM-based response generation step~\ref{07:sec:response}.
 In the few-shot setting, the context store stores a limited number of examples from the training set, which are retrieved based on similarity with the conversation context and included in LLM prompts (see Section~\ref{07:sec:context-store}).
 
 
@@ -65,7 +67,7 @@ We define a single \textbf{domain detection prompt} (Table~\ref{07_tab:domain}) 
 
 The domain detection prompt includes a task description and two static examples of domain detection.
 In addition to general instructions, each state tracking prompt contains a domain description, a list of relevant slots, the dialogue history, and the current user utterance.
-The response prompts do not contain the per-domain slot list but include the current belief state and database results instead.
+The response prompts do not contain the per-domain slot list but include the current belief state and database results.
 In the few-shot setting, each tracking and response prompt contains positive and negative examples retrieved from the context store (see Section~\ref{07:sec:context-store}).
 
 \begin{table}[tp]
@@ -98,7 +100,7 @@ In the few-shot setting, each tracking and response prompt contains positive and
       \bottomrule
   \end{tabular}
     \caption{A prompt used for domain detection for MultiWOZ.
-  It contains {\color{cyan!80!yellow!80!black!100} task definition},  {\color{green!100!yellow!70!black!100!}domains description}, {\color{red!50!yellow!90!black!100!} static examples} and {\color{orange!50!yellow!90!black!100!} user utterance}.}
+  It contains {\color{cyan!80!yellow!80!black!100} task definition},  {\color{green!100!yellow!70!black!100!}domains description}, {\color{red!50!yellow!90!black!100!} static examples} and {\color{orange!50!yellow!90!black!100!} user utterance}, coded by respective colors.}
   \label{07_tab:domain}
 \end{table}
 
@@ -128,7 +130,7 @@ In the few-shot setting, each tracking and response prompt contains positive and
       \bottomrule
   \end{tabular}
   \caption{A zero-shot version of the prompt used for state update prediction for MultiWOZ 2.2.
-  It contains {\color{cyan!80!yellow!80!black!100} task definition},  {\color{green!100!yellow!70!black!100!}domain description}, {\color{red!100!yellow!70!black!100!} dialogue history} and {\color{orange!50!yellow!90!black!100!} user utterance}. }
+  It contains {\color{cyan!80!yellow!80!black!100} task definition},  {\color{green!100!yellow!70!black!100!}domain description}, {\color{red!100!yellow!70!black!100!} dialogue history} and {\color{orange!50!yellow!90!black!100!} user utterance}, coded by respective colors.}
   \label{07_tab:zero-shot-state}
 \end{table}
 
@@ -152,31 +154,30 @@ In the few-shot setting, each tracking and response prompt contains positive and
 & \texttt{{\color{magenta!100!yellow!70!black!100!}State: hotel \{ pricerange: "cheap"\} }} \\
 & \texttt{{\color{magenta!100!yellow!70!black!100!} Database: hotels: 23 }}\\
       \midrule
-      \textbf{Output:} & \texttt{We have 23 such hotels available,} \\
+      \textbf{Output:} & \texttt{We have 23 [pricerange] hotels available,} \\
       & \texttt{do you have a location preference?} \\
       \bottomrule
   \end{tabular}
   \caption{A zero-shot version of the prompt for response prediction for MultiWOZ 2.2.
-  It contains {\color{cyan!80!yellow!80!black!100} task definition},  {\color{green!100!yellow!70!black!100!}domain description}, {\color{red!100!yellow!70!black!100!} dialogue history}, {\color{orange!50!yellow!90!black!100!} user utterance} and {\color{magenta!100!yellow!70!black!100!} belief state with db results}.}
+  It contains {\color{cyan!80!yellow!80!black!100} task definition},  {\color{green!100!yellow!70!black!100!}domain description}, {\color{red!100!yellow!70!black!100!} dialogue history}, {\color{orange!50!yellow!90!black!100!} user utterance} and {\color{magenta!100!yellow!70!black!100!} belief state with database results}, coded by respective colors}
   \label{07_tab:zero-shot-response}
 \end{table}
 \subsection{Domain Detection and State Tracking}
 \label{07:sec:state-tracking}
 
-We prompt the LM twice at each turn during state tracking to detect the active domain and then to output slot values that changed or appeared in the current turn. We then use the outputs to update the accumulated global belief state.
+We prompt the LM twice at each turn during state tracking, first to detect the active domain and then to output a belief state update. We then use the outputs to update the accumulated global belief state.
 
 The two prompting steps are used since 
 we need the models to operate in a multi-domain setting, i.e., handle conversations spanning multiple domains.
 Therefore, we need to be able to detect the current active domain.
-%Therefore, we intentionally retrieve more examples than needed from the context store and detect the domain by majority voting among the retrieved entries.
 We achieve this by first prompting the LLM with a domain detection prompt (using a single prompt for all examples).
-%This prompt is static, i.e., it remains the same for each example.
+This prompt (see Table~\ref{07_tab:domain}) is static, i.e., it remains the same for each example.
 
 Once we obtain the active domain prediction, we can include manually designed domain descriptions in a second prompt that handles belief state prediction.
+We ask the model to predict values that changed or appeared in the current turn.
 An example of a prompt used for state tracking is provided in Table~\ref{07_tab:zero-shot-state}.
-For the few-shot variants, %the retrieved context provides additional information.
-%, 
-we retrieve few-shot examples from the context store, limited to the active domain.\footnote{For this purpose, each conversation snippet contained in the context store comes from a single-domain conversation.}
+For the few-shot variants, we retrieve few-shot examples from the context store (Section~\ref{07:sec:context-store}), limited to the active domain.
+For this purpose, each conversation snippet contained in the context store comes from a single-domain conversation.
 
 Our preliminary experiments showed that LLMs consistently struggle to output all active slot values at every turn.
 Therefore, we model only state updates, following the MinTL approach \cite{lin-etal-2020-mintl}.
@@ -188,7 +189,7 @@ The current belief state is used to query the database for entries matching all 
 The prompt for the LLM includes dialogue history, user utterance, belief state, and database results (and retrieved examples in the few-shot setting).
 It requests the model to provide a fitting system response.
 We generate delexicalized responses (see Section~\ref{02:delex}).
-%\OD{a funguje to tak doopravdy? nedela nam to problem s evaluaci, ze model negeneruje placeholdery, ale ty skutecne hodnoty?}
+
 In addition to simplifying the task for the model, delexicalized outputs allow us to evaluate the success rate and compare it to previous works.
 The prompt specifies that the model should provide entity values as delexicalized placeholders, and any few-shot examples are constructed accordingly.
 
@@ -199,7 +200,17 @@ To apply this knowledge efficiently in our pipeline, we introduce a storage that
 This context storage is optional and is only required for the few-shot prompting variant.
 We use dialogue context taken from a fixed-length history window as the key to be encoded in the vector database.
 Once the relevant examples are retrieved, we include them in the prompt to guide the model better.
-Some of the LLMs rely on negative (counter-) examples as well \cite{supernaturalinstructions}; we take some of the retrieved belief state examples, corrupt them by replacing some of the correct slot values with random values, and present them as negative in the prompt.
+Some LLMs rely on negative (counter-) examples as well \cite{supernaturalinstructions}.
+Therefore, we follow \citet{peng-etal-2021-soloist}'s consistency classification task approach to produce negative examples: We take some of the retrieved belief state examples, corrupt them by replacing some of the correct slot values with random values, and present them as negative in the prompt for the Tk-Instruct model.
+When constructing the context store, we employ only a few training examples, ensuring we evaluate in a truly few-shot setting.
+
+\subsection{Response Generation}
+\label{07:sec:response}
+The prompt used for the final response generation in a zero-shot version is depicted in~\ref{07_tab:zero-shot-response}.
+In the few-shot version, examples are also included.
+The model is instructed to provide delexicalized responses (see Section~\ref{02:delex}) to be able to place correct values from database results.
+Also, the standardized evaluation scripts work with delexicalized utterances.
+\ref{07_tab:zero-shot-response}
 
 \section{Experimental Setup}
 \label{07:sec:experiments}
@@ -209,14 +220,15 @@ We also experiment with four variants of the base setup, using either zero-shot 
 
 \subsection{Tested Models}
 We chose the following five instruction-tuned models for our experiments, spanning different sizes (within the limitations of hardware available) and using freely available models and the paid ChatGPT API.
-We directly indicate the specific model variant (i.e., model size, given by the number of parameters) in the model name.
+We directly indicate the model name's specific model variant (i.e., model size, given by the number of parameters).
 \label{07:sec:par:models}
 \begin{itemize}
-    \item \textbf{Tk-Instruct-11B} \cite{supernaturalinstructions} is based on the T5 encoder-decoder architecture \cite{2020t5}. It was tuned on a dataset of over 5M task instances with instructions.
+    \item \textbf{Tk-Instruct-11B}\footnote{\url{https://huggingface.co/allenai/tk-instruct-11b-def-pos-neg-expl}} \cite{supernaturalinstructions} is based on the T5 encoder-decoder architecture \cite{2020t5}. It was tuned on a dataset of over 5M task instances with instructions.
     \item \textbf{ChatGPT} is a product introduced by OpenAI.\footnote{\url{https://openai.com/blog/chatgpt}} Although the exact training process and architectures were not published, it most probably uses a similar architecture and fine-tuning techniques as InstructGPT \cite{ouyang2022training}, with additional human feedback.
-    \item \textbf{Alpaca-LoRA-7B} is a version of the LLaMa model \cite{touvron2023llama} using the LoRA method \cite{hu2021lora} for fine-tuning on Stanford Alpaca project data \cite{alpaca}. LoRa keeps the base model parameters frozen but adds smaller weight matrices to transform its outputs.
-    \item \textbf{GPT-NeoXT-Chat-Base-20B} is based on the GPT-NeoX open-source language model \cite{black2022gpt} and fine-tuned with over 40M dialogue-style instructions.
-    \item \textbf{OPT-IML-30B} \cite{iyer2022opt} is based on the Transformer decoder OPT model \cite{zhang2022opt} and trained with a custom set of instructions, including the fine-tuning set from Tk-Instruct.
+    We use the \emph{gpt-3.5-turbo} model and API version \texttt{0301}.
+    \item \textbf{Alpaca-LoRA-7B} \footnote{\url{https://huggingface.co/tloen/alpaca-lora-7b}} is a version of the LLaMa model \cite{touvron2023llama} using the LoRA method \cite{hu2021lora} for fine-tuning on the Stanford Alpaca project data \cite{alpaca}. LoRa keeps the base model parameters frozen but adds smaller weight matrices to transform its outputs.
+    \item \textbf{GPT-NeoXT-Chat-Base-20B}\footnote{\url{https://huggingface.co/EleutherAI/gpt-neox-20b}} is based on the GPT-NeoX open-source language model \cite{black2022gpt} and fine-tuned with over 40M dialogue-style instructions.
+    \item \textbf{OPT-IML-30B}\footnote{\url{https://huggingface.co/facebook/opt-iml-30b}} \cite{iyer2022opt} is based on the Transformer decoder OPT model \cite{zhang2022opt} and trained with a custom set of instructions, including the fine-tuning set from the Tk-Instruct model.
 \end{itemize}
 
 \subsection{Evaluated variants}
@@ -227,19 +239,22 @@ Using the oracle belief state allows us to focus on evaluating the LLM's ability
 
 \subsection{Experiment Details}
 \label{subsec:exp-details}
-Due to the expensiveness of the LLM runs,\footnote{Hardware intensity for the freely available models and actual cost for ChatGPT.}, we did not perform a grid search but used a limited set of preliminary experiments to determine hyperparameters.
-Based on this, we used the context of two preceding utterances (user + system) as the context store keys (cf.~Section~\ref{07:sec:context-store}).
+Due to the expensiveness of the LLM runs (hardware intensity for the freely available models and actual cost for ChatGPT), we did not perform a grid search but used a limited set of preliminary experiments to determine hyperparameters.
+Based on this, we used the context of two preceding utterances (one user + one system) as the context store keys (cf.~Section~\ref{07:sec:context-store}).
 We retrieve two examples for few-shot prompts and make one corrupted variant for negative examples.
-To corrupt an example, we randomly switch some of the slot values, similarly to \citet{kulhanek-etal-2021-augpt}.
+To corrupt an example, we randomly switch some of the slot values, similarly to \citet{kulhanek-etal-2021-augpt}, Section~\ref{06:augpt}.
 In the context store, we encode few-shot examples using the multilingual embedding model provided by \citet{reimers-2020-multilingual-sentence-bert}\footnote{\url{https://huggingface.co/sentence-transformers/all-mpnet-base-v2}} and store them in the FAISS database \cite{johnson2019billion}.
 To perform the LLM calls, we use the Huggingface library\footnote{\url{https://huggingface.co}} and the OpenAI API.\footnote{\url{https://platform.openai.com}}
 
 \subsection{Evaluation Measures}
 
 We evaluate the system outputs on multiple levels using automatic metrics and human evaluation. Results are given in Sections~\ref{07:sec:results} and~\ref{07:sec:analysis}, respectively.
-Please see Section~\ref{02:sec:eval_metrics} for details about the used metrics.
+
 \subsubsection*{Automatic Metrics}
-In automatic evaluation, we first follow the LLM calls and evaluate domain detection, state tracking, and response generation. We also evaluate the overall dialogue-level performance.
+We first follow the LLM calls in automatic evaluation and evaluate domain detection, state tracking, and response generation.
+We also evaluate the overall dialogue-level performance.
+Please see Section~\ref{02:sec:eval_metrics} for details about the used metrics.
+
 For \emph{domain detection}, we compute \textbf{detection accuracy}.
 For \emph{state tracking}, we compute \textbf{micro-F1} score and \textbf{Joint Goal Accuracy} (JGA).
 To evaluate \emph{response generation}, we follow related works and use \textbf{BLEU score}.
@@ -247,6 +262,7 @@ The main \emph{overall measure} for evaluating a task-oriented dialogue is the d
 
 \subsubsection*{Human Evaluation}
 For human evaluation, we perform a small-scale in-house interaction study on MultiWOZ.
+The annotators were given goal descriptions sampled from the MultiWOZ test set and concise instructions on how to proceed.
 Since the MultiWOZ goal often involves tasks in multiple domains, we ask annotators to evaluate each domain in the dialogue distinctly.
 At the end of each dialogue, the annotators are asked to answer these questions:
 \begin{enumerate}
@@ -254,6 +270,7 @@ At the end of each dialogue, the annotators are asked to answer these questions:
     \item \emph{How many clarifications or corrections were needed?}
     \item \emph{Was all the provided information captured correctly?} (corresponding to JGA)
 \end{enumerate}
+More details on the annotation process and instructions are given in Section~\ref{07:sec:human}
 
 \begin{figure}[h]
     \centering
@@ -270,7 +287,8 @@ At the end of each dialogue, the annotators are asked to answer these questions:
 \label{subsec:domain}
 We report the domain detection accuracy on MultiWOZ and SGD
 in Figure~\ref{07:fig:domains}.
-We observe that the domain detection accuracy varies quite a lot for various models and presumably influences the quality of the retrieved few-shot examples and the appropriateness of the subsequent prompts.
+We observe that the domain detection accuracy varies quite a lot for most models.
+This presumably affects the quality of the retrieved few-shot examples and the appropriateness of the subsequent prompts.
 However, it is important to note that domain detection is turn-based, and arguably, some situations (e.g., providing an address, saying goodbye, etc.) are always handled similarly, even though they belong to different domains.
 Therefore, not all the retrieved examples from misclassified domains necessarily contain unrelated contexts.
 To explore this, we measure the performance of all models in case an oracle domain is given to them (Figure \ref{fig:oracle_domains}).
@@ -303,64 +321,69 @@ Forcing the ground truth domain examples in these cases can be potentially harmf
       \midrule
       % ZS-GBS
       \rowcolor{tablegray}
-      \emph{Alpaca-LoRA-7B-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 1.61 & 0.06 & 0.07 & 0.04 \\
+      Alpaca-LoRA-7B-\emph{zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 1.61 & 0.06 & 0.07 & 0.04 \\
       \rowcolor{tablegray}
-      \emph{Tk-Instruct-11B-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 2.48 & 0.04 & 0.04 & 0.04 \\
+      Tk-Instruct-11B\emph{-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 2.48 & 0.04 & 0.04 & 0.04 \\
       \rowcolor{tablegray}
-      \emph{GPT-NeoXT-20B-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 0.52 & 0.03 & 0.02 & 0.04 \\
+      GPT-NeoXT-20B\emph{-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 0.52 & 0.03 & 0.02 & 0.04 \\
       \rowcolor{tablegray}
-      \emph{OPT-IML-30B-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 0.56 & 0.02 & 0.04 & 0.03 \\
+      OPT-IML-30B\emph{-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 0.56 & 0.02 & 0.04 & 0.03 \\
       \rowcolor{tablegray}
-      \emph{ChatGPT-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 4.17 & 0.13 & 0.40 & 0.31 \\ 
+      ChatGPT\emph{-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 4.17 & 0.13 & 0.40 & 0.31 \\ 
 
       % ZS-OBS
-      \emph{Alpaca-LoRA-7B-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 1.73 & -- & -- & 0.08 \\
-      \emph{Tk-Instruct-11B-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 2.66 & -- & -- & 0.18 \\
-      \emph{GPT-NeoXT-20B-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 0.60 & -- & -- & 0.06 \\
-      \emph{OPT-IML-30B-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 0.54 & -- & -- & 0.06 \\
-      \emph{ChatGPT-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 3.76 & -- & -- & 0.47 \\ \midrule
+      Alpaca-LoRA-7B\emph{-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 1.73 & -- & -- & 0.08 \\
+      Tk-Instruct-11B\emph{-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 2.66 & -- & -- & 0.18 \\
+      GPT-NeoXT-20B\emph{-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 0.60 & -- & -- & 0.06 \\
+      OPT-IML-30B\emph{-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 0.54 & -- & -- & 0.06 \\
+      ChatGPT\emph{-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 3.76 & -- & -- & 0.47 \\ \midrule
 
       % FS- GBS
       \rowcolor{tablegray}
-      \emph{Alpaca-LoRA-7B-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 5.53 & 0.06 & 0.08 & 0.06\\
+      Alpaca-LoRA-7B\emph{-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 5.53 & 0.06 & 0.08 & 0.06\\
       \rowcolor{tablegray}
-      \emph{Tk-Instruct-11B-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 6.56 & 0.16 & 0.33 & 0.19 \\
+      Tk-Instruct-11B\emph{-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 6.56 & 0.16 & 0.33 & 0.19 \\
       \rowcolor{tablegray}
-      \emph{GPT-NeoXT-20B-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 2.73 & 0.05 & 0.04 & 0.05 \\
+      GPT-NeoXT-20B\emph{-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 2.73 & 0.05 & 0.04 & 0.05 \\
       \rowcolor{tablegray}
-      \emph{OPT-IML-30B-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 4.40 & 0.03 & 0.03 & 0.04 \\
+      OPT-IML-30B\emph{-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 4.40 & 0.03 & 0.03 & 0.04 \\
       \rowcolor{tablegray}
-      \emph{ChatGPT-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 6.77 & \textbf{0.27} & \textbf{0.51} & 0.44 \\
+      ChatGPT\emph{-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 6.77 & \textbf{0.27} & \textbf{0.51} & 0.44 \\
 
       % FS-OBS
-      \emph{Alpaca-LoRA-7B-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & 5.96 & -- & -- & 0.41 \\
-      \emph{Tk-Instruct-11B-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & \textbf{6.91} & -- & -- & 0.46 \\
-      \emph{GPT-NeoXT-20B-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & 2.92 & -- & -- & 0.28 \\
-      \emph{OPT-IML-30B-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & 5.40 & -- & -- & 0.28 \\
-      \emph{ChatGPT-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & 6.84 & -- & -- & \textbf{0.68} \\
+      Alpaca-LoRA-7B\emph{-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & 5.96 & -- & -- & 0.41 \\
+      Tk-Instruct-11B\emph{-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & \textbf{6.91} & -- & -- & 0.46 \\
+      GPT-NeoXT-20B\emph{-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & 2.92 & -- & -- & 0.28 \\
+      OPT-IML-30B\emph{-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & 5.40 & -- & -- & 0.28 \\
+      ChatGPT\emph{-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & 6.84 & -- & -- & \textbf{0.68} \\
      
     \bottomrule
   \end{tabular}
   \caption{
-  Evaluation of the chosen LLMs with respect to widely used TOD measures on the MultiWOZ dataset. For each model, we provide multiple variants. We use either zero-shot or few-shot prompts (\emph{-zs-} vs. \emph{-fs-}) and either generated or oracle belief state (\emph{-gbs} vs. \emph{-obs}).
-  The few-shot variants use 10 examples per domain in the context storage two of which are selected for the prompts.  We also provide supervised state-of-the-art results to put the numbers in context: $^\ast$\citet{zhu2022convlab3}, $^\dagger$\citet{feng-etal-2021-sequence}, $^\clubsuit$\citet{sun2022mars}, $^\diamondsuit$\citet{huangrobustness}, $^\heartsuit$\citet{feng2023fantastic}. }
+  Evaluation of the chosen LLMs concerning widely used TOD measures on the MultiWOZ dataset. For each model, we provide multiple variants. We use either zero-shot or few-shot prompts (\emph{-zs-} vs. \emph{-fs-}) and either generated or oracle belief state (\emph{-gbs} vs. \emph{-obs}).
+  The few-shot variants use 10 examples per domain in the context storage, two selected for the prompts.  We also provide supervised state-of-the-art results to put the numbers in context: $^\clubsuit$\citet{sun2022mars}, $^\diamondsuit$\citet{huangrobustness}, $^\heartsuit$\citet{feng2023fantastic}. }
   \label{tab:res_overall_1}
 \end{table}
+
+\subsection{Response Generation}
+BLEU scores are low overall, far below the supervised state-of-the-art.
+Tk-Instruct and ChatGPT are the strongest here and perform roughly on par.
+This behavior is likely because the models were not fine-tuned on the particular datasets, therefore they do not resemble the wording and phrasing used in this data.
+Nevertheless, this observation does not necessary imply that the generated responses are incorrect.
 
 
 \subsection{Belief State Tracking}
 \label{subsec:dst}
 The belief state tracking results overview is given in Tables \ref{tab:res_overall_1},\ref{tab:res_overall_2} (\emph{JGA} and \emph{Slot-F1}).
-A huge gap exists between the supervised models' performance and the LLM results.
-Also compared to \citet{hu-etal-2022-context}, who used few-shot in-context learning and reported JGA 43.13\% with a comparable dataset size, our instruction-tuned LLMs fall short.
-However, the models we use are generally an order of magnitude smaller, and we also use fewer examples in the prompt.
+A huge gap exists between the state-of-the-art supervised fine-tuned models' performance and the LLM results.
+Also, our instruction-tuned LLMs fall short compared to \citet{hu-etal-2022-context}, who used few-shot in-context learning to formulate state tracking prompts for big LLMs such as OpenAI \texttt{davinci-codex}~\citep{chen2021evaluating} with 175B parameters and reported JGA 43.13\% with a comparable number of examples used for few-shot retrieval.
+However, our models are generally an order of magnitude smaller, and we also use fewer examples in the prompt.
 We hypothesize that the performance could be further improved by careful model-specific prompt customization and perhaps task re-formulation; nevertheless, this is not the goal of this work.
 We intentionally focus on the universal framing of the task since we want to explore the general ability of the models to follow instructions.
 
 When comparing the results among the models, ChatGPT outperforms the rest of the models by a large margin. 
-Interestingly, the few-shot vs. zero-shot setting does not influence the results much, except for the GPT-NeoXT model.
+Interestingly, the few-shot vs. zero-shot setting does not influence the results much for tracking, except for the GPT-NeoXT model.
 
-\subsection{Response Generation}
 \begin{table}[tp]
     \centering\small
     \begin{tabular}{l|c|c|ccc>{\hspace{-2mm}}c}
@@ -374,54 +397,49 @@ Interestingly, the few-shot vs. zero-shot setting does not influence the results
       \midrule
       % ZS-GBS
       \rowcolor{tablegray}
-      \emph{Alpaca-LoRA-7B-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 2.79 & 0.02 & 0.01 & 0.11  \\
+      Alpaca-LoRA-7B\emph{-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 2.79 & 0.02 & 0.01 & 0.11  \\
       \rowcolor{tablegray}
-      \emph{Tk-Instruct-11B-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 4.16 & 0.05 & 0.03 & 0.10  \\
+      Tk-Instruct-11B\emph{-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 4.16 & 0.05 & 0.03 & 0.10  \\
       \rowcolor{tablegray}
-      \emph{GPT-NeoXT-20B-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 0.45 & 0.01 & 0.01 & 0.17 \\
+      GPT-NeoXT-20B\emph{-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 0.45 & 0.01 & 0.01 & 0.17 \\
       \rowcolor{tablegray}
-      \emph{OPT-IML-30B-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 1.63 & 0.01 & 0.01 & 0.17 \\
+      OPT-IML-30B\emph{-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & 1.63 & 0.01 & 0.01 & 0.17 \\
       \rowcolor{tablegray}
       % \emph{ChatGPT-zs-gbs} & \textcolor{red}{\xmark} & \textcolor{red}{\xmark} & -- & -- & -- & --  \\ 
 
       % ZS-OBS
-      \emph{Alpaca-LoRA-7B-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 2.76 & -- & -- & 0.23  \\
-      \emph{Tk-Instruct-11B-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 5.21 & -- & -- & 0.24  \\
-      \emph{GPT-NeoXT-20B-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 0.83 & -- & -- & 0.22  \\
-      \emph{OPT-IML-30B-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 1.94 & -- & -- & 0.22  \\
+      Alpaca-LoRA-7B\emph{-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 2.76 & -- & -- & 0.23  \\
+      Tk-Instruct-11B\emph{-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 5.21 & -- & -- & 0.24  \\
+      GPT-NeoXT-20B\emph{-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 0.83 & -- & -- & 0.22  \\
+      OPT-IML-30B\emph{-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & 1.94 & -- & -- & 0.22  \\
       % \emph{ChatGPT-zs-obs} & \textcolor{red}{\xmark} & \textcolor{green}{\cmark} & -- & -- & -- & --  \\ \midrule
 
       % FS- GBS
       \rowcolor{tablegray}
-      \emph{Alpaca-LoRA-7B-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 6.32 & 0.04 & 0.01 & 0.09 \\
+      Alpaca-LoRA-7B\emph{-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 6.32 & 0.04 & 0.01 & 0.09 \\
       \rowcolor{tablegray}
-      \emph{Tk-Instruct-11B-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 6.66 & 0.06 & 0.05 & 0.10 \\
+      Tk-Instruct-11B\emph{-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 6.66 & 0.06 & 0.05 & 0.10 \\
       \rowcolor{tablegray}
-      \emph{GPT-NeoXT-20B-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 1.62 & 0.04 & 0.02 & 0.09  \\
+      GPT-NeoXT-20B\emph{-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 1.62 & 0.04 & 0.02 & 0.09  \\
       \rowcolor{tablegray}
-      \emph{OPT-IML-30B-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 0.82 & \textbf{0.06} & \textbf{0.07} & 0.08  \\
+      OPT-IML-30B\emph{-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & 0.82 & \textbf{0.06} & \textbf{0.07} & 0.08  \\
       \rowcolor{tablegray}
       % \emph{ChatGPT-fs-gbs} & \textcolor{green}{\cmark} & \textcolor{red}{\xmark} & -- & -- & -- & --  \\
 
       % FS-OBS
-      \emph{Alpaca-LoRA-7B-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & 6.99 & -- & -- & \textbf{0.25} \\
-      \emph{Tk-Instruct-11B-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & \textbf{8.56} & -- & -- & \textbf{0.25} \\
-      \emph{GPT-NeoXT-20B-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & 1.97 & -- & -- & 0.24 \\
-      \emph{OPT-IML-30B-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & 0.56 & -- & -- & 0.22 \\
+      Alpaca-LoRA-7B\emph{-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & 6.99 & -- & -- & \textbf{0.25} \\
+      Tk-Instruct-11B\emph{-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & \textbf{8.56} & -- & -- & \textbf{0.25} \\
+      GPT-NeoXT-20B\emph{-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & 1.97 & -- & -- & 0.24 \\
+      OPT-IML-30B\emph{-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & 0.56 & -- & -- & 0.22 \\
       % \emph{ChatGPT-fs-obs} & \textcolor{green}{\cmark} & \textcolor{green}{\cmark} & -- & -- & -- & -- \\
 
     \bottomrule
   \end{tabular}
   \caption{
-  Evaluation of the chosen LLMs concerning widely used TOD measures on the SGD dataset. For each model, we provide multiple variants. We use either zero-shot or few-shot prompts (\emph{-zs-} vs. \emph{-fs-}) and either generated or oracle belief state (\emph{-gbs} vs. \emph{-obs}).
-  The few-shot variants use 10 examples per domain in the context storage, two selected for the prompts.
-  We did not evaluate the paid ChatGPT model on SGD to reduce cost.
-  We also provide supervised state-of-the-art results to put the numbers in context: $^\ast$\citet{zhu2022convlab3}, $^\dagger$\citet{feng-etal-2021-sequence}, $^\clubsuit$\citet{sun2022mars}, $^\diamondsuit$\citet{huangrobustness}, $^\heartsuit$\citet{feng2023fantastic}. }
+  Evaluation of the chosen LLMs concerning widely used TOD measures on the SGD dataset. For each model, we provide multiple variants, as described in Table~\ref{tab:res_overall_1}.
+  We also provide supervised state-of-the-art results to put the numbers in context: $^\ast$\citet{zhu2022convlab3}, $^\dagger$\citet{feng-etal-2021-sequence}. }
   \label{tab:res_overall_2}
 \end{table}
-
-
-BLEU scores are low overall, far below the supervised state-of-the-art. Tk-Instruct and ChatGPT are the strongest here and perform roughly on par.
 
 \subsection{Dialogue-level performance}
 \label{07:sec:dialogue-performance}
@@ -432,37 +450,36 @@ BLEU scores are low overall, far below the supervised state-of-the-art. Tk-Instr
     \label{07:fig:oracle_domains}
 \end{figure}
 %The ultimate measure to evaluate a task-oriented dialogue model is dialogue success.
-Results for dialogue success are provided in Tables~\ref{tab:res_overall_1},\ref{tab:res_overall_2}, and there is again a large gap between LLMs and supervised custom models' performance.
+Results for dialogue success are provided in Tables~\ref{tab:res_overall_1} and \ref{tab:res_overall_2}, and there is again a large gap between prompted LLMs and supervised custom models' performance.
 ChatGPT seems to outperform other models, similarly to state tracking (cf.~Section~\ref{subsec:dst}).
-However, in some cases, especially in the zero-shot setting, the difference is not that obvious.
 In most cases, adding the retrieved few-shot examples helps.
 The contribution of retrieved examples is more obvious when we supply the oracle belief state, which helps consistently for all the models.
 
-We also explore the influence of context storage size on the dialogue success rate.
+We also explore the influence of the context storage size on the dialogue success rate.
 The results are given in Figure~\ref{07:fig:shots}.
 The biggest improvement can be achieved by supplying just a few examples instead of zero-shot prompting, but increasing the size of the example pool for retrieval does not yield further performance gains.
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.49\textwidth]{images/shots.png}
-    \caption{The influence of the number of examples per domain available for few-shot retrieval and performance of the model in terms of the dialogue success on MultiWOZ 2.2 data with oracle state supplied. Note that this does not represent the number of examples selected for the prompt, which is fixed to two.}
+    \includegraphics[width=0.9\textwidth]{images/shots.png}
+    \caption{The influence of the number of examples per domain available for few-shot retrieval and response generation performance of the model in terms of the dialogue success on MultiWOZ 2.2 data with the oracle state supplied. Note that this does not represent the number of examples selected for the prompt, which is fixed to two.}
     \label{07:fig:shots}
 \end{figure}
 
 \subsection{Single-domain performance}
-We present a performance of the ChatGPT model when restricted to single-domain dialogues on MultiWOZ in Table~\ref{tab:single-domain}.
-The average performance is 0.76, which improves over the overall performance.
+We evaluated the performance of the ChatGPT model when restricted to single-domain dialogues on MultiWOZ in Table~\ref{tab:single-domain}.
+The average success rate is 0.76, which performs better then in case of the automatic metrics.
 This outcome is expected as single-domain dialogues are typically shorter and easier to manage.
-However, this observation can also give us interesting insights into the difficulty of particular domains, which does not necessarily correlate with the number of slots or average dialogue length.
+However, this observation can also give us interesting insights into the different performance values on the individual domains, which does not necessarily correlate with the number of slots or average dialogue length.
 \begin{table}[tp]
     \centering
     \begin{tabular}{lccccc}
     \toprule
-       domain  &  Attraction & Taxi & Train & Hotel & Restaurant \\ 
+       domain  &  \textbf{Attraction} & \textbf{Taxi} & \textbf{Train} & \textbf{Hotel} & \textbf{Restaurant} \\ 
     \midrule
         success & 0.65 & 0.81 & 0.86 & 0.64 & 0.82 \\
     \bottomrule
     \end{tabular}
-    \caption{Dialogue success of ChatGPT-3.5 model when restricted to single domain dialogues in MultiWoz.}
+    \caption{Dialogue success of ChatGPT model when restricted to single domain dialogues in MultiWoz.}
     \label{tab:single-domain}
 \end{table}
 \section{Model Analysis}
@@ -471,13 +488,43 @@ However, this observation can also give us interesting insights into the difficu
 \subsection{Human Evaluation}
 \label{07:sec:human}
 We employed 6 annotators with a background in linguistics and NLP and let them interact with the two strongest models in terms of automatic metrics: ChatGPT and Tk-Instruct.
-The annotators were given randomly selected goals from the MultiWOZ 2.2 dataset and a minimal set of essential instructions on how to proceed.
 We present the results in Table~\ref{tab:human}.
 We can see that in a real interaction with a human user and allowing for clarification or correction, the models perform better than the strict automatic evaluation.
 Furthermore, the models are often successful in multiple sub-dialogues, even if a part of the dialogue fails.
 The experiment also confirms the superior performance of ChatGPT on dialogue success and JGA.
 Not surprisingly, given the above results, conversations with ChatGPT also required fewer clarification turns than with Tk-Instruct.
 
+\begin{table}[tp]
+    \centering
+    \begin{tabular}{r|l}
+    \toprule
+         \textbf{Goal} & \texttt{You are looking for a train.}\\
+         & \texttt{The train should depart from {\color{cyan!80!yellow!80!black!100 }Cambridge} and should leave} \\
+         & \texttt{{\color{cyan!80!yellow!80!black!100 }after 9pm} on {\color{cyan!80!yellow!80!black!100 }thursday} and should go to {\color{cyan!80!yellow!80!black!100 }Stansted Airport}.} \\
+         & \texttt{Once you find the train you want to} \\
+         & \texttt{make a {\color{orange!50!yellow!90!black!100!}booking for 2 people}}\\
+         & \texttt{Make sure you get the {\color{orange!50!yellow!90!black!100!}reference number}} \\
+         \midrule
+         \textbf{Customer} & \texttt{i need to find a train} \\
+         & \texttt{from {\color{cyan!80!yellow!80!black!100 }cambridge} to {\color{cyan!80!yellow!80!black!100 }stansted airport}} \\
+         \textbf{Assistant} & \texttt{what day will you be leaving?}\\
+         \textbf{Customer} & \texttt{i need to leave on {\color{cyan!80!yellow!80!black!100 }thursday} {\color{cyan!80!yellow!80!black!100 }after 9pm.}}\\
+         \textbf{Assistant} & \texttt{there is one on Thursday at {\color{orange!50!yellow!90!black!100!}21:08},}\\
+         & \texttt{would you like me to book it for you?}\\
+         \textbf{Customer} & \texttt{yes please, for 2 people} \\
+         \textbf{Assistant} & \texttt{{\color{red!100!yellow!90!black!100!}Okay a honda will pick you up, the contact is [phone].}} \\
+         & \texttt{Do you need anything else?} \\
+         \textbf{Customer} & \texttt{i need to book the train for 2 people} \\
+         \textbf{Assistant} & \texttt{{\color{red!100!yellow!90!black!100!}a honda will pick you up from cambridge }}\\
+         & \texttt{{\color{red!100!yellow!90!black!100!}and the contact number is [phone].}}\\
+         \textbf{Customer} & \texttt{i need a {\color{orange!50!yellow!90!black!100!}reference number} for the train} \\
+         \textbf{Assistant} & \texttt{{\color{red!100!yellow!90!black!100!}TR8383 leaves Cambridge at 21:08 and}} \\
+         & \texttt{{\color{red!100!yellow!90!black!100!}arrives at Stansted Airport at 21:36}.}\\
+         \bottomrule
+    \end{tabular}
+    \caption{A sample evaluation conversation between human and LLM-based (ChatGPT) agent. The sample includes a textual goal description that instructs the user. The slot values are lexicalized in the assistant's responses. Here, the system {\color{red!100!yellow!90!black!100!} fails} to provide the requested information due to irrelevant examples (from taxi domain) in the retrieved context. The slot values are highlighted for both {\color{cyan!80!yellow!80!black!100 }informed} and {\color{orange!50!yellow!90!black!100!}requested} values.}
+    \label{07:tab:human-2}
+\end{table}
 \subsection{Error Analysis}
 
 To better understand the models' behavior, we manually inspect a random sample of ca.~20 dialogues for each model, chosen from cases where the automatic success metric was not satisfied. 
@@ -491,24 +538,12 @@ Most of these errors can also be fixed in postprocessing -- for example, we can 
 \paragraph{Inherent errors,} on the other hand, are likely not easily fixable by prompt modifications.
 They are not distributed evenly across the tested models and seem to constitute a more challenging problem.
 
-Perhaps the most important error, common to all the models, is hallucination, i.e., the model's output responses not grounded in the context (such as offering entities that are not included in the database). This happens in about 10-20\% of the inspected dialogues.
+Perhaps the most important error, common to all the models, is hallucination, i.e., the model's output responses are not grounded in the context (such as offering entities that are not included in the database results). This happens in about 10-20\% of the inspected dialogues.
 Some models (\emph{GPT-NeoXT, OPT-IML}) tend to generate more content than requested.
 This happens in more than 50\% of their failed dialogues.
-This sometimes means continuing the conversation for a few more turns (including hallucinating user turns), but the models also often generate unrelated text or even code snippets.
+This sometimes means continuing the conversation for a few more turns (including hallucinating user turns), but the models also often generate unrelated text or even code snippets, see Table~\ref{07:tab:human-2}.
 With \emph{Tk-Instruct}, we observed that in ca.~10\% cases, it copies the belief state from the example given in the prompt instead of generating a relevant one.
-Another issue is that the models tend to repeat their previous responses.
-
-\subsection{Limitations}
-One of the drawbacks of our work is the reproducibility.
-Closed models like ChatGPT are available only via API, and their behavior can change with time, making the experiments impossible to reproduce.
-To address this, we include more models for the evaluation.
-Another problem is the rapid development in this field of study.
-New and stronger LLMs frequently appear, quickly making some of our results obsolete.
-However, our experiments aim to put the LLM performance in context and show that despite their great capabilities, the approach of in-context learning is unlikely to solve the problem of task-oriented dialogues in the near future.
-
-It would also be desirable to focus more on prompt engineering techniques since the LLMs are arguably sensitive to the choice of the right prompt, which is model-specific.
-Nevertheless, it is unlikely that solely tweaking the input prompt would affect the performance dramatically.
-
+Another issue is that the models tend to repeat their previous responses as illustrated in Table~\ref{07:tab:human-1}.
 \begin{table}[tp]
     \centering\small
     \begin{tabular}{l|r|r}
@@ -563,46 +598,13 @@ Nevertheless, it is unlikely that solely tweaking the input prompt would affect 
         \textbf{Assistant} & \texttt{it will take you {\color{orange!50!yellow!90!black!100!}88 minutes} to get there. }\\
         \bottomrule
     \end{tabular}
-    \caption{A sample evaluation conversation between human and LLM-based agent. The sample includes a textual goal description that instucts the user. The slot values are lexicalized in the assistant's responses. Although the systems {\color{red!100!yellow!90!black!100!}fails initially} and the customer needs to ask repeatedly about the duration of travel, it can get the desired information in the end. The slot values are highlighted for both {\color{cyan!80!yellow!80!black!100 }informed} and {\color{orange!50!yellow!90!black!100!}requested} values.}
+    \caption{A sample evaluation conversation between human and LLM-based (ChatGPT) agent. The sample includes a textual goal description that instructs the user. The slot values are lexicalized in the assistant's responses. Although the systems {\color{red!100!yellow!90!black!100!}fails initially} and the customer needs to ask repeatedly about the duration of travel, it can get the desired information in the end. The slot values are highlighted for both {\color{cyan!80!yellow!80!black!100 }informed} and {\color{orange!50!yellow!90!black!100!}requested} values.}
     \label{07:tab:human-1}
-\end{table}
-
-\begin{table}[tp]
-    \centering
-    \begin{tabular}{r|l}
-    \toprule
-         \textbf{Goal} & \texttt{You are looking for a train.}\\
-         & \texttt{The train should depart from {\color{cyan!80!yellow!80!black!100 }Cambridge} and should leave} \\
-         & \texttt{{\color{cyan!80!yellow!80!black!100 }after 9pm} on {\color{cyan!80!yellow!80!black!100 }thursday} and should go to {\color{cyan!80!yellow!80!black!100 }Stansted Airport}.} \\
-         & \texttt{Once you find the train you want to} \\
-         & \texttt{make a {\color{orange!50!yellow!90!black!100!}booking for 2 people}}\\
-         & \texttt{Make sure you get the {\color{orange!50!yellow!90!black!100!}reference number}} \\
-         \midrule
-         \textbf{Customer} & \texttt{i need to find a train} \\
-         & \texttt{from {\color{cyan!80!yellow!80!black!100 }cambridge} to {\color{cyan!80!yellow!80!black!100 }stansted airport}} \\
-         \textbf{Assistant} & \texttt{what day will you be leaving?}\\
-         \textbf{Customer} & \texttt{i need to leave on {\color{cyan!80!yellow!80!black!100 }thursday} {\color{cyan!80!yellow!80!black!100 }after 9pm.}}\\
-         \textbf{Assistant} & \texttt{there is one on Thursday at {\color{orange!50!yellow!90!black!100!}21:08},}\\
-         & \texttt{would you like me to book it for you?}\\
-         \textbf{Customer} & \texttt{yes please, for 2 people} \\
-         \textbf{Assistant} & \texttt{{\color{red!100!yellow!90!black!100!}Okay a honda will pick you up, the contact is [phone].}} \\
-         & \texttt{Do you need anything else?} \\
-         \textbf{Customer} & \texttt{i need to book the train for 2 people} \\
-         \textbf{Assistant} & \texttt{{\color{red!100!yellow!90!black!100!}a honda will pick you up from cambridge }}\\
-         & \texttt{{\color{red!100!yellow!90!black!100!}and the contact number is [phone].}}\\
-         \textbf{Customer} & \texttt{i need a {\color{orange!50!yellow!90!black!100!}reference number} for the train} \\
-         \textbf{Assistant} & \texttt{{\color{red!100!yellow!90!black!100!}TR8383 leaves Cambridge at 21:08 and}} \\
-         & \texttt{{\color{red!100!yellow!90!black!100!}arrives at Stansted Airport at 21:36}.}\\
-         \bottomrule
-    \end{tabular}
-    \caption{A sample evaluation conversation between human and LLM-based agent. The sample includes a textual goal description that instructs the user. The slot values are lexicalized in the assistant's responses. Here, the system {\color{red!100!yellow!90!black!100!} fails} to provide the requested information due to irrelevant examples (from taxi domain) in the retrieved context. The slot values are highlighted for both {\color{cyan!80!yellow!80!black!100 }informed} and {\color{orange!50!yellow!90!black!100!}requested} values.}
-    \label{07:tab:human-2}
 \end{table}
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % CONCLUSION
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion}
-
 We present an experimental evaluation of instruction-tuned LLMs applied to the established task of task-oriented dialogue modeling, with five LLMs evaluated on two datasets.
 We find that current LLMs have difficulties concerning belief state tracking.
 The LLM-based state trackers struggle even when provided with in-context few-shot examples.
@@ -616,3 +618,13 @@ While the performance does not match the supervised state of the art on the eval
 Moreover, few-shot examples improve the model performance and access to the oracle belief state.
 Therefore, carefully picking representative examples and combining the LLM with an in-domain belief tracker can be a viable choice for a task-oriented dialogue pipeline.
 Also, our evaluation experiments suggest that LLM-based systems are surprisingly good in human interaction, surpassing the results suggested by the corpus-based automatic evaluation metrics.
+
+\paragraph{Limitations}
+One of the drawbacks of our work is the reproducibility.
+Closed models like ChatGPT are available only via API, and their behavior can change with time as out-of-date model are deprecated, making the experiments impossible to reproduce.
+To address this, we include more models for the evaluation.
+Another problem is the rapid development in this field of study.
+New and stronger LLMs frequently appear, quickly making some of our results obsolete.
+However, our experiments aim to put the LLM performance in context and show that despite their great capabilities, the approach of in-context learning is unlikely to solve the problem of task-oriented dialogues in the near future.
+
+It would also be desirable to focus more on prompt engineering techniques since the LLMs are arguably sensitive to the choice of the right prompt, which is model-specific.

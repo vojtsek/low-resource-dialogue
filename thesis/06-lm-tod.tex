@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Sequence-to-Sequence Task-Oriented Dialogue Modeling}
-\label{chap:lm-tod}
+\label{06:chap:lm-tod}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Task-oriented dialogue is a complex task typically modeled with architectures consisting of multiple modules \ref{02:sec:basics}.
 This approach makes it challenging to transfer the learned knowledge since all the modules need to be adjusted during the transfer.
@@ -16,6 +16,7 @@ For modeling, we use the AuGPT model \cite{kulhanek-etal-2021-augpt} to the deve
 We also present some additional experiments regarding the smaller training set, presented in \ref{tab:exp-results-seed}
 
 \section{AuGPT Model Description}
+\label{06:augpt}
 We choose the AuGPT model introduced by \citet{kulhanek-etal-2021-augpt}.
 The architecture utilizes GPT-2 model~\cite{radford2019language} that is used for both belief state prediction and response generation, following the method described in Section~\ref{background:2stage-lm-modeling}.
 GPT-2 is a pre-trained language model based on a Transformer decoder.
@@ -31,7 +32,7 @@ This modification aims to improve the robustness of the belief state prediction.
 Since GPT can work with any natural language sentences, it is straightforward to apply this model to our dialogue datasets.
 
 \section{DIASER corpus introduction}
-\label{sec:diaser}
+\label{06:sec:diaser}
 Motivated by the questions raised in this chapter, we created a collection of several well-established task-oriented dialogue datasets spanning several domains to yield one larger multi-domain corpus.
 Specifically, we used: \textbf{MultiWOZ 2.2} (MW), \textbf{Schema-guided dialogue} (SGD), \textbf{DSTC2} (DSTC) and \textbf{CamRest676} (CR).
 For more details about the aforementioned datasets, please refer to Section~\ref{02:sec:input-data-desc}.
@@ -153,7 +154,7 @@ It consists of 12 transformer blocks with a model layer size equal to 768, havin
 For the state corruption detection task, we use a dropout of 0.1 with label smoothing of 0.1.
 We use the AdamW optimizer \cite{DBLP:conf/iclr/LoshchilovH19}.
 % For greater training effectiveness, we employ mixed-precision training \cite{micikevicius2017mixed} through PyTorch AMP. 
-We discuss the used data in detail in Section~\ref{sec:diaser}
+We discuss the used data in detail in Section~\ref{06:sec:diaser}
 \subsection{Experiment goals}
 In this chapter, we want to explore if sequence-to-sequence LM-based architectures can robustly learn the dialogue modeling capabilities and how well they can transfer them to other domains.
 To answer these questions, we conduct a series of experiments to train the model using only a small portion of the training data or a completely different dataset with similar properties.

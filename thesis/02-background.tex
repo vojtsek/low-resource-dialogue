@@ -160,7 +160,11 @@ Consequently, several datasets were proposed \cite{supernaturalinstructions,blac
 These datasets allow tuning of the models using reinforcement learning or supervised fine-tuning methods.
 
 \paragraph{Prompt engineering vs. LLM fine-tuning}
+\label{02:in-context}
 The in-context learning approach has great advantages because it makes it possible to obtain great performance from LLMs by simply formulating the task and desired output structure in the LLM input (i.e. prompt).
+There are multiple strategies to formulate the prompt of the in-context learning technique.
+We can include examples for better model guidance or just formulate the instructions.
+These approaches are referred to as \emph{few-shot} or \emph{zero-shot} settings, respectively.
 Although this approach might be very efficient for some tasks, especially those that are well described in the corpora available to the LLM during training \cite{wei2022emergent}, some more specific tasks might yield better results after fine-tuning of the model \cite{tu-etal-2022-prompt}.
 However, the LLM fine-tuning process is quite demanding regarding computational resources.
 Therefore, alternative approaches were proposed, such as LoRA \cite{hu2021lora} or Transformer Adapters \cite{pfeiffer2020AdapterHub}.
@@ -328,7 +332,7 @@ When given text input, such a basic model can save each text memory into a new m
 Therefore, old memories are not updated, and new inputs are stored sequentially.
 The most interesting components of this simple text model are $O$ and $R$.
 The $O$ module scores the saved memory vectors given text input $x$ and subsequently retrieves $k$ supporting entries with the highest scores from the memory.
-To produce a response, the $R$ module takes the input $x$ and $k$ retrieved memories.
+The $R$ module takes the input $x$ and $k$ retrieved memories to produce a response.
 It generates an output by copying one of the memories or creating new outputs, for example, with an auto-regressive RNN decoder. 
 
 \subsection{Multi-hop end-to-end MemNN}
@@ -423,7 +427,7 @@ That means we have a predefined set of semantic \textit{slots} that must be fill
 Each utterance in the task-oriented dialogue is considered an action that potentially changes the state of the conversation.
 Such actions can be represented using \textit{Dialogue Acts (DA)}\cite{core1997coding}.
 To define the Dialogue Act, we first must introduce the concept of \emph{slots} and \emph{intents}.
-To represent the meaning of user utterances, annotation based on \emph{slots} is commonly employed \cite{young_pomdp-based_2013}. Slots, which describe semantic concepts relevant to completing the task, serve as a means of capturing the user's desires as well as facilitating the system's communication with the user. Typical examples of slots include \emph{area}, \emph{price}, and \emph{address}, among others. By tracking slots and their values throughout the dialogue, a dialogue system can maintain a \emph{dialogue state}, allowing it to plan the next actions \cite{williams2013dialog} effectively. The dialogue state represents explicitly all the important knowledge known to the system at a specific point in the dialogue. Consequently, it can be utilized to communicate with external sources of information and data, such as databases, structured knowledge bases, or various APIs, to provide users with accurate and relevant information.
+To represent the meaning of user utterances, annotation based on \emph{slots} is commonly employed \cite{young_pomdp-based_2013}. Slots, which describe semantic concepts relevant to completing the task, serve as a means of capturing the user's desires as well as facilitating the system's communication with the user. Typical examples of slots include \emph{area}, \emph{price}, and \emph{address}, among others. By tracking slots and their values throughout the dialogue, a dialogue system can maintain a \emph{dialogue state}, effectively planning the next actions \cite{williams2013dialog}. The dialogue state represents explicitly all the important knowledge known to the system at a specific point in the dialogue. Consequently, it can be utilized to communicate with external sources of information and data, such as databases, structured knowledge bases, or various APIs, to provide users with accurate and relevant information.
 Intent describes the user's intention expressed by a respective utterance.
 In other words, intent represents what the user wants and what his wish is.
 Slots describe attributes of this wish and ground it to an ontology.
