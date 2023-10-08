@@ -470,7 +470,7 @@ Thus, obtaining a dataset suitable for training all components can be difficult 
 Also, the system design itself is more complicated since it requires the implementation of multiple models.
 Because of the drawbacks, many current research works focus on dialogue modeling end-to-end, i.e., using systems without explicit components that can be trained jointly.
 \label{02:delex}
-One of the commonly used concepts in end-to-end dialogue modeling is that of \emph{delexicalization} \cite{wen-etal-2015-stochastic}.
+One commonly used concept in end-to-end dialogue modeling is that of \emph{delexicalization} \cite{wen-etal-2015-stochastic}.
 When using delexicalization, the slot values in the text of the utterances are replaced by placeholders.
 This addresses the problem of data sparsity because the model can learn just the important concepts and does not have to remember full ontology or use the correct values.
 Also, delexicalized values are better suited for interaction with external interfaces -- we can fill (lexicalize) them later in a deterministic way to prevent the model from hallucinating incorrect values.
@@ -563,7 +563,7 @@ It has been released in several versions; the standard most commonly used nowada
 MultiWOZ 2.2 is a version of the original dataset improved by (1) fixing some annotation errors, inconsistencies, and ontology issues and (2) adding slot span annotations for utterances.
 MultiWOZ contains over 10,000 annotated dialogues and spans multiple domains -- restaurant and hotel reservations, tourist attraction search, and taxi and train reservations.
 While some of the dialogues use only a single domain, most of them are multi-domain.
-For example, after finding a restaurant, the user also asks for a hotel and orders a taxi.
+For example, after finding a restaurant, the user asks for a hotel and orders a taxi.
 This makes the dataset more relevant to real-world use cases.
 
 The data were gathered via a crowd-sourcing Wizard-of-Oz scheme described in~\citet{wen-etal-2017-wizard-of-oz}.
