@@ -2,9 +2,8 @@
 \chapter{Background}%
 \label{chap:background}
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Before we introduce our work and delve into discussions, we would like to establish the common theoretical background of the concepts we use.
-Some of the concepts are well known, some less, but we consider it important to have this reference point.
-We aim to be concise here and discuss only the most relevant points.
+Before we introduce our work and delve into discussions, we will establish the common theoretical background of the concepts we use.
+Some of the concepts are well known, some less, but we consider it important to have this reference point and provide at least a concise description.
 First, we briefly describe this work's basic concepts and foundational models.
 We link to literature when needed.
 Next, we introduce methods from related research areas upon which we build.
@@ -13,8 +12,6 @@ Ultimately, we introduce the data and evaluation metrics we are working with.
 \section{Key concepts}
 \label{02:sec:basics}
 In this section, we first introduce some key concepts necessary for understanding this work and establish common ground.
-Some of the concepts are well-known in the community.
-However, we still consider it appropriate to mention them here and provide the reader with references to the literature for detailed descriptions.
 
 \subsection{Neural Networks}
 \label{background:nns}
@@ -28,16 +25,16 @@ Essentially, these models parameterize non-linear functions with millions of par
 Neural Networks (NN) are widely used across various fields, and NLP is among the most prominent.
 However, it is not straightforward how to represent words in NN.
 A simple one-hot vector or bag of words representation is insufficient as it throws away a lot of useful information about the relations between words, their position, etc.
-Traditional statistical N-gram models \cite{jurafsky2000speech} address some of the issues but again discard some positional information and are inherently limited by context size (N-gram length).
-A breakthrough in this field, which allowed for successful NN applications, dates back to the works \citep{mikolov2010recurrent} and \citep{mikolov2013distributed}, which build on the principle of word distributional hypothesis and introduced the concept of \emph{word embeddings}.
+Traditional statistical n-gram models \cite{jurafsky2000speech} address some of the issues but again discard some positional information and are inherently limited by context size (n-gram length).
+A breakthrough in this field, which allowed for successful NN applications, dates back to the works of \citet{mikolov2010recurrent} and \citet{mikolov2013distributed}, which build on the principle of word distributional hypothesis and introduced the concept of \emph{word embeddings}.
 Word embeddings are multi-dimensional real vectors that capture important information about each word in some particular input corpora.
 When input to an NN, word embeddings accurately represent the word and arguably capture the meaning.
 This principle was later improved by introducing large-scale pre-trained neural language models such as ELMo~\cite{peters-etal-2018-deep} and BERT~\cite{devlin2019}, which can create contextualized high-dimensional representations.
-We introduce these principles in more detail in Section~\ref{background:plms}
+We introduce these principles in more detail in Section~\ref{background:plms}.
 
 \subsection{Recurrent Neural Networks (RNNs)}
 \label{background:rnns}
-Recurrent Neural Networks are a type of neural network well-suited for processing sequential data\cite{GoodBengCour16}. Sequential data is ordered in time, such as text or audio.
+Recurrent Neural Networks are a type of neural network well-suited for processing sequential data~\cite{GoodBengCour16}. Sequential data is ordered in time, such as text or audio.
 RNNs can learn long-range dependencies between different parts of the input sequence, which makes them well-suited for tasks such as machine translation, text summarization, and question answering.
 The motivation for RNNs comes from human language being sequential by nature; therefore, sequential dependencies must be handled.
 
@@ -47,8 +44,8 @@ This means that the network's output at a given time step is fed back into the n
 Basic RNN consists of 3 weight matrices: $W_{i}$ to process the input, $W_h$ to process the hidden state, and $W_o$ to construct output.
 The computation of output sequence $\mathbf{y} = \{y_0, ..., y_n\}$ from an input sequence $\mathbf{x} = \{x_0, ..., x_n\}$ proceeds in the following steps:
 \begin{enumerate}
-    \item An initial hidden state $h_0$ is constructed
-    \item For time step $t$, first hidden state $h_t$ is obtained using the formula $h_t = f(W_hh_{t-1} + W_ix_t)$. Then, the output is computed as $y_t = W_oh_t$
+    \item An initial hidden state $h_0$ is constructed.
+    \item For time step $t$, the first hidden state $h_t$ is obtained using the formula $h_t = f(W_hh_{t-1} + W_ix_t)$. Then, the output is computed as $y_t = W_oh_t$.
 \end{enumerate}
 Note that the output sequence has the same length as the input sequence, which is useful for sequence tagging problems.
 However, RNNs can also be used for sequence classification, in which case only the last hidden state is considered, or the encoder-decoder setup can be used in which one network is used to encode the sequence.
@@ -77,7 +74,7 @@ Therefore, improvements were proposed \cite{bahdanau2014neural,luong-etal-2015-e
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.9\textwidth]{images/transfo-arch.png}
-    \caption{The Transformer architecture as proposed by \citep{vaswani2017attention}. We can see the encoder (left) and decoder (right) stacks and their interconnection.}
+    \caption{The Transformer architecture as proposed by \citet{vaswani2017attention}. We can see the encoder (left) and decoder (right) stacks and their interconnection.}
     \label{fig:trafo}
 \end{figure}
 The Transformer architecture is another neural network architecture capable of processing sequential data.
@@ -86,7 +83,7 @@ Unlike RNNs, the Transformer architecture does not work with a hidden state that
 Instead, the architecture is based solely on the attention mechanism, which allows the model to learn long-range dependencies between different parts of the input sequence.
 The high-level equation describing the self-attention mechanism is formulated as follows:
 \begin{equation*}
-    Att(Q,K,V) = softmax(\frac{QK^T}{\sqrt{d_k}}V)
+    Att(Q,K,V) = softmax\left(\frac{QK^T}{\sqrt{d_k}}V\right)
 \end{equation*}
 where $Q$, $K$ and $V$ are trainable square weight matrices corresponding to \emph{queries}, \emph{keys} and \emph{values} and with dimension $d_q$, $d_k$, $d_v$ respectively.
 The attention mechanism allows the model to focus on different parts of the input sequence when producing the output sequence.
@@ -127,7 +124,7 @@ They are often referred to as \emph{foundational} models because of their langua
 From a certain point of view, the usability of PLMs lies in the ability to create useful and contextual representations of input words and phrases, often called \emph{(word) embeddings}.
 This ability has been observed in the word2vec model \cite{mikolov2013distributed} and improved by ELMo~\cite{peters-etal-2018-deep}, BERT~\cite{devlin2019}, SBERT~\cite{reimers2019sentence} and others.
 
-Many model architectures based on Transformer blocks followed both for encoders \cite{liu2019roberta,reimers2019sentence}; decoders \cite{radford2019language,brown2020language} or even sequence-to-sequence \cite{raffel2020exploring,lewis-etal-2020-bart}.
+Many model architectures based on Transformer blocks followed both for encoders \cite{liu2019roberta,reimers2019sentence}; decoders \cite{radford2019language,brown2020language} or even encoder- decoder~\cite{raffel2020exploring,lewis-etal-2020-bart}.
 The NLP community largely adopted these models.
 
 
@@ -146,7 +143,7 @@ The textual input for LLMs is frequently called a \emph{prompt}.
 \paragraph{On LM scaling}
 Scaling laws in language models describe the relationship between the size of a language model and its performance.
 It has been shown that with the next token prediction objective (which is what virtually all LMs are trained for), some abilities start to emerge when exceeding a certain size threshold \cite{kaplan2020scaling}.
-However, bigger models also need to be trained longer and with more data \cite{hoffmann2022training}
+However, bigger models also need to be trained longer and with more data \cite{hoffmann2022training}.
 In general, larger language models tend to perform better than smaller models but also require more computational resources to train.
 This line of research can help us understand how the size of a language model affects its performance and predict the performance of a language model before it is trained.
 
@@ -188,7 +185,7 @@ The modeled distributions are typically Gaussian; the prior is the standard norm
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.46\textwidth]{images/VAE.png}
-    \caption{Variational autoencoder latent space. Colors and different classes by shapes distinguish the encoder distributions. It can be seen the interpolation between two sampled points is meaningful}
+    \caption{Variational autoencoder latent space. Colors and different classes by shapes distinguish the encoder distributions. It illustrates that we can interpolate between two points in the latent space smoothly.}
     \label{fig:vae}
 \end{figure}
 \begin{figure}[t]
@@ -202,15 +199,15 @@ However, there is a drawback regarding the implementation of sampling.
 The sampling operation is not differentiable and, therefore, cannot be trained using standard approaches.
 A solution to this problem is to use the \textit{reparameterization trick} \cite{kingma2013auto}.
 The reparameterization trick exploits that a random variable under a certain conditional distribution can be expressed as a deterministic transformation of some other variable with an independent marginal distribution.
-Distributions that allow us to do such a transformation include \textit{Gaussian, Logistic} or \textit{Gumbel}~\cite{jang2016categorical}.
+Distributions that allow us to do such a transformation include \textit{Gaussian, Logistic}, or \textit{Gumbel}~\cite{jang2016categorical}.
 
 \subsubsection{VAE latent space discretization}
 \label{02:sec:vae_discrete}
 Although VAE training yields robust representations that are also more interpretable thanks to the regularized latent space, in some cases, we require the latent representations to be discrete.
 The motivation is mainly to improve interpretability and uncover underlying processes in sequential tasks.
 Incorporating discrete variables into neural network models is problematic because the widely used backpropagation algorithm requires smooth differentiable functions to propagate the gradients correctly.
-\cite{van2017neural} propose a vector quantization technique to discretize the latent variables in VAEs.
-Another approach is to use the Gumbel-softmax distribution \cite{jang2016categorical} that, together with the reparameterization trick (Section \ref{02:sec:vae}), enables work with categorical variables while not breaking the gradient flow in the network.
+\citet{van2017neural} propose a vector quantization technique to discretize the latent variables in VAEs.
+Another approach is to use the Gumbel-softmax distribution \cite{jang2016categorical} that, together with the reparameterization trick (Section \ref{02:sec:vae}), enables working with categorical variables while not breaking the gradient flow in the network.
 
 \subsection{Variational Recurrent Neural Networks}
 \label{02:sec:vrnn}
@@ -265,7 +262,7 @@ The update of the hidden state $\mathbf{h}^t$ is as follows:
 \end{equation}
 where $[.,.]$ is concatenation, $\varphi_z(.)$ is a feature extractor, and $\text{RNN}()$ is a step transition function of a recurrent neural network, in our case an LSTM \cite{hochreiter1997}.
 
-\subsection{Latent Action Spaces via Variational Auto-encoding - LAVA}
+\subsection{Latent Action Spaces via Variational Auto-encoding -- LAVA}
 \label{02:sec:lava}
 \todo{More details}
 The LAVA framework~\cite{lubis-etal-2020-lava} focuses on learning latent variables in a way that they store dialogue-related actions.
@@ -318,14 +315,14 @@ The basic Memory Network takes an input $\mathbf{x}$ and processes it in four pr
 \begin{enumerate}
     \item The input $x$ is processed with \emph{input feature map} $I$ to obtain internal representations of the input $I(x)$.
     \item The memory array is updated using the \emph{generalization component} $G$. In this step, each memory entry gets updated following the equation $\mathbf{m}_i = G(\mathbf{m}_i, I(\mathbf{x}), \mathbf{m})$.
-    \item The output features are computed with the \emph{output feature map} using the memory and transformed input $ o = O(I(\mathbf{x}, \mathbf{m})$
+    \item The output features are computed with the \emph{output feature map} using the memory and transformed input $ o = O(I(\mathbf{x}, \mathbf{m}))$
     \item Finally, the output representation is used to decode the final response: $r = R(o)$
 \end{enumerate}
 
 The components $I, G, O$, and $R$ can be represented with any function capable of doing the task.
 However, in most cases in the literature, we see models that use neural networks to instantiate these components.
 Consequently, the whole model is end-to-end differentiable and thus trainable with algorithms such as backpropagation.
-We talk about Memory Neural Networks (MemNNs).
+In that case we talk about Memory Neural Networks (MemNNs).
 Although various kinds of data can be input and output to MemNNs in general, we consider only MemNNs that work with text in this work.
 Let us describe a basic MemNN for text.
 When given text input, such a basic model can save each text memory into a new memory slot.
@@ -337,7 +334,7 @@ It generates an output by copying one of the memories or creating new outputs, f
 
 \subsection{Multi-hop end-to-end MemNN}
 The MemNN architecture's disadvantage is that it requires supervision at each layer during training, as pointed out by \citet{sukhbaatar2015end}.
-In this work, the authors address this problem and present a fully end-to-end trainable memory network model, which we call \emph{e2eMemNN}.
+In this work, the authors address this problem and present a fully end-to-end trainable memory network model, which we call \emph{e2e MemNN}.
 In the e2e MemNN, we input a set of vectors $x$ to be stored in the memory and a query $q$.
 Each input $x_i$ is then embedded with two distinct embedding functions $E_m$ and $E_c$ to obtain a memory entry $m_i$ and corresponding output embedding $c_i$, respectively.
 The query $q$ is then embedded with the different function $E_q$ to obtain query embedding $u$.
@@ -349,7 +346,7 @@ The query $q$ is then embedded with the different function $E_q$ to obtain query
     \label{fig:mem2seq}
 \end{figure}
 
-Upon embedding the inputs, a memory distribution $p$ is computed as a match between $u$ and each memory $m_i$ as $softmax (u^Tm_i)$.
+Upon embedding the inputs, a memory distribution $p$ is computed as a match between $u$ and each memory $m_i$ as $\operatorname{softmax} (u^Tm_i)$.
 The memory distribution $p$ is then used to create an output $o$ computed as a weighted sum over the output embeddings $\sum_i p_ic_i$.
 The output $o$ is then used to produce the final answer, a categorical label or textual response generated with an auto-regressive model.
 
@@ -390,7 +387,7 @@ This way, the model can use information from the past effectively.
         \textbf{\texttt{SYSTEM:}} & \textit{\texttt{Have a great day.}} & \textbf{\texttt{\colorbox{pastelyellow}{goodbye}()}} \\
         \end{tabular}
 \normalsize
-        \caption{Example of task-oriented dialogue in the restaurant reservation domain. Utterance representations as dialogue acts are depicted on the right. Intents are highlighted in orange, slot names in blue, and respective values in green. Note that not all dialogue acts include slots and values}
+        \caption{Example of task-oriented dialogue in the restaurant reservation domain. Utterance representations as dialogue acts are depicted on the right. Intents are highlighted in orange, slot names in blue, and respective values in green. Note that not all dialogue acts include slots and values.}
     \label{fig:das}
 \end{table*}
 First, we describe various approaches to constructing dialogue systems pipelines and provide insights about approaches to modeling the underlying processes.
@@ -413,26 +410,26 @@ Here, we introduce the widely used classification scheme \cite{jurafsky2000speec
 
 Another way of classifying the dialogues considers their domain of operation.
 \textbf{Single-domain} systems can work only in one topic area, e.g. public transport or restaurant information, whereas \textbf{multi-domain} systems can handle multiple domains.
-These types of systems cannot give meaningful answers outside the domains they're trained on.
+These types of systems cannot give meaningful answers outside the domains they are trained on.
 A dialogue system is considered \textbf{open-domain} if it can have a conversation not limited to a predefined set of domains.
 In practice, this is achievable only to some extent since the knowledge base of the program is always limited.
 However, the systems can cover many domains with internet access and smart information retrieval methods.
 
 Here, we focus on the task-oriented DS and discuss it more deeply.
 From the domain perspective, task-oriented DS are usually single or multi-domain systems.
-Open-domain is not often the case, at least in the research community.
-We can see a task-oriented dialogue as a slot-filling task.
+Open-domain dialogue systems are rare, at least in the research community.
+We can see a task-oriented dialogue as a composition of two tasks - slot-filling and response generation.
 Task-oriented dialogue systems are widely used for various applications, such as customer service, personal assistance, and information retrieval. These systems aim to assist users in accomplishing specific tasks by engaging in a natural language conversation. 
 That means we have a predefined set of semantic \textit{slots} that must be filled with the right \textit{values}.
 Each utterance in the task-oriented dialogue is considered an action that potentially changes the state of the conversation.
-Such actions can be represented using \textit{Dialogue Acts (DA)}\cite{core1997coding}.
+Such actions can be represented using \textit{Dialogue Acts (DA)}~\cite{core1997coding}.
 To define the Dialogue Act, we first must introduce the concept of \emph{slots} and \emph{intents}.
 To represent the meaning of user utterances, annotation based on \emph{slots} is commonly employed \cite{young_pomdp-based_2013}. Slots, which describe semantic concepts relevant to completing the task, serve as a means of capturing the user's desires as well as facilitating the system's communication with the user. Typical examples of slots include \emph{area}, \emph{price}, and \emph{address}, among others. By tracking slots and their values throughout the dialogue, a dialogue system can maintain a \emph{dialogue state}, effectively planning the next actions \cite{williams2013dialog}. The dialogue state represents explicitly all the important knowledge known to the system at a specific point in the dialogue. Consequently, it can be utilized to communicate with external sources of information and data, such as databases, structured knowledge bases, or various APIs, to provide users with accurate and relevant information.
 Intent describes the user's intention expressed by a respective utterance.
-In other words, intent represents what the user wants and what his wish is.
+In other words, intent represents what the user wants and what their wish is.
 Slots describe attributes of this wish and ground it to an ontology.
 
-DA is a tuple consisting of \textit{intent} and optionally also \textit{slot} and the corresponding \textit{value}.
+DA is a tuple consisting of an \textit{intent} and \textit{slot} and the corresponding \textit{value}.
 If multiple slot values are present, all are considered to have the same intent.
 
 An example dialogue with respective DA representation is depicted in Table \ref{fig:das}.
@@ -473,10 +470,10 @@ Thus, obtaining a dataset suitable for training all components can be difficult 
 Also, the system design itself is more complicated since it requires the implementation of multiple models.
 Because of the drawbacks, many current research works focus on dialogue modeling end-to-end, i.e., using systems without explicit components that can be trained jointly.
 \label{02:delex}
-One of the commonly used concepts in end-to-end dialogue modeling is that of \emph{delexicalization} \cite{wen-etal-2015-stochastic}
+One of the commonly used concepts in end-to-end dialogue modeling is that of \emph{delexicalization} \cite{wen-etal-2015-stochastic}.
 When using delexicalization, the slot values in the text of the utterances are replaced by placeholders.
-This addresses the problem of data sparsity because the model can learn just the important concepts and doesn't have to remember full ontology or use the correct values.
-Also, delexicalized values are better suited for interaction with external interfaces - we can fill (lexicalize) them later in a deterministic way to prevent the model from hallucinating incorrect values.
+This addresses the problem of data sparsity because the model can learn just the important concepts and does not have to remember full ontology or use the correct values.
+Also, delexicalized values are better suited for interaction with external interfaces -- we can fill (lexicalize) them later in a deterministic way to prevent the model from hallucinating incorrect values.
 However, delexicalization also suffers from several drawbacks.
 First, it is not straightforward to perform and requires ontology knowledge.
 Second, the inverted lexicalization process is sometimes difficult to implement and might require complex rules.
@@ -527,10 +524,10 @@ In the subsequent step, the model has all the needed information in the input an
 \label{02:sec:input-data-desc}
 We describe some of the most prominent datasets we use for our experiments.
 Most of them are largely used in the dialogue community and provide common benchmarks used for the evaluation.
-All these datasets have several task-oriented dialogue properties in common that define the conversation according to \cite{young_pomdp-based_2013}:
+All these datasets have several task-oriented dialogue characteristics that define the conversation according to \cite{young_pomdp-based_2013}:
 \begin{enumerate}
 \item \textbf{Domain(s)} define the topic (or range of topics) which are mentioned in the dialogue. There can be several domains per dialogue.
-\item \textbf{Task} -- the users in each dialogue attempt to reach a certain goal (such as booking a restaurant or finding a tourist attraction).
+\item \textbf{Task}: the users in each dialogue attempt to reach a certain goal (such as booking a restaurant or finding a tourist attraction).
 \item \textbf{Turns} We consider \emph{turn-taking} dialogues, i.e.\ the participating sides exchange utterances alternately.
 One such utterance exchange is called a dialogue turn.
 Utterance is considered the linguistic realization of the speaker's thoughts and will. It can be spoken or written. 
@@ -561,20 +558,20 @@ We provide statistics about the dialogue datasets we use in this work in Table \
 
 \subsection{Datasets description}
 \label{02:sec:data-desc}
-\paragraph{MultiWOZ} (\textbf{MW}) is an established task-oriented dataset introduced by \cite{budzianowski-etal-2018-multiwoz}.
+\paragraph{MultiWOZ} (\textbf{MW}) is an established task-oriented dataset introduced by \citet{budzianowski-etal-2018-multiwoz}.
 It has been released in several versions; the standard most commonly used nowadays are MultiWOZ 2.1 and MultiWOZ 2.2.
-MultiWOZ 2.2 is an improved version of the original dataset by (1) fixing some annotation errors, inconsistencies, and ontology issues and (2) adding slot span annotations for utterances.
-MultiWOZ contains over 10,000 annotated dialogues and spans multiple domains - restaurant and hotel reservations, tourist attraction search, and taxi and train reservations.
+MultiWOZ 2.2 is a version of the original dataset improved by (1) fixing some annotation errors, inconsistencies, and ontology issues and (2) adding slot span annotations for utterances.
+MultiWOZ contains over 10,000 annotated dialogues and spans multiple domains -- restaurant and hotel reservations, tourist attraction search, and taxi and train reservations.
 While some of the dialogues use only a single domain, most of them are multi-domain.
 For example, after finding a restaurant, the user also asks for a hotel and orders a taxi.
 This makes the dataset more relevant to real-world use cases.
 
-The data were gathered via a crowd-sourcing Wizard-of-Oz scheme described in \cite{wen-etal-2017-wizard-of-oz}.
+The data were gathered via a crowd-sourcing Wizard-of-Oz scheme described in~\citet{wen-etal-2017-wizard-of-oz}.
 As MW is used most in our work, we provide further information on the data distribution in Figure~\ref{02:fig:mw-dist} and a sample of the data in Table~\ref{02:tab:mw_example}.
 
-\paragraph{DSTC2} \cite{henderson_robust_2014} was introduced as a part of a challenge to improve state tracking within dialogue systems. It contains over 3,000 dialogues covering a single domain around restaurant reservations. The dialogue corpus was collected using Amazon Mechanical Turk with a POMDP-based spoken dialogue system. It is the only human-machine dataset in our collection.
+\paragraph{DSTC2} \cite{henderson_robust_2014} was introduced as a part of a challenge to improve state tracking within dialogue systems. It contains over 3,000 dialogues covering a single domain around restaurant reservations. The dialogue corpus was collected using Amazon Mechanical Turk\footnote{\url{https://www.mturk.com/}} with a POMDP-based spoken dialogue system. It is the only human-machine dataset in our collection.
 
-\paragraph{CamRest676} (\textbf{CR}) \cite{wen2016network} is another crowd-sourced dialogue corpus gathered via the Wizard-of-Oz scheme. CamRest, with its 676 conversations, is the smallest of the datasets used in this work, and it is also a single-domain dataset focused on helping users to find a restaurant in Cambridge, UK. 
+\paragraph{CamRest676} (\textbf{CR}) \cite{wen2016network} is another crowd-sourced dialogue corpus gathered via the Wizard-of-Oz scheme. CamRest676, with its 676 conversations, is the smallest of the datasets used in this work, and it is also a single-domain dataset focused on helping users to find a restaurant in Cambridge, UK. 
 
 \paragraph{Schema-guided dialogue} (\textbf{SGD}) is a large (more than 20,000 dialogues) multi-domain (around 20 domains covered) dataset containing a total of 45 API services based on a pre-defined schema. First, the data was collected via a simulator that interacts with the API services, and then the dialogues were paraphrased using crowd-sourcing. \\
 
@@ -707,14 +704,14 @@ Those metrics are described together with experiments in respective sections of 
     \begin{itemize}
     \item \textbf{Joint Goal Accuracy (JGA)}~\cite{mrkvsic2016neural} is computed as the ratio of dialogue turns for which the predicted belief state matches the ground truth.
     We use fuzzy matching of the slot values so that capitalization or minor typos do not influence the result.
-    \item $F_1$ score on the slot level can also be used to evaluate the performance of state tracking
+    \item $F_1$ score on the slot level can also be used to evaluate the performance of state tracking.
     \end{itemize}
 \subsection{Dialogue-level metrics}
     \begin{itemize}
         \item The main \emph{overall measure} for evaluating a task-oriented dialogue is the dialogue \textbf{success rate} \cite{deriu_survey_2021}.
 For MultiWOZ, we use the standard evaluation of dialogue success as the ratio of dialogues where the user reaches the desired goal, based on goal annotation provided with the data \cite{nekvinda-dusek-2021-shades}. 
 The SGD dataset does not include goal annotation but contains information about the requested slots. Therefore, we compute SGD success rate as the proportion of dialogues in which (1) the system captures all the informed slots correctly and (2) all the requested slots are provided.
-For more details about the inform and request slots, we refer the reader to Section~\ref{02:sec:input-data-desc}
+For more details about the inform and request slots, we refer the reader to Section~\ref{02:sec:input-data-desc}.
     \item  \textbf{BLEU score} \cite{papineni-etal-2002-bleu} is largely used to evaluate response generation in machine translation, summarization, and other tasks, including dialogue generation.
     Although it has some flaws \cite{callison-burch-etal-2006-evaluating} and was designed mainly for corpus-based evaluation, it is widely used, so it is desirable to measure it for comparison with other works.
 \end{itemize}

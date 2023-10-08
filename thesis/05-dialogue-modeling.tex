@@ -3,7 +3,7 @@
 \label{chap:modeling}
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Dialogue modeling is a complicated task requiring the ability to communicate in a natural language and handle discrete decision processes representing the conversation logic.
-Various architectures have been proposed over the years (see Sections~\ref{02:ds-background},\ref{relwork:end-to-end}), mostly relying on explicit data annotation on multiple levels to guide the model training process.
+Various architectures have been proposed over the years (see Sections~\ref{02:ds-background}, \ref{relwork:end-to-end}), mostly relying on explicit data annotation on multiple levels to guide the model training process.
 One of the biggest challenges is to model task-oriented dialogue that requires interaction with external interfaces such as databases or API services.
 This aspect puts a hard constraint on the dialogue system architecture -- it requires some explicit representation that allows one to communicate with external systems.
 It's challenging to achieve this in a fully unsupervised setting due to the lack of model guidance in the form of structured labels.
@@ -47,14 +47,13 @@ Database query results can be stored and used in follow-up questions to maintain
         \bottomrule
     \end{tabular}
     \vspace{-2mm}
-    \caption{An example dialogue drawn from the CamRest676 validation set illustrates our injection of database interaction turns. We show the user input (or inserted database results), the gold-standard system response, and system action annotation based on manual rules. A database query is constructed in the first turn, and the second turn illustrates how the result is retrieved and fed as input. Values inferred correctly by our system are depicted in green.
-    The wrong inference is in red.}
+    \caption{An example dialogue drawn from the CamRest676 validation set illustrates our injection of database interaction turns. We show the user input (or inserted database results), the gold-standard system response, and system action annotation based on manual rules. A database query is constructed in the first turn, and the second turn illustrates how the result is retrieved and fed as input.}
     \label{05:tab:example}
 \end{table*}
 
 \section{Task-Oriented dialogue with TO-VRNN}
 The VRNN model architecture (see Section~\ref{02:sec:vrnn}) is designed to model sequences of observations coupled with latent states.
-It's a generative model that can learn the conditional generative distribution of observations given the state.
+It is a generative model that can learn the conditional generative distribution of observations given the state.
 Moreover, although VRNN does not require a fixed set of states, it can be adjusted to model discrete states.
 The VRNN is great for modeling the discrete decision processes behind conversation exchanges, thanks to the above-mentioned properties.
 However, we propose some extensions for task-oriented dialogue modeling to distinguish between the user and system roles and incorporate the possibility of handling interaction with external interfaces.
@@ -157,7 +156,7 @@ The training is sensitive to some parameters, such as the \nobreak{Gumbel-softma
 To address the issue of posterior collapse (see Section~\ref{background:vae-problems}), we experiment with various approaches to KL annealing.
 In our experiments, we use a liner annealing schedule, increasing the $\beta$ annealing coefficient from 0 $\rightarrow$ 1.
 \paragraph{Metrics}
-We use common metrics described in Table~\ref{05:automatic_metrics}).
+We use common metrics described in Table~\ref{05:automatic_metrics}.
 To evaluate the quality of individual responses, we compute BLEU score and perplexity on the test set.
 Without dialogue-state supervision, we cannot measure task-oriented metrics such \emph{joint goal accuracy}.
 Therefore, we decided to measure dialogue success and entity match rate, which we adjusted to the minimally supervised case (details follow).
@@ -248,7 +247,7 @@ A relatively common error is informing about wrong slots, e.g., the model provid
         \bottomrule
     \end{tabular}
     \vspace{-2mm}
-    \caption{Predicted outputs or our VRNN model for a conversation snippet presented in~\ref{05:tab:example}}
+    \caption{Predicted outputs or our VRNN model for a conversation snippet presented in Section~\ref{05:tab:example}.}
     \label{05:tab:example-cont}
 \end{table*}
 
@@ -463,7 +462,7 @@ We want to explore this question to see if the model can learn to leverage this 
     \caption{The architecture of our HVTOD model. The dialogue context is first processed with a recurrent network encoder to obtain a hidden representation. This representation then serves as an input to the hierarchical system of variational encoders stacked on each other. The latent variables are merged to form the decoder's initial hidden state.}
     \label{05:fig:HVTOD-full}
 \end{figure}
-The proposed HVTOD architecture is based on the LAVA framework (\cite{lubis-etal-2022-dialogue}, see Section~\ref{02:sec:lava}).
+The proposed HVTOD architecture is based on the LAVA framework (\citealp{lubis-etal-2022-dialogue}, see Section~\ref{02:sec:lava}).
 In LAVA, the authors propose an architecture that uses latent representations of dialogue actions computed with VAE.
 They use context encoded with an RNN encoder as an input into the VAE.
 We extend the architecture so that instead of just one VAE.
@@ -473,7 +472,7 @@ In the input, we have a set of dialogues $\mathcal{D}$ where each dialogue $d$ w
 Similarly to LAVA, our model encodes the context $C^t = (s_1,u_1,...,s_t,u_t)$ with RNN-based utterance encoder to obtain a hidden representation of the context $h_0 = RNN_{\varphi_{enc}^u} (C^t)$.
 The obtained representation $h_0$ is subsequently used as input to a hierarchical $L$ variational autoencoder system.
 The autoencoders are stacked on each other.
-Therefore, we refer to $l-th$ VAE as VAE on level $l$ or sometimes just \emph{layer l}.
+Therefore, we refer to $l$-th VAE as VAE on level $l$ or sometimes just \emph{layer l}.
 Formally, each level $l$ computes parameters of posterior distribution $q(z_l|C^t)$ to sample the latent variable as follows:
 \begin{equation}
 \begin{split}    
@@ -590,9 +589,9 @@ Also, we can see that the placeholder loss contributes to the overall model perf
 
 \paragraph{Unsupervised response generation}
 For the unsupervised response generation (Table~\ref{05:tab:hvtod-unsup}), we observe the benefits of using the placeholder loss when only one-level hierarchy is used.
-Surprisingly, we don't observe a similar effect when more layers are employed.
+Surprisingly, we do not observe a similar effect when more layers are employed.
 Nevertheless, there are performance gains when using placeholder loss in the supervised setting (Table~\ref{05:tab:hvtod-ft}).
-This behavior shows that unsupervised dialogue response generation doesn't benefit from placeholder loss when more layers are employed.
+This behavior shows that unsupervised dialogue response generation does not benefit from placeholder loss when more layers are employed.
 This suggests that one of the layers in a multi-layer hierarchy can capture information that can be gained from placeholder loss.
 
 \subsubsection{Latent space inspection}

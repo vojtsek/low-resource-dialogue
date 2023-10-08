@@ -12,7 +12,7 @@ showing outstanding performance across many NLP benchmarks such as Winograd Chal
 Instruction fine-tuning of LLMs can align the model outputs with human preferences \cite{ouyang2022training,supernaturalinstructions} and improve the LLMs' communication capabilities substantially.
 
 State-of-the-art LLMs are good at understanding user needs and can provide relevant answers.
-Consequently, we have seen many chatbot applications both inside and outside academia (ChatGPT\footnote{\url{https://openai.com/blog/chatgpt}}, Claude\footnote{\url{https://www.anthropic.com/index/introducing-claude}} or BARD\footnote{\url{https://blog.google/technology/ai/bard-google-ai-search-updates/}}) which build upon the raw power of instruction-fine-tuned LLMs.
+Consequently, we have seen many chatbot applications both inside and outside academia (ChatGPT\footnote{\url{https://openai.com/blog/chatgpt}}, Claude\footnote{\url{https://www.anthropic.com/index/introducing-claude}} or Bard\footnote{\url{https://blog.google/technology/ai/bard-google-ai-search-updates/}}) which build upon the raw power of instruction-fine-tuned LLMs.
 
 In this chapter, we explore the abilities of LLM to model task-oriented dialogue using in-context learning.
 We evaluate the performance regarding response generation and dialogue success.
@@ -239,7 +239,7 @@ Using the oracle belief state allows us to focus on evaluating the LLM's ability
 
 \subsection{Experiment Details}
 \label{subsec:exp-details}
-Due to the expensiveness of the LLM runs (hardware intensity for the freely available models and actual cost for ChatGPT), we did not perform a grid search but used a limited set of preliminary experiments to determine hyperparameters.
+Due to the expensiveness of the LLM runs (hardware requirements for the freely available models and actual cost for ChatGPT), we did not perform a grid search but used a limited set of preliminary experiments to determine hyperparameters.
 Based on this, we used the context of two preceding utterances (one user + one system) as the context store keys (cf.~Section~\ref{07:sec:context-store}).
 We retrieve two examples for few-shot prompts and make one corrupted variant for negative examples.
 To corrupt an example, we randomly switch some of the slot values, similarly to \citet{kulhanek-etal-2021-augpt}, Section~\ref{06:augpt}.
@@ -374,7 +374,7 @@ Nevertheless, this observation does not necessary imply that the generated respo
 
 \subsection{Belief State Tracking}
 \label{subsec:dst}
-The belief state tracking results overview is given in Tables \ref{tab:res_overall_1},\ref{tab:res_overall_2} (\emph{JGA} and \emph{Slot-F1}).
+The belief state tracking results overview is given in Tables \ref{tab:res_overall_1} and \ref{tab:res_overall_2} (\emph{JGA} and \emph{Slot-F1}).
 A huge gap exists between the state-of-the-art supervised fine-tuned models' performance and the LLM results.
 Also, our instruction-tuned LLMs fall short compared to \citet{hu-etal-2022-context}, who used few-shot in-context learning to formulate state tracking prompts for big LLMs such as OpenAI \texttt{davinci-codex}~\citep{chen2021evaluating} with 175B parameters and reported JGA 43.13\% with a comparable number of examples used for few-shot retrieval.
 However, our models are generally an order of magnitude smaller, and we also use fewer examples in the prompt.

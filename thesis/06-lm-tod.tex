@@ -2,11 +2,11 @@
 \chapter{Sequence-to-Sequence Task-Oriented Dialogue Modeling}
 \label{06:chap:lm-tod}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Task-oriented dialogue is a complex task typically modeled with architectures consisting of multiple modules \ref{02:sec:basics}.
+Task-oriented dialogue is a complex task typically modeled with architectures consisting of multiple modules (see Section~\ref{02:sec:basics}).
 This approach makes it challenging to transfer the learned knowledge since all the modules need to be adjusted during the transfer.
 
 This concern can be addressed using end-to-end trainable models that can transfer the knowledge in one step and, therefore can be adjusted to different domains and use cases more easily.
-In task-oriented dialogue, end-to-end implementations are dominated by sequence-to-sequence architectures based on Language Models \ref{relwork:end-to-end}.
+In task-oriented dialogue, end-to-end implementations are dominated by sequence-to-sequence architectures based on Language Models (Section~\ref{relwork:end-to-end}).
 The LM-based approaches have taken over the benchmarks \footnote{\url{https://github.com/budzianowski/multiwoz\#trophy-benchmarks}}, demonstrating SoTA performance.
 However, these competitive models are fine-tuned on a single training set.
 In this chapter, we raise the question of how well these models can transfer the obtained skill of leading the dialogue to other domains.
@@ -52,8 +52,6 @@ We identified two main problems related to this issue:
     We need to design the final ontology so that different slot names refer to different concepts (with due precaution for label choice) and merge different slot names associated with the same value set under a single label.
     For example, in MultiWOZ, there are two different slot names \textit{day} and \textit{book-day} for the same value set (weekdays) and usage contexts.
     But in SGD, slot names may be misleading since we can find a slot named \textit{start-day} and another called \textit{day}; the former refers to a calendar date while the latter refers to a weekday.
-    %In MultiWOZ again, there is a slot named \textit{leave-at} whose value is always a time frame (independently of the domain), but its dual slot called \textit{arrive-by} can be either a time frame (train domain), or a day of the week (hotel domain). \\
-    %In SGD, all the following slots have exactly the same values : \{\textit{number-of-tickets,number-of-adults,people,total-people,persons,number-of-riders,group-size,number-of-seats} \}.
     
     \item \textbf{Absence of ontology/database} When the SGD dataset was collected, the authors used API calls instead of the database lookup.
     Therefore, no database-related metadata was released with the corpus, forcing us to create an ontology and a database for the data based on values occurring in the conversations.

@@ -3,7 +3,7 @@
 \label{chap:related}
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:relwork}
-Unlike in chapter~\ref{chap:background}, here we introduce some of the less widely known models and approaches that address the same tasks we are trying to solve.
+Here we introduce some of the less widely known models and approaches that address the same tasks we are trying to solve.
 The purpose of this section is to put our work in context, offer a comparison, and provide a broader intuition about what our ideas are based on.
 
 \section{Modular dialogue architectures}
@@ -30,7 +30,7 @@ However, the situation is usually more complicated.
 We must consider a distribution of slot value probabilities, and the update rules can be rather complex.
 \citet{vzilka2013comparison} compares different data-driven models for dialogue state tracking.
 Neural networks have also been used to model the distributions \cite{mrkvsic2016neural, zhong2018global} and deal with multiple domain handling \cite{rastogi2017scalable}.
-Some recent works explore the usage of language models for dialogue state tracking~\cite{lee-etal-2021-dialogue, hu2022context}
+Some recent works explore the usage of language models for dialogue state tracking~\cite{lee-etal-2021-dialogue, hu2022context}.
 
 \subsection{Dialogue Policy}
 \label{relwork:policy}
@@ -39,17 +39,18 @@ Learning the policy just from the offline data might not produce robust policy d
 Therefore, many works model the dialogue as a partially observable Markov decision process \cite{gavsic2010gaussian, thomson2010bayesian}.
 Reinforcement learning techniques are then applied to learn the policy and incorporate human feedback \cite{peng2017composite, su2016line}.
 Some approaches also try to model the actions in latent space and tune them via RL~\cite{lubis-etal-2022-dialogue}.
-Again, new line of works uses language models and prompting methods such as~\citep{zhang2023sgp}.
+Again, new line of works uses language models and prompting methods such as~\citet{zhang2023sgp}.
 \subsection{Natural Language Generation (NLG)}
 NLG is often realized with a set of handcrafted templates that are selected heuristically \cite{rudnicky_creating_1999}.
 The variability of the generated utterances is limited, and the scalability is poor.
 Therefore, corpus-based methods have been proposed \cite{oh2000stochastic, mairesse-young-2014-stochastic}.
-Lately, neural network based systems were proposed as well \cite{wen-etal-2015-semantically, wen-etal-2016-multi}
+Neural network based systems were proposed as well \cite{wen-etal-2015-semantically, wen-etal-2016-multi}.
+Another approach combines schemas and templates~\citep{kale-rastogi-2020-template} or use more sophisticated semantic representations~\citep{balakrishnan-etal-2019-constrained} 
 
 \section{End-to-end architectures}
 \label{relwork:end-to-end}
 Various end-to-end solutions have been proposed to address the drawbacks of modular system training (discussed in Section~\ref{02:ds-background}).
-This was made possible largely thanks to the growing popularity of Neural Networks (NN) and the backpropagation algorithm over the last decade (see Section~\ref{background:nns}.
+This was made possible largely thanks to the growing popularity of Neural Networks (NN) and the backpropagation algorithm over the last decade (see Section~\ref{background:nns}).
 NN forms a family of models that naturally allow us to combine and train multiple models using a single training algorithm.
 Therefore, several solutions were proposed to implement the respective modules using neural network-based models, interconnecting them to form the pipeline and train them jointly \cite{li-etal-2017-end,wen-etal-2017-network}.
 Although the end-to-end training improves the scalability of the models, the proposed architectures still require multiple levels of data annotation for training.
@@ -67,14 +68,14 @@ Thus, the annotation process is significantly easier.
 
 In recent years, the NLP world has witnessed the great success of attention-based models (Transformers) \cite{vaswani2017attention} and their usage as pre-trained language models \cite{devlin-etal-2019-bert}.
 In dialogue systems, these models also show prominent results in the open-domain setting \cite{DBLP:journals/corr/abs-1901-08149} or for dialogue state tracking \cite{chao2019bert}.
-The pre-trained models are naturally utilizable for transfer learning, which proved useful in dialogue domain adaptation task \cite{shalyminov-etal-2019-shot}.
-Recently, attention-based architecture was proposed that models latent dialogue actions \cite{bao2019plato}.
+The pre-trained models are naturally utilizable for transfer learning, which proved useful in dialogue domain adaptation task \citep{shalyminov-etal-2019-shot}.
+Recently, attention-based architecture was proposed that models latent dialogue actions \citep{bao2019plato}.
 
 Task-oriented dialogue modeling with the use of pre-trained language models was researched by \citet{zhang2019dialogpt} or \citet{peng-etal-2021-soloist}, who followed the ideas of text-based state encoding and 2-stage generation proposed in the Sequicity model \cite{lei2018sequicity}.
 This approach first uses a text-based model to decode the structured belief state.
 The belief state is later used to retrieve db information optionally, and finally, the model is called once more, conditioned on the belief state and retrieved information to generate a response.
-Several other improvements were proposed to the architecture that either improve contrastive state training \cite{kulhanek-etal-2021-augpt} or redefine state tracking as generation of belief state differences \cite{lin-etal-2020-mintl}.
-Others also proposed combining the purely generative models and retrieval-based approaches\cite{pandey-etal-2018-exemplar,cai-etal-2019-retrieval,nekvinda-dusek-2022-aargh}.
+Several other improvements were proposed to the architecture that either improve contrastive state training \citep{kulhanek-etal-2021-augpt} or redefine state tracking as generation of belief state differences \citep{lin-etal-2020-mintl}.
+Others also proposed combining the purely generative models and retrieval-based approaches~\citep{pandey-etal-2018-exemplar,cai-etal-2019-retrieval,nekvinda-dusek-2022-aargh}.
 The above-mentioned works fine-tuned the model on the in-domain data, contrasting with the pure in-context learning approach we apply in Chapter~\ref{chap:llms}.
 
 \subsection{Instruction Tuning for Large Language Models}

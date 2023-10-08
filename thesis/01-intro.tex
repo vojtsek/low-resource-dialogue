@@ -1,50 +1,51 @@
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Introduction}%
 \label{chap:intro}
-Human language is a convenient and the most natural means of communication for human beings.
-It is, therefore, desirable to implement an interface that mimics natural language and allows humans to interact with computers in the same way as they would with other human individuals.
+Human language is a convenient and natural means of communication for human beings.
+It is, therefore, desirable to implement an interface that mimics natural language and allows humans to interact with computers like they would with other human individuals.
 
 To achieve this goal, we need to be able to transfer information between human users and the computer.
-Humans most often use speech or written text to encode and transfer information and there are techniques that deal with this kind of encoding such as Automatic Speech Recognition (ASR), Optical Character Recognition (OCR), and Text-to-speech Synthesis (TTS).
-However, to perform a meaningful dialogue, we need more than just to mimic the interface.
+Humans most often use speech or written text to encode and transfer information, and some techniques deal with this kind of encoding, such as Automatic Speech Recognition (ASR), Optical Character Recognition (OCR), and Text-to-speech Synthesis (TTS).
+However, to perform a meaningful dialogue, we need more than to mimic the interface.
 The computer should be able to understand the meaning of utterances in the context and provide relevant responses.
 In this work, we focus on this part of the problem, i.e. we do not care about encoding or decoding natural language in a signal such as speech.
-Rather we assume textual interfaces for both input and output.
-Put, the task of a Dialogue System (DS) is to generate the correct natural language response \textit{r} given the natural language user utterance \textit{u} and context \textit{c}.
+Rather, we assume textual interfaces for both input and output.
+Put simply, the task of a Dialogue System (DS) is to generate the correct natural language response \textit{r} given the natural language user utterance \textit{u} and context \textit{c}.
 The dialogue is a \textit{turn-taking} conversation, i.e. participants (user and system) communicate in alternating \textit{turns}.
 
-The ultimate goal is to construct a dialogue agent that provides meaningful responses to all kinds of questions taking the conversation history into account.
-Such an agent would effectively pass the Turing test, the holy grail of sorts for the field of Artificial Intelligence.
+The ultimate goal is to construct a dialogue agent that provides meaningful responses to all kinds of questions, considering the conversation history.
+Such an agent would effectively pass the Turing test, the holy grail for Artificial Intelligence.
 The development of Large Language Models (LLMs) and their instruction tuning brings us close to achieving this goal.
 Nevertheless, in many real-life cases, we do not need such complexity.
-For example, we can take situated artificial agents who solely focus on achieving a certain well-specified goal such as ordering food or reserving a flight ticket.
+For example, we can take situated artificial agents who solely focus on achieving a certain well-specified goal, such as ordering food or reserving a flight ticket.
 
 Dialogue systems promise a convenient means of communication between humans and computers.
-They allow voice interaction, making it especially well suited for applications that should not disrupt attention such as car control.
-Systems capable of human-like conversation and accomplishing given tasks have huge potential to automate tech support processes, and call centers or serve as personal assistants.
+They allow voice interaction, making it especially well suited for applications that should not disrupt attention, such as car control.
+Systems capable of human-like conversation and accomplishing given tasks have huge potential to automate tech support processes and call centers or serve as personal assistants.
 
-Despite some successful dialogue system deployments, dialogue systems still suffer from a number of drawbacks.
+Despite some successful dialogue system deployments, dialogue systems still suffer from several drawbacks.
 Usually, the DSs are tailored to specific applications, and applying them in other domains is hard.
 Typically, the system is customized to handle a set of predefined domains with a high success rate.
 A lot of effort goes into designing an ontology and handling domain-specific scenarios.
 This results in bad scalability and inflexible applications.
-Ideally, a system would learn common behavioral patterns required to successfully finish the defined goal through conversational exchange.
-It would be able to apply the learned knowledge to previously unseen domains and applications given some description data.
+Ideally, a system would learn common behavioral patterns required to finish the defined goal through conversational exchange successfully.
+Given some description data, it could apply the learned knowledge to previously unseen domains and applications.
 Although the LLMs make a huge step forward in this ability, they still might require finetuning and are not yet suitable for direct applications in the task-oriented world.
 
-Another problem is that there seems to be a trade-off between interpretability and performance or scalability of the systems in the case of neural network based models.
-In the vast majority of cases, the more complex and capable the model is, the harder it is to interpret its behavior and explain its decisions.
+Another problem is that there seems to be a trade-off between interpretability and performance or scalability of the systems in the case of neural network-based models.
+In most cases, the more complex and capable the model is, the harder it is to interpret its behavior and explain its decisions.
 
-In this thesis, we aim to propose solutions to some of these problems, especially in the task-oriented setting.
+This thesis aims to propose solutions to some of these problems, especially in the task-oriented setting.
 We now outline the main goals we want to achieve:
 \begin{itemize}
-    \item Make the task-oriented dialogue systems more scalable and easier to extend. As suggested, it is extensively difficult to apply task-oriented systems on unseen domains because of several reasons. (1) It is not easy for the current system architectures to transfer the learned knowledge. To explore this phenomenon more, we conduct a series of experiments in Chapter~\ref{chap:lm-tod}. We also explore the ways to teach LLMs with a limited number of examples in Chapter~\ref{chap:llms} (2) Extending the system is hard since it requires significant expert effort to be involved in designing the schemas and annotating the data. In Chapter~\ref{chap:data_analysis} we propose a method of automatic data analysis tool to gather information from dialogue corpora and suggest annotation schema without direct supervision.
-    \item Enable the dialogue systems to leverage large unannotated data sets and consequently train more robust models. There has not been much work on training task-oriented systems in an unsupervised way. We delve into our proposed models in Chapter~\ref{chap:modeling} and explore the usage of Pre-trained Language Models, which leverage large unannotated corpora, in Chapters~\ref{chap:lm-tod},\ref{chap:llms}.
+    \item Make the task-oriented dialogue systems more scalable and easier to extend. As suggested, it is difficult to apply task-oriented systems on unseen domains for several reasons. (1) Extending the system is hard since it requires significant expert effort to design the schemas and annotate the data. In Chapter~\ref{chap:data_analysis}, we propose an automatic data analysis tool to gather information from dialogue corpora and suggest annotation schema without direct supervision.
+    (2) It is difficult for the current system architectures to transfer the learned knowledge. To explore this phenomenon more, we conduct a series of experiments in Chapter~\ref{06:chap:lm-tod}. We also explore how to teach LLMs with a limited number of examples in Chapter~\ref{chap:llms}
+    \item Enable the dialogue systems to leverage large unannotated data sets and train more robust models. There has not been much work on training task-oriented systems in an unsupervised way. We delve into our proposed models in Chapter~\ref{chap:modeling} and explore the usage of Pre-trained Language Models, which leverage large unannotated corpora, in Chapters~\ref{chap:lm-tod},\ref{chap:llms}.
 \end{itemize}
 
 Scalability and domain adaptation go hand in hand.
-We focus on the reduction of the amount of annotation needed to train a system and on knowledge abstraction in order to make transfer learning possible.
-To be able to leverage larger data sets, we explore unsupervised techniques that do not require annotation and therefore, make the data collection process substantially easier.
+We focus on reducing the annotation needed to train a system and on knowledge abstraction to make transfer learning possible.
+To leverage larger data sets, we explore unsupervised techniques that do not require annotation, making the data collection process substantially easier.
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

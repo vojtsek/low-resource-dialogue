@@ -8,8 +8,8 @@ A requirement for dialogue state labels, which we discuss in Section~\ref{02:ds-
 The sets of slots and their values typically must be designed by domain experts.
 This procedure consists of multiple tasks:
 \begin{enumerate}
-    \item Determine which concepts need to be captured
-    \item Define them in a consistent way
+    \item Determine which concepts need to be captured.
+    \item Define them in a consistent way.
     \item Label the occurrences of these concepts in the training data.
 \end{enumerate}
 As mentioned, these steps require expert knowledge and sometimes non-trivial domain understanding.
@@ -39,10 +39,10 @@ Our slot discovery method has three main stages:
     We obtain this annotation using domain-independent natural language taggers such as a semantic frame parser or a named entity recognizer (NER).
     These models can detect important and relevant concepts in natural language utterances and subsequently group them using a set of pre-determined generic labels.
     Nevertheless, the raw output of these models is not polished and cannot be used for the purpose of the dialogue system directly.
-    For more details, see Section~\ref{04:sec:tagging_concepts}
+    For more details, see Section~\ref{04:sec:tagging_concepts}.
     \item We identify domain-relevant slots based on the annotation labels by iteratively (a) merging and (b) ranking and selecting the most viable candidates (Section~\ref{04:sec:candidate_selection}).
     
-    \item we use the discovered slots to train an independent slot tagger (Section~\ref{04:sec:training_tagger}).
+    \item We use the discovered slots to train an independent slot tagger (Section~\ref{04:sec:training_tagger}).
 \end{enumerate}
 
 We refer to this approach as "weak supervision" because it uses noisy labels as input instead of the desired ones.
@@ -59,7 +59,7 @@ Slots discovered by our approach can then be used to design a schema relevant to
 \begin{figure}[h]
 \centering
     \includegraphics[width=0.8\textwidth]{images/tagging-example.png}
-    \caption{An utterance from the restaurant recommendation domain tagged with generic semantic parser (green) and Named Entity Recognition system (red). We provide a comparison with ground truth dialogue slot labels (blue)}
+    \caption{An utterance from the restaurant recommendation domain tagged with generic semantic parser (green) and Named Entity Recognition system (red). We provide a comparison with ground truth dialogue slot labels (blue).}
     \label{fig:tagged_example}
 \end{figure}
 
@@ -134,7 +134,7 @@ These tokens will likely be slot candidates as they supposedly correspond to ent
 We then run k-means clustering to obtain a set of slot candidates.
 This way, we obtain multiple groups of word forms that can be used as input for our slot discovery pipeline.
 
-We also note the similarity of this approach to the two-step generation process used in multiple architectures (\cite{lei2018sequicity, peng2021soloist}).
+We also note the similarity of this approach to the two-step generation process used in multiple architectures~\citep{lei2018sequicity, peng2021soloist}.
 In the first step of this process, the model generates placeholders such as \emph{[address]} instead of specific values.
 This delexicalized utterance is then lexicalized in the second step by replacing the placeholders with actual values, e.g. using the database.
 This is almost exactly what happens in the Mem2Seq model.
@@ -170,8 +170,8 @@ Also, the lexicalization procedure of placing values instead of placeholders is 
 Another way of obtaining the slot candidates is by employing Large Language Models.
 These models can be instructed in the input text (prompted) to perform virtually any task (see Section~\ref{background:plms}).
 In our case, we instruct the model to extract the potential slot candidates directly from the input utterance.
-We use two models: \emph{Tk-Instruct-11B} \cite{supernaturalinstructions}, which is T5 encoder-decoder architecture \cite{2020t5} tuned on a dataset of over 5M task instances with instructions and \emph{ChatGPT} which is a closed source product introduced by the OpenAI company.\footnote{\url{https://openai.com/blog/chatgpt}}.
-The given prompt is given in Table~\ref{04:tab:prompt}.
+We use two models: \emph{Tk-Instruct-11B} \cite{supernaturalinstructions}, which is T5 encoder-decoder architecture \cite{2020t5} tuned on a dataset of over 5M task instances with instructions and \emph{ChatGPT} which is a closed source product introduced by the OpenAI company\footnote{\url{https://openai.com/blog/chatgpt}}.
+The used prompt is given in Table~\ref{04:tab:prompt}.
 We use both models in parallel to obtain two sets of candidates.
 We then use a clustering procedure similar to the process described in~\ref{04:sec:memnn}.
 Note that although the model categorizes the extracted words as part of the output, the category names are arbitrary and inconsistent among examples.
@@ -232,8 +232,8 @@ If a slot candidate is selected in at least one of the clusters, it is considere
 The data clustering step aims to distinguish contexts in which the candidates appear.
 We simplify the notion of context to the head verb connected with the respective slot filler word.
 We process the data with a generic semantic role labeling tagger to obtain verb dependency relations.
-Each occurrence of a filler is thus associated with a \emph{head verb} whose semantic argument the corresponding word is, if such, exists. 
-For example, at this step, we have \emph{verb-filler} pairs such as \emph{want-chinese} or \emph{reserve-hotel}.
+Each occurrence of a filler is thus associated with a \emph{head verb} whose semantic argument the corresponding word is, if such exists. 
+To give an example, consider \emph{verb-filler} pairs such as \emph{want-chinese} or \emph{reserve-hotel}.
 We then compute embeddings of the formed pairs.
 To do this, we take an embedding of both the head verb and the fillers and average them.
 The pairs are then clustered using agglomerative (bottom-up) hierarchical clustering with average linkage according to the cosine distance of their embeddings.
@@ -255,7 +255,7 @@ Specifically, we compute the following characteristics for each candidate:
     where $C^2_s$ is a set of all pairs of fillers for the slot candidate \emph{s}.
     We follow \citet{chen2014leveraging}'s assumption that fillers with high coherence, i.e., focused on one topic, are good slot candidates.
     
-    \item \textbf{TextRank} \cite{mihalcea2004textrank} is a keyword extraction algorithm similar to the well-known PageRank todo : cite PageRank.
+    \item \textbf{TextRank} \cite{mihalcea2004textrank} is a keyword extraction algorithm similar to the well-known PageRank~\citep{page1999pagerank}.
     It constructs a graph where nodes represent words and edges represent their co-occurrence.
     The dominant eigenvector of the adjacency matrix of this graph then gives the individual words' scores.
 \end{itemize}
@@ -306,7 +306,7 @@ Here, we provide only a concise list with basic descriptions.
 \begin{itemize}
     \item \textbf{CamRest676} (\textbf{CR}) is dataset of 2,744 user utterances, all in the restaurant reservation domain.
     \item \textbf{Cambridge SLU} (\textbf{CS}) is in the same domain as CamRest676 but only focuses on NLU annotation of  10,569 user utterances.
-    \item \textbf{MultiWOZ} Is a multi-domain dialogue corpus. For experiments in this chapter, we picked only single-domain dialogues from two domains -- hotel reservation and attraction recommendation -- to form \textbf{WOZ-hotel} (\textbf{WH}) with 14,435 utterances, 9 slots, 3 intents and \textbf{WOZ-attr} (\textbf{WA}) with 7524 utterances, 8 slots and 3 intents respectively.
+    \item \textbf{MultiWOZ} is a multi-domain dialogue corpus. For experiments in this chapter, we picked only single-domain dialogues from two domains -- hotel reservation and attraction recommendation -- to form \textbf{WOZ-hotel} (\textbf{WH}) with 14,435 utterances, 9 slots, 3 intents and \textbf{WOZ-attr} (\textbf{WA}) with 7524 utterances, 8 slots and 3 intents respectively.
     \item \textbf{ATIS} (\textbf{AT}) is focused on flight search and contains nearly 5,000 utterances.
 \end{itemize}
 \paragraph{3rd party models}
@@ -336,7 +336,7 @@ Here we give an overview of all the system variants:
     \item \textit{Ours-notag} excludes the slot tagger. This means that the outputs of input taggers are used directly to annotate the data.
     \item \textit{Ours-nocl} further excludes the clustering step; slot candidate ranking and selection is performed over all candidates together.
 \end{itemize}
-We also compare to previous work of \citet{chen2014leveraging},\footnote{We use our re-implementation of their approach.}
+We also compare to previous work of \citet{chen2014leveraging}\footnote{We use our re-implementation of their approach.}.
 This method is similar to the variant \textit{Ours-nocl} but does not merge similar frames and uses different ranking criteria.
 Essentially, they use the outputs of the input tagger directly after the selection step without further processing.
 
@@ -357,7 +357,7 @@ Therefore, we construct a handcrafted mapping between our discovered slots and t
 Importantly, this mapping is only needed for evaluation; \textbf{our method does not depend on it}.
 The mapping is domain-specific, but it is very easy to construct even for an untrained person -- the process takes less than 10 minutes for each of our domains.
 It amounts to matching slots from the domain ontology against slots output by our approach, represented by the FrameNet labels.
-We provide an example of such a reference mapping in Table \ref{03:ref_mapping}
+We provide an example of such a reference mapping in Table \ref{03:ref_mapping}.
 \label{sec:app-ref-mapping}
 
 \begin{table}[tp]
