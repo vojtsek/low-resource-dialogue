@@ -489,7 +489,7 @@ To form the output, we aggregate the information on each layer in an output vari
 \begin{equation}
 \mathbf{g}_l = D_l(z_l) + \alpha \cdot \mathbf{g}_{l+1}, \alpha_l \in [0, 1]
 \end{equation}
-Where $D_l$ is a trainable linear projection and  $\alpha_l$ is a scaling coefficient increased during training. All $\alpha_l$ are set to 1 in the trained network.
+Where $D_l$ is a trainable linear projection, and  $\alpha_l$ is a scaling coefficient increased during training. All $\alpha_l$ are set to 1 in the trained network.
 The output from the bottom hidden layer $g_1$ generates the response $s_{t+1}$  using an RNN decoder parametrized by $\varphi^s_{dec}$.
 
 \subsection{HVTOD training}
