@@ -133,17 +133,17 @@ The foundational models changed the NLP paradigm but still need substantial in-d
 Moreover, fine-tuning those larger models requires more computational resources.
 Therefore, more lightweight methods were proposed to adapt the models to downstream tasks, such as Transformer Adapters \cite{pfeiffer2020AdapterHub}.
 However, as researchers started to scale up the models with GPT-2 and GPT-3 leading the efforts \cite{radford2019language,brown2020language}, new abilities emerged \cite{wei2022emergent}.
-With model sizes exceeding billions of parameters, the large pre-trained Transformer decoders can perform many tasks that they were not explicitly trained for \cite{brown2020language}.
+With model sizes exceeding billions of parameters, the large pre-trained Transformer decoders can perform many tasks not explicitly trained for \cite{brown2020language}.
 Such large models can perform tasks like summarization, translation, question answering, or even reasoning and arithmetics to some extent without any task-specific training.
 However, it is unclear how many examples of the abovementioned tasks were seen during these models' training phase.
-Those tasks can be presented to the LLMs purely in the form of textual task descriptions in the inference time.
+Those tasks can be presented to the LLMs in textual task descriptions in the inference time.
 This approach of \emph{in-context learning} is frequently used with great success \cite{min2022rethinking,dong2022survey}.
 The textual input for LLMs is frequently called a \emph{prompt}.
 
 \paragraph{On LM scaling}
 Scaling laws in language models describe the relationship between the size of a language model and its performance.
-It has been shown that with the next token prediction objective (which is what virtually all LMs are trained for), some abilities start to emerge when exceeding a certain size threshold \cite{kaplan2020scaling}.
-However, bigger models also need to be trained longer and with more data \cite{hoffmann2022training}.
+It has been shown that with the next token prediction objective (which virtually all LMs are trained for), some abilities emerge when exceeding a certain size threshold \cite{kaplan2020scaling}.
+However, bigger models must also be trained longer and with more data \cite{hoffmann2022training}.
 In general, larger language models tend to perform better than smaller models but also require more computational resources to train.
 This line of research can help us understand how the size of a language model affects its performance and predict the performance of a language model before it is trained.
 
@@ -185,7 +185,7 @@ The modeled distributions are typically Gaussian; the prior is the standard norm
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.46\textwidth]{images/VAE.png}
-    \caption{Variational autoencoder latent space. Colors and different classes by shapes distinguish the encoder distributions. It illustrates that we can interpolate between two points in the latent space smoothly.}
+    \caption{Variational autoencoder latent space. Colors and different classes by shapes distinguish the encoder distributions. It illustrates that we can smoothly interpolate between two points in the latent space.}
     \label{fig:vae}
 \end{figure}
 \begin{figure}[t]
@@ -464,11 +464,12 @@ We shortly discuss the responsibilities of each component:
 The module-based approach is advantageous thanks to its good level of explainability.
 In case of low performance, we can track the respective modules' outputs and find the source of problems.
 On the other hand, error accumulation makes it difficult to recover from errors made by the modules early on in the pipeline.
-Another disadvantage is the way these systems are trained \cite{li-etal-2017-end}
+Another disadvantage is how these systems are trained \cite{li-etal-2017-end}.
 Each component requires specific data annotation.
 Thus, obtaining a dataset suitable for training all components can be difficult and costly.
 Also, the system design itself is more complicated since it requires the implementation of multiple models.
-Because of the drawbacks, many current research works focus on dialogue modeling end-to-end, i.e., using systems without explicit components that can be trained jointly.
+Because of the drawbacks, many current research works focus on dialogue modeling end-to-end, i.e., using systems without explicit components (see Section~\ref{background:2stage-lm-modeling}) that can be trained jointly.
+
 \label{02:delex}
 One commonly used concept in end-to-end dialogue modeling is that of \emph{delexicalization} \cite{wen-etal-2015-stochastic}.
 When using delexicalization, the slot values in the text of the utterances are replaced by placeholders.
@@ -481,7 +482,7 @@ Second, the inverted lexicalization process is sometimes difficult to implement 
 \subsection{Modeling TOD without supervision}
 \label{02:no-super}
 Here, we introduce some challenges concerning TOD modeling without external structured supervision.
-We discuss every step in the pipeline (Section~\ref{02:sec:basics}) separately.
+We separately discuss selected components in the overall pipeline (Section~\ref{02:ds-background}).
 
 \paragraph{Natural Language Understanding (NLU)}
 Recall that the purpose of the NLU component in a traditional dialogue pipeline is to extract the meaning from input utterances in natural language and represent it in a structured way.
@@ -493,7 +494,7 @@ Another way is to let the model handle NLU implicitly, i.e., effectively omittin
 \paragraph{Action Selection}
 One of the tasks of the dialogue manager is to select the next system action in a given situation.
 Most implemented systems implicitly perform this task, i.e., there is no explicit representation of the system action, just a surface realization (verbalized utterance).
-The reason for this option is that it requires less supervised labels, which might be hard and costly to obtain.
+The reason for this option is that it requires fewer supervised labels, which might be hard and costly to obtain.
 However, modeling the information about system action can benefit the overall performance~\cite{DBLP:conf/aaai/LiangTCY20}.
 We explore the possibility of implicitly learning this information by introducing a network bottleneck in Chapter~\ref{chap:modeling}.
 
@@ -503,22 +504,29 @@ To communicate with such external entities, we typically need to design some rep
 This can be troublesome in a setting where no supervision in the form of labels is present.
 Without a known structure, it is very challenging to design the communication protocol with external sources of information.
 
-\subsection{Modeling a dialogue with Language Models (LMs)}
+\subsection{End-to-end dialogue modeling with Language Models (LMs)}
 \label{background:2stage-lm-modeling}
 \begin{figure}[h]
     \centering
-    \includegraphics[width=\textwidth]{images/augpt.png}
+    \includegraphics[width=\textwidth,trim={0 5px 0 0},clip]{images/augpt.png}
     \caption{An explanation of two-stage LM-based dialogue model as described in \citep{kulhanek-etal-2021-augpt}}
     \label{fig:augpt-2-stage}
 \end{figure}
-The pre-trained LMs can generate fluent and natural-sounding text and work with structured data.
+The pre-trained LMs can generate fluent, natural-sounding text and work with structured data.
 It is desirable to leverage these properties for end-to-end dialogue modeling.
-However, it's not a straightforward application.
-Task-oriented dialogues require interaction with external interfaces, so there is a need to have some intermediate structured representation 
+However, their application is not straightforward.
+Task-oriented dialogues require interaction with external interfaces, so there is a need to obtain an intermediate structured representation 
 to allow this interaction.
 A common approach (depicted in Figure~\ref{fig:augpt-2-stage}), pioneered in \citep{lei2018sequicity}, proposes to split the generation into two steps: (1) belief state generation and (2) response generation.
-This allows us first to decode a structured representation that can be used to interact with external interfaces and extend the context.
-In the subsequent step, the model has all the needed information in the input and can generate the final response.
+In the first step, we decode a structured representation that can be used to interact with external interfaces and extend the context.
+This representation must follow the exact structure to be easily parsable with a deterministic function that constructs the query.
+Once generated, we can parse it, construct the query, and retrieve results.
+In the subsequent step (2), the model has all the needed information in the input and can generate the final response.
+Here, we usually generate delexicalized (Section~\ref{02:delex}) utterances that are later post-processed to fill in values from the retrieved results or generated state.
+
+To train such an architecture, we can simply train the model jointly on belief state generation and response generation, with appropriate loss masking if needed.
+The database results are usually injected directly into the training data.
+During inference, the model is conditioned only on the left context and, therefore, can be applied for the 2-step generation process described above.
 
 \section{Datasets}
 \label{02:sec:input-data-desc}

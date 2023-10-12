@@ -351,6 +351,30 @@ Specifically, we ask how well these clusters are formed and if they are meaningf
 We compare to gold-standard intent annotation with respect to the following baselines: (1) a majority baseline (assigning the most frequent intent class to all instances), and (2) a simple method that represents the utterances as averages of respective word embeddings and performs sentence-level intent clustering.
 All the slots in a given utterance are assumed to have the same intent.
 
+\begin{figure}[tp]
+\includegraphics[width=1.0\textwidth]{images/label_example.pdf}
+%\newtcbox{\bluebox}[1][]{nobeforeafter, tcbox raise base, shrink tight, sharp corners, extrude by=1mm, colback=blue!15, colframe=blue, #1}
+%\newtcbox{\graybox}[1][]{nobeforeafter, tcbox raise base, shrink tight, sharp corners, extrude by=1mm, colback=gray!15, colframe=gray, #1}
+%\small
+%        \centering
+%        \begin{tabular}{rl}
+%        \hline
+%        \texttt{user input 1:} & \textit{\texttt{I would like an \bluebox{expensive} \graybox{restaurant} that serves \bluebox{Afghan} food }} \\
+%        \texttt{original annotation:} & \hspace{29mm} Expensiveness \hspace{4mm} Locale \hspace{33mm} - \\
+        %\rowcolor{lightblue}
+%        \texttt{our slot tagger:} & \bf\hspace{31mm} slot-0 \hspace{15mm} - \hspace{38mm}slot-1  \\
+%        \hline
+%        \texttt{user input 2:} & \textit{\texttt{How about \bluebox{Asian} oriental \graybox{food}?}} \\
+%        \texttt{original annotation:} & \hspace{19mm} Origin \hspace{19mm} Food \\
+        %\rowcolor{lightblue}
+%        \texttt{our slot tagger:} & \bf\hspace{20mm}slot-0 \hspace{22mm} - \\
+%        \hline
+%        & ...
+%        \end{tabular}
+        \caption{A sample of a dialogue from CamRest676 data, with labels from a frame-semantic parser (middle) and our slot tagger (bottom).
+        Although ``Afghan'' food is not in the frame parser output, our tagger could recognize it. The second utterance successfully captures the change in value for slot-1 (corresponding to food type). This shows that our model can categorize entities (both ``Afghan'' and ``Asian'' relate to the same slot).}
+    \label{fig:example}
+\end{figure}
 \section{Evaluation}
 We need a way of comparing the predicted structure to the ground truth to evaluate the discovered set of slots.
 Therefore, we construct a handcrafted mapping between our discovered slots and the respective ground-truth slots.
@@ -401,31 +425,6 @@ We also use some metrics specific to this part of the work:
 For slot tagging and ranking evaluation, we sampled a random data order 50 times and performed 5-fold cross-validation for each permutation.
 For the dialogue generation evaluation, we trained the models 100 times and used averaged results.
 All results are given with 95\% confidence intervals.
-
-\begin{figure}[h]
-\includegraphics[width=1.0\textwidth]{images/label_example.pdf}
-%\newtcbox{\bluebox}[1][]{nobeforeafter, tcbox raise base, shrink tight, sharp corners, extrude by=1mm, colback=blue!15, colframe=blue, #1}
-%\newtcbox{\graybox}[1][]{nobeforeafter, tcbox raise base, shrink tight, sharp corners, extrude by=1mm, colback=gray!15, colframe=gray, #1}
-%\small
-%        \centering
-%        \begin{tabular}{rl}
-%        \hline
-%        \texttt{user input 1:} & \textit{\texttt{I would like an \bluebox{expensive} \graybox{restaurant} that serves \bluebox{Afghan} food }} \\
-%        \texttt{original annotation:} & \hspace{29mm} Expensiveness \hspace{4mm} Locale \hspace{33mm} - \\
-        %\rowcolor{lightblue}
-%        \texttt{our slot tagger:} & \bf\hspace{31mm} slot-0 \hspace{15mm} - \hspace{38mm}slot-1  \\
-%        \hline
-%        \texttt{user input 2:} & \textit{\texttt{How about \bluebox{Asian} oriental \graybox{food}?}} \\
-%        \texttt{original annotation:} & \hspace{19mm} Origin \hspace{19mm} Food \\
-        %\rowcolor{lightblue}
-%        \texttt{our slot tagger:} & \bf\hspace{20mm}slot-0 \hspace{22mm} - \\
-%        \hline
-%        & ...
-%        \end{tabular}
-        \caption{A sample of a dialogue from CamRest676 data, with labels from a frame-semantic parser (middle) and our slot tagger (bottom).
-        Although ``Afghan'' food is not in the frame parser output, our tagger could recognize it. The second utterance successfully captures the change in value for slot-1 (corresponding to food type). This shows that our model can categorize entities (both ``Afghan'' and ``Asian'' relate to the same slot).}
-    \label{fig:example}
-\end{figure}
 
 \begin{figure}
     \centering
