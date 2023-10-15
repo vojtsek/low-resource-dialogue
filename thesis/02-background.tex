@@ -264,7 +264,6 @@ where $[.,.]$ is concatenation, $\varphi_z(.)$ is a feature extractor, and $\tex
 
 \subsection{Latent Action Spaces via Variational Auto-encoding -- LAVA}
 \label{02:sec:lava}
-\todo{More details}
 The LAVA framework~\cite{lubis-etal-2020-lava} focuses on learning latent variables in a way that they store dialogue-related actions.
 To achieve this, they employ VAE-based model architecture.
 The architecture comprises an RNN utterance encoder, VAE module, and RNN decoder.
@@ -272,6 +271,7 @@ They train the model in multiple stages and different variants.
 Specifically, they first pre-train the encoder module using an autoencoding objective.
 Then, they use the pre-trained decoder and train an additional encoding module for the next response prediction.
 In the end, they use reinforcement learning to tune the model parameters further.
+
 Formally, the authors first train an encoder-decoder network with an autoencoding objective version of ELBo parameterized by $\phi$.
 \begin{equation}
     \mathbb{L}_{ae}(\phi) = \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})}[\log~p_{\phi}(\mathbf{x}|\mathbf{z})] -\mathrm{KL}(q_{\phi}(\mathbf{z}|\mathbf{x})||p(\mathbf{z}))
