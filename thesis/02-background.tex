@@ -4,10 +4,14 @@
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Before we introduce our work and delve into discussions, we will establish the common theoretical background of the concepts we use.
 Some of the concepts are well known, some less, but we consider it important to have this reference point and provide at least a concise description.
-First, we briefly describe this work's basic concepts and foundational models.
+First, we briefly describe this work's basic concepts and foundational models in Section~\ref{02:sec:basics}.
 We link to literature when needed.
-Next, we introduce methods from related research areas upon which we build.
-Ultimately, we introduce the data and evaluation metrics we are working with.
+Next, we introduce methods from related research areas upon which we build in our experimental chapters.
+Specifically, we first discuss pre-trained language models (Section~\ref{background:plms}).
+Next, we introduce variational autoencoders~\cite{kingma2013auto} and some architectures that build upon them, such as variational recurrent neural networks~\cite{chung2015recurrent} in Section~\ref{02:sec:vae}.
+We also describe the memory network architecture principal ideas~\cite{DBLP:journals/corr/WestonCB14} in Section~\ref{02:sec:mem_nn}.
+Next, Section~\ref{02:ds-background} describes some typical approaches to dialogue system implementations.
+Ultimately, we introduce the datasets we use in this work for training and testing our models and evaluation metrics we are working with in Sections~\ref{02:sec:data-desc} and~\ref{02:sec:eval_metrics} respectively.
 
 \section{Key concepts}
 \label{02:sec:basics}

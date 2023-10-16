@@ -4,25 +4,29 @@
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Getting raw, unlabeled data for dialogue system training is not difficult, especially if we restrict the target domain.
 In general, recording conversations in real life or artificial conditions is sufficient.
-A requirement for dialogue state labels, which we discuss in Section~\ref{02:ds-background} makes this process much more costly.
+A requirement for dialogue state labels, which we discuss in Section~\ref{02:ds-background}, makes this process much more costly.
 The sets of slots and their values typically must be designed by domain experts.
 This procedure consists of multiple tasks:
 \begin{enumerate}
     \item Determine which concepts need to be captured.
-    \item Define them in a consistent way.
+    \item Define the captured concepts in a consistent way.
     \item Label the occurrences of these concepts in the training data.
 \end{enumerate}
 As mentioned, these steps require expert knowledge and sometimes non-trivial domain understanding.
-Although we might design a system that does not rely on the usage of slots, both traditional pipeline systems \cite{young_pomdp-based_2013} and end-to-end task-oriented architectures \cite{wen2016network} typically require such annotation.
+While a dialogue system does not necessarily have to rely on the usage of slots, both traditional pipeline systems \cite{young_pomdp-based_2013} and end-to-end task-oriented architectures \cite{wen2016network} typically require such annotation.
 While some systems presented in Section~\ref{relwork:modular} use implicit, latent state representation and do not require explicit labels, the behavior of such systems is hard to interpret or control, which can be crucial in practical applications.
-Moreover, slots enable communication with external interfaces, as discussed in~\ref{02:ds-background}.
-Several works are aiming at keeping interpretability and reducing the annotation needs by automating it \citep{chen2014leveraging,chen2015jointly} or transferring annotation across domains \cite{zhao_zero-shot_2018,coope_span-convert_2020}, but they still require significant manual effort.
+Moreover, slots enable communication with external interfaces, as discussed in Section~\ref{02:ds-background}.
+Several works are aiming at keeping interpretability and reducing the annotation needs by automating it \citep{chen2014leveraging,chen2015jointly} or transferring annotation across domains \cite{zhao_zero-shot_2018,coope_span-convert_2020}, but they still require a significant manual effort.
 We present a novel approach to discovering a set of domain-relevant dialogue slots and their values given a set of dialogues in the target domain (such as transcripts from a call center).
 Our approach requires no manual annotation to tag slots in dialogue data.
-This substantially simplifies the dialogue system design and training process, as the developer no longer needs to design a set of slots and annotate their occurrences in training data.
-The content of this Chapter was published at ACL 2021~\cite{hudecek-etal-2021-discovering}.
-We also present extensions to the published content to address the requirement of 3rd party models and put our method in the context of instruction-tuned LLMs.
-These extensions are discussed in Section~\ref{04:sec:candidate_selection}.
+This substantially simplifies the dialogue system design and training process, as the developer no longer needs to design a set of slots and annotate their occurrences in the training data.
+We present the overview of our method in Section~\ref{04:sec:overview}.
+Next, we go through details of each stage.
+We discuss the experimental setup in Section~\ref{04:sec:experiments} and the results in Section~\ref{04:sec:discovery_results}.
+
+Most of the contents of this chapter were published at ACL 2021~\cite{hudecek-etal-2021-discovering}.
+We also present extensions to the published content to remove the requirement for third-party weak-supervision annotation models and put our method in the context of instruction-tuned LLMs.
+These extensions are discussed in Section~\ref{04:sec:candidate_selection} and reflected in the following experimental sections.
 
 \section{Method overview}
 \label{04:sec:overview}
@@ -38,7 +42,7 @@ Our slot discovery method has three main stages:
     \item We obtain weak supervision labels from automatic generic annotation.
     We obtain this annotation using domain-independent natural language taggers such as a semantic frame parser or a named entity recognizer (NER).
     These models can detect important and relevant concepts in natural language utterances and subsequently group them using a set of pre-determined generic labels.
-    Nevertheless, the raw output of these models is not polished and cannot be used for the purpose of the dialogue system directly.
+    Nevertheless, the raw output of these models is not polished and cannot be used for the dialogue system directly.
     For more details, see Section~\ref{04:sec:tagging_concepts}.
     \item We identify domain-relevant slots based on the annotation labels by iteratively (a) merging and (b) ranking and selecting the most viable candidates (Section~\ref{04:sec:candidate_selection}).
     
@@ -75,7 +79,7 @@ This procedure aims to identify words or phrases in the text representing distin
 We can use any sequence tagging NLP model that meets the following criteria: (1) a set of words with the same label indicates semantically coherent, distinct concepts, (2) no additional annotation is needed, and (3) the model is domain-independent.
 
 For our experiments, we chose two types of taggers to obtain the input tags: Frame Semantic Parser and Named Entity Recognition (NER).
-We can quickly and accurately identify candidate labels that meet our criteria by leveraging these models.
+By leveraging these models, we can quickly and accurately identify candidate labels that meet our criteria.
 
 
 .
@@ -181,12 +185,7 @@ This leaves us with a set of slot candidates again used as input to our pipeline
 
 \section{Selection of slot candidates}
 \label{04:sec:candidate_selection}
-% \begin{figure}[ht]
-%     \centering
-%     \includegraphics[width=0.9\textwidth]{images/merging.pdf}
-%     \caption{The selection step in our pipeline processes the input data and yields a set of slot candidates that should be relevant to the target domain.}
-%     \label{fig:candidate_selection}
-% \end{figure}
+
 In the previous step, we obtained a superset of all the slot candidates using weak supervision from the tagging models.
 Subsequently, we need to identify domain-relevant slots based on candidates provided by the automatic annotation.
 To achieve this, we design an iterative slot discovery procedure -- in each iteration, we: 
@@ -263,14 +262,9 @@ The final score is a simple sum of rankings with respect to all three scores.
 For TextRank and frequency, we use a placeholder representing the slot candidate instead of the respective fillers.
 Therefore, we obtain scores relevant to candidates rather than the individual words.
 
-\section{Training standalone tagger}
+\section{Training a standalone tagger}
 \label{04:sec:training_tagger}
-% \begin{figure}[h]
-%     \centering
-%     \includegraphics[width=0.9\textwidth]{images/tagging.pdf}
-%     \caption{After the set of slots is selected we assign the obtained labels to their occurrences in the data and use this labeled corpus to train a standalone tagger. }
-%     \label{fig:training_tagger}
-% \end{figure}
+
 The steps described in Sections~\ref{04:sec:tagging_concepts}, \ref{04:sec:unsup_candidate_selection} and \ref{04:sec:candidate_selection} can give us a good set of dialogue slots. % to be tracked.
 However, directly using the merged and filtered slots may result in low recall since the original annotation models used as weak supervision are not adapted to our specific domain.
 Therefore, we use the obtained labels to train a new, domain-specific slot tagger to improve performance.
@@ -294,7 +288,7 @@ The rest of the training set is used for a grid search to determine model hyperp
 
 
 \section{Experimental setup}
-\label{04:sec:discovery_results}
+\label{04:sec:experiments}
 In this section, we provide a quantitative analysis of the results with respect to the NLU performance and quality of the discovered slots.
 We also evaluate the application of this method as a module in the end-to-end dialogue system model.
 \paragraph{Datasets}
@@ -375,6 +369,7 @@ All the slots in a given utterance are assumed to have the same intent.
         Although ``Afghan'' food is not in the frame parser output, our tagger could recognize it. The second utterance successfully captures the change in value for slot-1 (corresponding to food type). This shows that our model can categorize entities (both ``Afghan'' and ``Asian'' relate to the same slot).}
     \label{fig:example}
 \end{figure}
+
 \section{Evaluation}
 We need a way of comparing the predicted structure to the ground truth to evaluate the discovered set of slots.
 Therefore, we construct a handcrafted mapping between our discovered slots and the respective ground-truth slots.
@@ -434,6 +429,7 @@ All results are given with 95\% confidence intervals.
 \end{figure}
 
 \section{Results}
+\label{04:sec:discovery_results}
 We evaluate our approach to slot discovery by comparing the resulting slot labels to gold-standard supervised slot annotation.
 
 \paragraph{Slot tagging}\hspace{-3mm} is evaluated in Table \ref{table:slotfilling}.
@@ -620,7 +616,25 @@ Nevertheless, this behavior barely influences slot tagging performance as the ca
 Table \ref{table:intentclust} suggests that our clustering performs better than simple baselines and can yield useful results for intent detection.
 Nevertheless, intent detection is more complex and presumably requires more features and information about the dialogue context, which we reserve for future work.
 The complexity is also suggested by the naive embedding clustering performing worse than the majority baseline in 4 out of 5 cases.
-\begin{table}[tp]
+
+\section{Dialogue generation application}
+To verify the usefulness of the labels discovered by our method, we use them to train and evaluate an end-to-end task-oriented dialogue system.
+We choose Sequicity \cite{lei2018sequicity} based architecture for our experiments, an LSTM-based encoder-decoder model that uses a system of copy nets and two-stage decoding.
+First, it decodes the dialogue state so the database can be queried externally.
+Sequicity generates the system response conditioned on the belief state and database results in the subsequent step.
+This architecture works with a flat representation of the dialogue state, i.e. the state is represented as a sequence of tokens -- slot values.
+
+The basic architecture is further extended by \citet{jin2018explicit}.
+They propose to model the dialogue state explicitly in a semi-supervised way.
+They extend the end-to-end encoder-decoder dialogue response generation model of \citet{lei2018sequicity} by introducing an additional decoder with access to posterior information about the system response.
+This allows them to train a state representation with a reconstruction loss on unsupervised examples, using the state as a limited memory for essential concepts (roughly corresponding to slots).
+Their method can be applied fully unsupervised, but it still requires some in-domain annotations to perform well.
+The default Sequicity model uses gold-standard dialogue state annotation. However, a compatible state representation is directly obtainable from our labels simply by concatenating the labels aggregated in each turn from user utterances. Whenever a new value for a slot is found in user input by our tagger, it is either appended to the state representation or replaces a previous value of the same slot.
+
+We run three versions of the \citet{jin2018explicit}'s model: \emph{Jin et al.\ supervised} is a model that is trained fully on supervised data to provide perspective on the achieved performance.
+\emph{Jin et al.\ unsupervised} is, on the contrary, fully unsupervised, i.e. we provide no labeled examples during the training phase to give a fair comparison against our model.
+Finally, \emph{Jin et al.\ weak-labels} does not use supervised labels but presents labels obtained by our method.
+\begin{table}[]
     \centering
     \small
     \begin{tabular}{lccccc}
@@ -637,56 +651,6 @@ The complexity is also suggested by the naive embedding clustering performing wo
     }
     \label{table:intentclust}
 \end{table}
-
-
-% \subsection{Slot tagging precision and recall}
-% \label{sec:app-pr}
-% \begin{table}[tp][h]
-%         \centering
-%         \small
-%         \begin{tabular}{l|cc|cc|cc|cc|cc|cc}
-%          \hline
-%           \multirow{2}{*}{\textbf{method}} & \multicolumn{2}{c|}{\textbf{CR}} & \multicolumn{2}{c|}{\textbf{CS}} & \multicolumn{2}{c|}{\textbf{WH}} & \multicolumn{2}{c|}{\textbf{WA}} & \multicolumn{2}{c}{\textbf{AT}} & \multicolumn{2}{c}{\textbf{AT(+NER)}} \\
-%          %\hline
-%            & P & R & P & R & P & R & P & R & P & R & P & R \\
-%         \hline
-%         Tag-supervised$^\ast$\hspace{-2mm} & $0.794$ & $0.814$ & $0.823$ & $0.696$ & $0.880$ & $0.683$ & $0.802$ & $0.715$ & $0.772$ & $0.913$ & -- & -- \\
-%         Dict-supervised$^\ast$\hspace{-2mm} & $0.793$ & $0.710$ & $0.831$ & $0.752$ & $0.869$ & $0.710$ & $0.669$ & $0.859$ & $0.546$ & $0.990$ & -- & -- \\
-%         \hline
-%          Chen et al. & $\textbf{0.771}$  & $0.486$ & $\textbf{0.813}$ & $0.529$ & $0.384$ & $0.579$ & $0.362$ & $0.462$ & $0.701$ & $0.583$ & -- & --
-%          \\\hdashline[0.5pt/2pt]
-%          %\hline
-%          Ours-nocl & $0.537$ & $0.347$ & $0.616$ & $0.371$ & $0.101$ & $0.218$ & $0.244$ & $0.340$ & $0.634$ & $0.595$ & $0.662$ & $0.704$ \\
-%          %\hline
-%          Ours-notag & $0.561$ &  $0.586$ & $0.690$ & $0.688$ & $0.369$ & $0.607$ & $0.335$ & $0.575$ & $0.715$ & $0.642$ & $0.685$ & $0.623$  \\
-%          Ours-nothr & $0.636$ & $0.549$ & $0.585$ & $0.566$ & $0.458$ & $0.575$ & $\textbf{0.394}$ & $0.561$ & $0.701$ & $0.687$ & $\textbf{0.710}$ & $0.697$ \\
-%          %\hline
-%          Ours-full & $0.752$ & $\textbf{0.643}$ & $0.718$ & $\textbf{0.703}$ & $\textbf{0.494}$ & $\textbf{0.750}$ & $0.373$ & $\textbf{0.606}$ & $0.684$ & $0.672$ & $0.703$ & $\textbf{0.725}$ \\
-%          \hline
-%         \end{tabular}
-                 
-%         \caption{Precision (P) and recall (R) values slot tagging performance comparison among different methods (see Section~\ref{sec:setups}; frames are used as weak supervision in all setups, the rightmost column on ATIS additionally uses NER). We can see consistent recall improvement when using our slot tagger. The measures are evaluated using a manually designed slot mapping to the datasets' annotation, which is not needed for the methods themselves (see Section~\ref{lbl:mapping}). $^\ast$Note that supervised setups are not directly comparable to our approach.
-%         \label{table:slotfilling_pr}
-%         }
-% \end{table}
-
-\section{Dialogue generation application}
-To verify the usefulness of the labels discovered by our method, we use them to train and evaluate an end-to-end task-oriented dialogue system.
-We choose Sequicity \cite{lei2018sequicity} based architecture for our experiments, an LSTM-based encoder-decoder model that uses a system of copy nets and two-stage decoding.
-First, it decodes the dialogue state so the database can be queried externally.
-Sequicity generates the system response conditioned on the belief state and database results in the subsequent step.
-This architecture works with a flat representation of the dialogue state, i.e. the state is represented as a sequence of tokens -- slot values.
-
-The basic architecture is further extended by \citet{jin2018explicit}.
-They propose to model the dialogue state explicitly in a semi-supervised way.
-They extend the end-to-end encoder-decoder dialogue response generation model of \citet{lei2018sequicity} by introducing an additional decoder with access to posterior information about the system response.
-This allows them to train a state representation with a reconstruction loss on unsupervised examples, using the state as a limited memory for essential concepts (roughly corresponding to slots).
-Their method can be applied fully unsupervised, but it still requires some in-domain annotations to achieve good performance.
-The default Sequicity model uses gold-standard dialogue state annotation. However, a compatible state representation is directly obtainable from our labels simply by concatenating the labels aggregated in each turn from user utterances. Whenever a new value for a slot is found in user input by our tagger, it is either appended to the state representation or replaces a previous value of the same slot.
-
-We run three versions of the \citet{jin2018explicit}'s model: \emph{Jin et al.\ supervised} is a model that is trained fully on supervised data to provide perspective on the achieved performance.
-\emph{Jin et al.\ unsupervised} is, on the contrary, fully unsupervised, i.e. we provide no labeled examples during the training phase to give a fair comparison against our model.
-Finally, \emph{Jin et al.\ weak-labels} does not use supervised labels but presents labels obtained by our method.
 
 \begin{table}[tp]
     \centering
@@ -706,7 +670,6 @@ Finally, \emph{Jin et al.\ weak-labels} does not use supervised labels but prese
     \caption{Evaluation on the downstream task of dialogue generation on CamRest676 data. We evaluate with respect to three state tracking metrics. The best results in an unsupervised setting are presented in bold.}
     \label{table:downstream}
 \end{table}
-\footnotetext{We present results taken in an unsupervised setting, i.e. when no ontology is available.}
 
 \subsection{Results} We explore the influence that our labels have on sequence-to-sequence dialogue response generation in an experiment on the CamRest676 data (see Table~\ref{table:downstream}).
 We can see that our method provides helpful slot labels that improve dialogue state tracking performance.
@@ -723,8 +686,8 @@ The methods can take unstructured conversation data as inputs and require no dat
 We show that our pipeline can work with various candidate identification methods and improve their performance regardless of the particular setup.
 The method also compares favorably to similar proposed approaches.
 
-The analysis shows that our method is rather sensitive to the quality of input clusters, i.e. the input source performance.
-Our method is easy to apply and has reasonable performance that improves with the quality of provided input slot candidates.
+The analysis shows that our method is rather sensitive to the quality of input clusters, i.e. the performance of the initial source of the candidate annotation (weak supervision, Mem2Seq, LLMs).
+Our method is easy to apply and provides a reasonable performance, improving with the increasing quality of input slot candidates.
 
 For future work in this area, we can consider applying better methods for text representations and parsing, which would likely improve the qualitative performance.
 It is also desirable to address the need for setting empirical thresholds, especially in the slot candidate selection and merging phase, exploiting the power of pre-trained language models.
