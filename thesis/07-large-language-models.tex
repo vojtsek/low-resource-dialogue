@@ -4,9 +4,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \label{07:sec:intro}
-As described in the previous chapter, pre-trained Language Models perform very well in end-to-end dialogue modeling.
-Despite this success, the widely used approach of fine-tuning pre-trained LM on a particular dataset still does not guarantee easy transferability of the learned knowledge.
-Large Language Models (LLMs) increased the model size by an order of magnitude compared to the previous generation of pre-trained LMs.
+As described in the previous chapter, pre-trained language models perform very well in end-to-end dialogue modeling.
+Despite this success, the widely used approach of fine-tuning pre-trained LM on a particular dataset still does not guarantee easy transferability of the learned knowledge, as we also show in Chapter~\ref{06:chap:lm-tod}.
+Large Language Models (LLMs) increased the model size by order of magnitude compared to the previous generation of pre-trained LMs.
 Undeniably, LLMs have transformed the NLP field,
 showing outstanding performance across many NLP benchmarks such as Winograd Challenge \cite{levesque2012winograd} or GLUE \cite{wang2018glue}.
 Instruction fine-tuning of LLMs can align the model outputs with human preferences \cite{ouyang2022training,supernaturalinstructions} and improve the LLMs' communication capabilities substantially.
@@ -15,15 +15,17 @@ State-of-the-art LLMs are good at understanding user needs and can provide relev
 Consequently, we have seen many chatbot applications both inside and outside academia (ChatGPT\footnote{\url{https://openai.com/blog/chatgpt}}, Claude\footnote{\url{https://www.anthropic.com/index/introducing-claude}} or Bard\footnote{\url{https://blog.google/technology/ai/bard-google-ai-search-updates/}}) which build upon the raw power of instruction-fine-tuned LLMs.
 
 In this chapter, we explore the abilities of LLM to model task-oriented dialogue using in-context learning.
-We evaluate the performance regarding response generation and dialogue success.
-To obtain more insights, we also perform a human evaluation to test more real-world scenarios.
-We introduce an LLM-based TOD conversation pipeline and evaluate its performance concerning commonly used task-oriented metrics such as Joint Goal Accuracy, Slot F1, and Dialogue Success \cite{rastogi_multi-task_2018,budzianowski_multiwoz_2018}, see also Section~\ref{02:sec:eval_metrics}.
-Our pipeline resembles other approaches based on LMs \cite{peng-etal-2021-soloist,yang2021ubar}, using state tracking and response generation as two main, separate steps while keeping the role of a dialogue policy implicit (see also Sections~\ref{background:2stage-lm-modeling},\ref{06:augpt}).
+We introduce an LLM-based TOD conversation pipeline which resembles other approaches based on LMs \cite{peng-etal-2021-soloist,yang2021ubar} in Section~\ref{07:sec:method}.
+The method uses state tracking and response generation as two main, separate steps while keeping the role of a dialogue policy implicit (see also Sections~\ref{background:2stage-lm-modeling}, \ref{06:augpt}).
 However, instead of fine-tuning LMs, it intentionally relies almost exclusively on using pre-trained LLMs as-is so we can test their out-of-the-box capabilities.
 The dialogue context and domain description are introduced to the model only by including them in the input prompt.
-We experiment with zero-shot and few-shot approaches (see Section~\ref{02:in-context}).
-In the zero-shot setting, the model receives a domain description only; in the few-shot setting, it additionally uses a few retrieved examples (see Section~\ref{07:sec:method} for details).
+We experiment with zero-shot and few-shot approaches (see Section~\ref{02:in-context}) and describe the experiments in Section~\ref{07:sec:experiments}.
+In the zero-shot setting, the model receives a domain description only; in the few-shot setting, it additionally uses a few retrieved examples (see Section~\ref{07:sec:prompts} for details).
+We evaluate the performance regarding response generation and dialogue success and discuss the results in Section~\ref{07:sec:results}.
+To obtain more insights, we also perform a human evaluation to test more real-world scenarios and present the analysis in Section~\ref{07:sec:analysis}.
+
 This work was published at the SIGDial 2023 conference~\cite{hudecek-dusek-2023-large} and was extended in this chapter with more details and additional experiments.
+Our experimental code is available on GitHub\footnote{\url{https://github.com/vojtsek/to-llm-bot}}.
 
 \section{Motivation}
 Given the millions of daily interactions with LLM-based chatbots, these models can handle users' needs satisfactorily, at least to some extent.
@@ -368,8 +370,8 @@ Forcing the ground truth domain examples in these cases can be potentially harmf
 \subsection{Response Generation}
 BLEU scores are low overall, far below the supervised state-of-the-art.
 Tk-Instruct and ChatGPT are the strongest here and perform roughly on par.
-This behavior is likely because the models were not fine-tuned on the particular datasets, therefore they do not resemble the wording and phrasing used in this data.
-Nevertheless, this observation does not necessary imply that the generated responses are incorrect.
+This behavior is likely because the models were not fine-tuned on the particular datasets, therefore, they do not resemble the wording and phrasing used in this data.
+Nevertheless, this observation does not necessarily imply that the generated responses are incorrect.
 
 
 \subsection{Belief State Tracking}

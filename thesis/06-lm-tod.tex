@@ -2,20 +2,22 @@
 \chapter{Sequence-to-Sequence Task-Oriented Dialogue Modeling}
 \label{06:chap:lm-tod}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Using end-to-end trainable models instead of modular architectures (see Section~\ref{02:sec:basics}) can address transferring the learned behavior since we use only a single step and, therefore, can be adjusted to different domains and use cases more easily.
+Using end-to-end trainable models instead of modular architectures (see Section~\ref{02:sec:basics}) can can potentially offer more flexibility with respect to domain transfer, as only a single module needs to be adapted to new domains or use cases.
 In task-oriented dialogue, end-to-end implementations are dominated by sequence-to-sequence architectures based on language models (LM, Section~\ref{relwork:end-to-end}).
-The LM-based approaches have taken over the benchmarks, \footnote{\url{https://github.com/budzianowski/multiwoz\#trophy-benchmarks}}demonstrating state-of-the-art performance.
-However, these competitive models are fine-tuned on a single training set.
+The LM-based approaches have taken over the benchmarks\footnote{\url{https://github.com/budzianowski/multiwoz\#trophy-benchmarks}}, demonstrating state-of-the-art performance.
+
+However, these competitive models are fine-tuned on a large in-domain dataset, and domain transfer performance is not evaluated.
 In this chapter, we raise the question of how well these models can transfer the obtained skill of leading the dialogue to other domains.
 In other words, we want to discover if the models learn useful skills that can be beneficial in other domains or if the demonstrated behavior merely reproduces the patterns seen in the training portion of the data.
 We hypothesize that pre-training of these models can help to improve the performance.
-To confirm this hypothesis, we first describe our approach to end-to-end modeling with the AuGPT model \cite{kulhanek-etal-2021-augpt} in Section~\ref{06:augpt}.
-We then describe our data in Section~\ref{06:sec:diaser} and conduct experiments (see Section~\ref{06:expe}).
+To confirm this hypothesis, we first describe our approach to end-to-end modeling with the GPT-2-based model \cite{kulhanek-etal-2021-augpt} in Section~\ref{06:augpt}.
+We then describe our newly assembled and unified multi-domain dataset, designed for domain transfer experiments in Section~\ref{06:sec:diaser} and detail our experimental results with AuGPT on this data in Section~\ref{06:expe}.
 
-The work presented in this chapter was published at the LREC conference and covered by~\citet{hudecek-etal-2022-unifying}.
-\footnote{This was a joint effort in which we focused on the data preparation pipelines and AuGPT model training.}
-For modeling, we use the AuGPT model \cite{kulhanek-etal-2021-augpt} to the development we contributed to during this work.
-The experiments published in \citet{hudecek-etal-2022-unifying} are further extended to determine if the model can learn from smaller training sets (\ref{tab:exp-results-seed}).
+The work presented in this chapter was published at the LREC conference and covered by~\citet{hudecek-etal-2022-unifying}
+\footnote{This was a joint effort in which the author of this thesis focused on the data processing pipelines and AuGPT model training.}.
+For modeling, we use the AuGPT model \cite{kulhanek-etal-2021-augpt} to the development of which we contributed\footnote{The author of this thesis contributed to the model design and data preparation for the training}.
+The published experiments in \citet{hudecek-etal-2022-unifying} are further extended to determine if the model can learn from smaller training sets (\ref{06:seed}).
+We released the code for data preparation on GitHub\footnote{\url{https://github.com/ufal/diaser}}.
 
 \section{AuGPT Model Description}
 \label{06:augpt}
@@ -32,7 +34,7 @@ For corruption, portions of the belief state are replaced with random values.
 Several strategies can be used to create the corrupted versions; AuGPT corrupts half of the samples by randomly applying one or more of the following modifications:
 \begin{itemize}
     \item Replace the belief state $b$ with another belief state, sampled uniformly randomly from the training data.
-    \item Replace the delexicalized response $\bar{r}$ with a different randomly chosen one. If this change is combined with the first one, the delexicalized response and the belief state are taken from the same random sample.
+    \item Replace the delexicalized response with a different randomly chosen one. If this change is combined with the first one, the delexicalized response and the belief state are taken from the same random sample.
     \item A different valid value is uniformly sampled for each slot in the belief state. In this case, the domain names and order are unchanged (i.e., the active domain is the same).
 \end{itemize}
 The model learns to predict if the presented belief state corresponds to the respective context in the training example.
@@ -185,7 +187,8 @@ We are interested in the overall performance of the models.
 Therefore, we measure Joint Goal Accuracy and Slot-F1 and BLEU for response generation (see Section~\ref{02:sec:eval_metrics}).
 We do not compute the dialogue success as it is not well-defined on all the sub-datasets.
 
-\subsection{Exerimental setup}
+\subsection{Experimental setup}
+\label{06:experiments}
 For training, we follow~\citep{kulhanek-etal-2021-augpt} with the training setup --
 We use PyTorch framework \cite{pytorch} and run the training for 8 epochs on the MultiWOZ data when all the training examples are used.
 The AuGPT model described in Section~\ref{06:augpt} consists of 12 transformer blocks with a model layer size equal to 768, having 124 million parameters in total.
@@ -196,6 +199,7 @@ For the data, we follow the dataset discussed in Section~\ref{06:sec:diaser}.
 We use different subsets for training and testing the model, as described for each experiment individually.
 
 \subsection{Influence of training data on the target performance}
+\label{06:training_data}
 \begin{table*}[tp]
     \centering \small
     \begin{tabular}{ccc >{\hspace{1em}} ccc >{\hspace{1em}} ccc}
@@ -208,11 +212,11 @@ We use different subsets for training and testing the model, as described for ea
        % mwoz-mwoz
        {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & 0.89 & 0.53 & 18.61 \\
        % schema-mwoz
-       {\textcolor{red} \xmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & 0.16 & 0.02 & 4.01 \\
+       {\textcolor{red} \xmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & 0.16 & 0.02 & \pz4.01 \\
        % dsctmwoz-mwoz
        {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{red} \xmark}  & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & 0.89 & {0.55} & 19.67 \\
        % dstcschema-mwoz
-       {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & 0.17 & 0.03 & 5.68 \\
+       {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & 0.17 & 0.03 & \pz5.68 \\
        % mwozschema-mwoz
        {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & 0.89 & 0.52 & 19.92 \\
        % all-mwoz
@@ -221,11 +225,11 @@ We use different subsets for training and testing the model, as described for ea
        \midrule
        %========================================================
        % mwoz-schema
-       {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{red} \xmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & 0.04 & 0.01 & 5.63 \\
+       {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{red} \xmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & 0.04 & 0.01 & \pz5.63 \\
        % schema-schema
        {\textcolor{red} \xmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & 0.59 & 0.21 & {28.17} \\
        % dstcmwoz-schema
-       {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{red} \xmark}  & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & 0.03 & 0.01 & 5.51 \\
+       {\textcolor{green} \cmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{red} \xmark}  & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & 0.03 & 0.01 & \pz5.51 \\
        % dstcschema-schema
        {\textcolor{green} \cmark} & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & {\textcolor{red} \xmark}  & {\textcolor{red} \xmark} & {\textcolor{green} \cmark} & 0.58 & 0.21 & 27.96 \\
        % mwozschema-schema
@@ -271,6 +275,7 @@ Finally, if we evaluate all three datasets, it is clear that the best-performing
 Table \ref{tab:exp-results-diaser} shows that including SGD data is crucial for achieving higher BLEU values while training on MultiWOZ helps the model predict slot values.
 
 \subsection{Domain adaptation with a small in-domain set}
+\label{06:seed}
 Table~\ref{tab:exp-results-seed} presents results for domain adaptation experiments.
 We first train the AuGPT model on the MultiWOZ dataset and then use a small portion of the SGD data to adapt the model to this different dataset.
 The results show that although on MultiWOZ helps slightly to improve the final BLEU score, the performance of belief state tracking is not significantly improved, and the results are overall rather negative.

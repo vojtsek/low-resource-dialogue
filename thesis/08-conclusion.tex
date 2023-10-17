@@ -3,11 +3,15 @@
 \label{chap:conclusion}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 In this thesis, we discussed the problems of data annotation needed for task-oriented dialogue modeling.
-We propose multiple approaches to address how current systems rely on extensive data annotation.
-Specifically, we explore a way to mitigate the need for data annotation in Chapter~\ref{chap:data_analysis} and propose novel approaches to dialogue modeling in Chapters~\ref{chap:modeling}, \ref{06:chap:lm-tod} and \ref{chap:llms}.
-Finally, we also discuss possible future research directions in this field.
+We proposes multiple approaches to address how current systems rely on extensive data annotation.
+Specifically, we explored a way to mitigate the need for data annotation in Chapter~\ref{chap:data_analysis} and discuss this in Section~\ref{08:sec:labels}.
+We also proposed novel approaches to dialogue modeling in Chapters~\ref{chap:modeling}, \ref{06:chap:lm-tod} and \ref{chap:llms}.
+Some results are very promising and competitive with state-of-the-art, but we also present some negative results.
+We conclude from these experiments in Sections~\ref{08:sec:less} and \ref{08:sec:unsup}.
+Finally, we discuss possible future research directions in this field in Section~\ref{08:sec:future}.
 
-\section{Unsupervised techniques for automatic data annotation}
+\section{Decreasing the amount of required supervision}
+\label{08:sec:labels}
 Automatic data labeling procedures are desirable since they can save expensive resources by providing valuable insights into the gathered conversation data.
 In Chapter~\ref{chap:data_analysis}, we proposed a pipeline method for the unsupervised discovery of dialogue slot schema and automatic labeling.
 The method iteratively refines a set of input candidates to obtain semantically coherent concepts that are suitable to use as slots to guide a dialogue system in a particular domain.
@@ -16,33 +20,37 @@ The pipeline is generic because it can take an arbitrary set of input candidates
 We showed that the method can successfully exploit the inputs and refine the initial candidate pool to outperform other approaches.
 Moreover, we have shown that the outputs of our pipeline can be used as a noisy supervision for training task-oriented dialogue system models.
 
-\section{Less supervision for end-to-end TOD models}
+\section{Training dialogues from unlabeled data}
+\label{08:sec:unsup}
 The ultimate goal is to train task-oriented dialogue models solely from an unlabeled input corpus.
 As an intermediate step toward this goal, we introduce a novel usage of latent variable models for TOD generation in Chapter~\ref{chap:modeling}.
 In particular, we focused on latent system action modeling and providing the model with a means to communicate with external interfaces using sparse annotation.
 Modeling task-oriented dialogue this way is challenging, and achieving competitive performance with state-of-the-art supervised models is hard.
-However, our latent action models based on variational training show some promising performance when outperforming other baseline approaches, even with many more parameters when the same amount of training data is presented.
+However, our latent action models based on variational training show promising performance when outperforming other baseline approaches, even with many more parameters when the same amount of training data is presented.
 Moreover, our model creates representations in a discrete latent space that can be used to predict the system's actions successfully.
 
+\section{Less data for end-to-end TOD models}
+\label{08:sec:less}
 Another direction is using full supervision but minimizing the required training data.
 We explore this path in Chapters~\ref{06:chap:lm-tod}~and~\ref{chap:llms}.
 The power of pre-trained language models is great, and they can achieve good performance with only a fraction of the training set available to them.
 We observe the importance of examples in the in-context learning approach.
-Although they seem to struggle with the belief state tracking task, this can likely be fixed with fine-tuning techniques or different task formulation.
-Moreover, according to our findings, using large language models promises to bridge the gap between academic datasets and real-world use cases as they can handle various conversation behaviors very well, which we observe in our human evaluation.
+Although LLMs seem to struggle with the belief state tracking task, this can likely be fixed with fine-tuning techniques or different task formulation.
+Moreover, based on our observations in human evaluation, using LLMs promises to bridge the gap between academic datasets and real-world use cases as LLMs can handle various conversation behaviors very well.
 
 \section{Future research directions}
-Thanks to the tremendous progress in large language models pre-training and applications, unsupervised dialogue modeling will likely improve greatly.
-LLMs can be used to obtain better representations and, together with contrastive learning objectives, achieve unseen performance in dialogue structure discovery and schema induction.
+\label{08:sec:future}
+Thanks to the tremendous recent progress in large language models pre-training and applications, unsupervised dialogue modeling will likely improve greatly in the near future.
+LLMs can be used to obtain better representations and, together with contrastive learning objectives, achieve previously unseen performance in dialogue structure discovery and schema induction.
 Therefore, our method proposed in Chapter \ref{chap:data_analysis} can be improved with stronger and more capable initial candidate identification and representation models.
 Moreover, our method works globally for arbitrarily large datasets.
 With the growing size of the context window that can be input to LLMs, we can explore approaches that analyze much larger subsets of datasets simultaneously, thus providing more context and information for the model decision.
 
-
 The modeling capabilities of the Transformer-based models will likely achieve significant improvements in human-machine interaction with little to no need to provide in-domain data examples.
 Their performance can contribute to creating more powerful latent variable models, which we discussed in Chapter~\ref{chap:modeling}.
 First, submodules of the pre-trained models could be used to model more capable systems based on the VAE architecture, as proposed, for example, in \citet{li-etal-2020-optimus}.
-Moreover, the low-parameter fine-tuning approaches such as LoRA~\citep{hu2021lora} can be extended to model distributions, which can be sampled from and perhaps introduce an additional control over the model behavior and explain its actions.
+Moreover, the low-parameter fine-tuning approaches such as LoRA~\citep{hu2021lora} can be modified similarly to VAE and model distribution parameters.
+We can then sample from these predicted distributions and perhaps introduce an additional control over the model behavior and explain its actions.
 
 As for using the pre-trained LLMs, which we discussed in Chapter~\ref{chap:llms},
 we can expect a lot of applications based on in-context learning augmented with retrieval mechanisms to guide the model with certain dialogue flows.
@@ -52,4 +60,4 @@ Nevertheless, we might experience a paradigm shift when a possible future archit
 Apart from the performance gains, this would greatly simplify the interaction with various interfaces.
 
 One way or the other, we are living in exciting times, not only for NLP but also for image processing, multimodal systems, embodied agents, speech technologies, and much more.
-As these technologies integrate more and more with each other, there is an even more exciting future ahead of us.
+As these technologies integrate more and more, there is an even more exciting future ahead of us.

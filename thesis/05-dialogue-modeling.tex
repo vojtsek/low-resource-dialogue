@@ -6,12 +6,15 @@ Dialogue modeling is a complicated task requiring the ability to communicate in 
 Various architectures have been proposed over the years (see Sections~\ref{02:ds-background}, \ref{relwork:end-to-end}), mostly relying on explicit data annotation on multiple levels to guide the model training process.
 One of the biggest challenges is to model task-oriented dialogue that requires interaction with external interfaces such as databases or API services.
 This aspect puts a hard constraint on the dialogue system architecture -- it requires some explicit representation that allows one to communicate with external systems.
-It's challenging to achieve this in a fully unsupervised setting due to the lack of model guidance in the form of structured labels.
-However, we explore some of the approaches in this chapter.
+Achieving this in a fully unsupervised setting is challenging due to lack of model guidance in the form of structured labels.
+However, we explore multiple viable approaches to this problem in this chapter.
+
 First, we discuss the challenges of unsupervised task-oriented dialogue modeling in more detail in Section \ref{05:sec:to-unsup}.
 Next, we propose our architecture that uses latent representations and explore its abilities and performance in Section \ref{05:sec:vrnn-model}.
-Finally, we discuss the usage of pre-trained Language Models as dialogue models and try to answer whether these models can close the gap between unsupervised and supervised systems.
-In this chapter, we present a modeling approach proposed by \citet{hudecek-dusek-2022-learning} and propose alternative extensions of another architecture using latent representations~\citep{lubis-etal-2022-dialogue}. 
+Finally, we explore extensions to the latent variable models by proposing hierarchical architecture.
+
+In this chapter, we present a modeling approach that we previously published in \citet{hudecek-dusek-2022-learning} and propose alternative unpublished extensions of a different base architecture using latent representations~\citep{lubis-etal-2022-dialogue}.
+Our experimental code is available on GitHub\footnote{\url{https://github.com/vojtsek/to-vrnn}}.
 
 \section{Challenges of TOD interaction with external interfaces under less supervision}
 \label{05:sec:to-unsup}
@@ -22,7 +25,7 @@ Therefore, the model can learn to construct the database queries ad-hoc using sp
 A turn-level annotation of database queries would represent a similar amount of annotation used in supervised training. It thus would not lead to our desired setting, where the model is trained without labeled data.
 To support database access while avoiding costly turn-level annotation, we follow \citet{bordes2016learning} and 
 insert sparse database queries and results into the training data, forming special dialogue turns.
-Specifically, we identify turns that require database results, e.g.\ to inform about entity attributes or the count of matching entities, and insert a query-result pair in front of those turns (see Table~\ref{05:tab:example}). We argue that this is the minimal level of supervision required to operate a task-oriented system with database access successfully; it is significantly lower than the full dialogue-state supervision used by most systems.
+Specifically, we identify turns that require database results, e.g.\ to inform about entity attributes or the count of matching entities, and insert a query-result pair in front of those turns (see Table~\ref{05:tab:example}). We argue that this is the minimal level of supervision required to successfully operate a task-oriented system with database access; it is significantly lower than the full dialogue-state supervision used by most systems.
 Moreover, this kind of supervision is readily available in a realistic setting (such as using call center recordings and agent activity logs).
 In practice, database queries are only inserted for 24\% turns on average.
 Per-dataset query counts are 36\%, 23\%, and 11\% for CamRest676, MultiWOZ, and SMD, respectively.
@@ -204,9 +207,10 @@ A relatively common error is informing about wrong slots, e.g., the model provid
     \emph{supervised $^{*}$} & \textcolor{green}{\cmark} & 25.50  & -- & -- & -- & 19.40 & 2.50 & -- & -- \\
     \bottomrule
   \end{tabular}
+  \vskip 1em
     \begin{tabular}{l|c|rrr}
       \toprule
-      model &  & \multicolumn{3}{c}{SMD} \\
+      model &  & \multicolumn{3}{c}{\textbf{SMD}} \\
       & db & BLEU & Ppl & MI  \\
     LSTM & \textcolor{red}{\xmark} & 1.62 & 7.84 & -- \\
     Transformer & \textcolor{red}{\xmark}  & 1.53 & 6.33 & -- \\
@@ -229,6 +233,7 @@ A relatively common error is informing about wrong slots, e.g., the model provid
   We measure MI only for the models that use latent variables explicitly. The \emph{db} column indicates systems that use database information. $^{*}$Note that the supervised state-of-the-art scores are not directly comparable, as the systems use full turn-level supervision.\cite{qin2020dynamic}; }
   \label{05:automatic_metrics}
 \end{table}
+
 \begin{table*}[tp]
     \centering\scriptsize
     \begin{tabular}{crp{0.6\linewidth}}
@@ -444,7 +449,7 @@ As the results show, this approach works well despite the above limitation.
   \label{tab:homo}
 \end{table}
 
-\section{Hierarchical Variational Model for TOD (HVTOD)}
+\section{A Hierarchical Variational Model for TOD (HVTOD)}
 A structured representation of utterances in the dialogue with dialogue acts (Chapter~\ref{02:sec:basics}) is hierarchical because it is a composition of several concepts that can constrain each other.
 Specifically, each utterance is characterized on the top level by its domain.
 Each domain is connected with some intents and system actions, typically further connected with certain slots.
@@ -458,6 +463,7 @@ Note that there is no guarantee that the learned representations in different la
 We want to explore this question to see if the model can learn to leverage this structure by itself. 
 
 \subsection{HVTOD model architecture}
+\label{05:hvtod}
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{images/HVTOD-full-noN.pdf}
@@ -554,7 +560,7 @@ To get a fair comparison, we adjust the number of latent variables used accordin
 We adjust the number so that each configuration effectively has the same dimension of the latent space.
 In the supervised training stage, we represent the belief state as a one-hot discrete vector corresponding to specific slots.
 
-\subsubsection{HVTOD performance}
+\subsection{HVTOD performance}
 We evaluate the performance of HVTOD with a different number of layers and with or without the placeholder loss for dialogue response generation in unsupervised (Table~\ref{05:tab:hvtod-unsup}) and supervised (Table~\ref{05:tab:hvtod-ft}) setting.
 All variants are first trained with an autoencoding objective.
 We also evaluate the model quality after pre-training in Table~\ref{05:tab:hvtod-ae}.
@@ -562,7 +568,7 @@ We also evaluate the model quality after pre-training in Table~\ref{05:tab:hvtod
 Note that when we increase the number of layers, we decrease the dimension of the latent space accordingly.
 Therefore, all the compared models have the same number of parameters.
 
-\paragraph{Autoencoding}
+\subsubsection{Autoencoding}
 We can see that in the autoencoding setting (Table~\ref{05:tab:hvtod-ae}), the increased number of layers helps to improve the performance concerning dialogue success and BLEU.
 Moreover, the dialogue success is also improved by including our additional placeholder loss.
 
@@ -589,14 +595,14 @@ Also, we can see that the placeholder loss contributes to the overall model perf
     \label{05:tab:hvtod-unsup}
 \end{table}
 
-\paragraph{Unsupervised response generation}
+\subsubsection{Unsupervised response generation}
 For the unsupervised response generation (Table~\ref{05:tab:hvtod-unsup}), we observe the benefits of using the placeholder loss when only one-level hierarchy is used.
 Surprisingly, we do not observe a similar effect when more layers are employed.
 Nevertheless, there are performance gains when using placeholder loss in the supervised setting (Table~\ref{05:tab:hvtod-ft}).
 This behavior shows that unsupervised dialogue response generation does not benefit from placeholder loss when more layers are employed.
 This suggests that one of the layers in a multi-layer hierarchy can capture information that can be gained from placeholder loss.
 
-\subsubsection{Latent space inspection}
+\subsection{Latent space inspection}
 We inspect the structure of the learned latent space by transforming the variables using the t-SNE algorithm~\cite{van2008visualizing} into 2-dimensional latent space and plotting them colored by their assignment to respective domains~\cite{lubis-etal-2022-dialogue}.
 For autoencoding (Figure~\ref{05:fig:ae-layers}), the placeholder loss shapes the latent space to form more spread homogenous clusters, specifically on layer 1.
 The same influence is even more visible when we visualize latent spaces after training the model for dialogue response generation (Figure~\ref{05:fig:ft-layers}).
@@ -640,17 +646,16 @@ This suggests that it might be useful to enforce disentanglement of the latent v
     \label{05:tab:hvtod-ae}
 \end{table}
 
-
 \begin{figure}[h]
 \centering
 \subfloat[level 1]{\label{sfig:a0}\includegraphics[width=.5\textwidth]{images/lava-tsne/ae-lvl-0-nll.png}}\hfill
-\subfloat[level 1 + ph loss]{\label{sfig:b0}\includegraphics[width=.5\textwidth]{images/lava-tsne/ae-lvl-0-bce.png}}\\
+\subfloat[level 1 + placeholder loss]{\label{sfig:b0}\includegraphics[width=.5\textwidth]{images/lava-tsne/ae-lvl-0-bce.png}}\\
 
 \subfloat[level 2]{\label{sfig:a1}\includegraphics[width=.5\textwidth]{images/lava-tsne/ae-lvl-1-nll.png}}\hfill
-\subfloat[level 2 + ph loss]{\label{sfig:b1}\includegraphics[width=.5\textwidth]{images/lava-tsne/ae-lvl-1-bce.png}}\\
+\subfloat[level 2 + placeholder loss]{\label{sfig:b1}\includegraphics[width=.5\textwidth]{images/lava-tsne/ae-lvl-1-bce.png}}\\
 
 \subfloat[level 3]{\label{sfig:a2}\includegraphics[width=.5\textwidth]{images/lava-tsne/ae-lvl-2-nll.png}}\hfill
-\subfloat[level 3 + ph loss]{\label{sfig:b2}\includegraphics[width=.5\textwidth]{images/lava-tsne/ae-lvl-2-bce.png}}\\
+\subfloat[level 3 + placeholder loss]{\label{sfig:b2}\includegraphics[width=.5\textwidth]{images/lava-tsne/ae-lvl-2-bce.png}}\\
 \caption{Visualization of t-SNE projections of latent variables after the autoencoding stage, sorted left-to-right. In the bottom row, we have a version using the additional placeholder loss. The colors correspond to respective domains.}
 \label{05:fig:ae-layers}
 \end{figure}
@@ -658,13 +663,13 @@ This suggests that it might be useful to enforce disentanglement of the latent v
 \begin{figure}[h]
 \centering
 \subfloat[level 1]{\label{sfig:c0}\includegraphics[width=.5\textwidth]{images/lava-tsne/ft-lvl-0-nll.png}}\hfill
-\subfloat[level 1 + ph loss]{\label{sfig:d0}\includegraphics[width=.5\textwidth]{images/lava-tsne/ft-lvl-0-bce.png}}\\
+\subfloat[level 1 + placeholder loss]{\label{sfig:d0}\includegraphics[width=.5\textwidth]{images/lava-tsne/ft-lvl-0-bce.png}}\\
 
 \subfloat[level 2]{\label{sfig:c1}\includegraphics[width=.5\textwidth]{images/lava-tsne/ft-lvl-1-nll.png}}\hfill
-\subfloat[level 2 + ph loss]{\label{sfig:d1}\includegraphics[width=.5\textwidth]{images/lava-tsne/ft-lvl-1-bce.png}}\\
+\subfloat[level 2 + placeholder loss]{\label{sfig:d1}\includegraphics[width=.5\textwidth]{images/lava-tsne/ft-lvl-1-bce.png}}\\
 
 \subfloat[level 3]{\label{sfig:c2}\includegraphics[width=.5\textwidth]{images/lava-tsne/ft-lvl-2-nll.png}}\hfill
-\subfloat[level 3 + ph loss]{\label{sfig:d2}\includegraphics[width=.5\textwidth]{images/lava-tsne/ft-lvl-2-bce.png}}\\
+\subfloat[level 3 + placeholder loss]{\label{sfig:d2}\includegraphics[width=.5\textwidth]{images/lava-tsne/ft-lvl-2-bce.png}}\\
 \caption{Visualization of t-SNE projections of latent variables after training for unsupervised dialogue response generation, sorted left-to-right. In the bottom row, we have a version using the additional placeholder loss. The colors correspond to respective domains.}
 \label{05:fig:ft-layers}
 \end{figure}
@@ -674,3 +679,10 @@ In this section, we introduced HVTOD, a hierarchical variational model for task-
 We wanted to assess the contributions of hierarchical structure to the overall model performance.
 Although the layer representations are not guaranteed to be distinct, we show that the model can leverage the benefits introduced by hierarchical structure since the variant with more layers outperforms the baseline (1-layer) variant with the same number of parameters.
 The visualizations of latent spaces also uncover that the learned representations are structurally different.
+
+\section{Conclusion}
+In this chapter, we have presented the latent variable models trained with variational training methods.
+The TO-VRNN model (presented in Section~\ref{05:sec:vrnn-model}) is based on recurrent architecture augmented with variational autoencoders.
+The HVTOD model (Section~\ref{05:hvtod}) encodes the whole dialogue context in each step and uses a hierarchical structure to model the latent space.
+Both models show promising performance, although the HVTOD model performs better overall.
+Moreover, we experiment with interpreting the representations formed in the latent space and observe that both models create representations that carry important and relevant information.

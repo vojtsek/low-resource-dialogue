@@ -50,8 +50,8 @@ This thesis proposes solutions to some of these problems, especially in the task
 We now outline the main goals we want to achieve and the ways we address them in our experiments:
 \begin{enumerate}
     \item \textbf{Limit the amount of supervision needed}. Extending the system is hard since it requires significant expert effort to design the schemas and annotate the data. In Chapter~\ref{chap:data_analysis}, we propose an automatic data analysis tool to gather information from dialogue corpora and suggest annotation schema without direct supervision.
-    \item \textbf{Be able to train the systems with less data overall} It is difficult for the current system architectures to transfer the learned knowledge to new domains. To explore this phenomenon more, we conduct experiments to see if language models can transfer the knowledge in Chapter~\ref{06:chap:lm-tod}. We also explore how to train LLMs with a limited number of examples in Chapter~\ref{chap:llms}
     \item \textbf{Enable the dialogue systems to leverage large unannotated data sets and train more robust models}. There has not been much work on training task-oriented systems in an unsupervised way. We delve into this problem and suggest using latent variable models in Chapter~\ref{chap:modeling} and explore the usage of pre-trained language models, which leverage large unannotated corpora, in Chapters~\ref{06:chap:lm-tod}, \ref{chap:llms}.
+    \item \textbf{Be able to train the systems with less data overall} It is difficult for the current system architectures to transfer the learned knowledge to new domains. To explore this phenomenon more, we conduct experiments to see if language models can transfer the knowledge in Chapter~\ref{06:chap:lm-tod}. We also explore how to train LLMs with a limited number of examples in Chapter~\ref{chap:llms}.
 \end{enumerate}
 
 Scalability and domain adaptation go hand in hand.

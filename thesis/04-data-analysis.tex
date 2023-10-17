@@ -21,12 +21,13 @@ We present a novel approach to discovering a set of domain-relevant dialogue slo
 Our approach requires no manual annotation to tag slots in dialogue data.
 This substantially simplifies the dialogue system design and training process, as the developer no longer needs to design a set of slots and annotate their occurrences in the training data.
 We present the overview of our method in Section~\ref{04:sec:overview}.
-Next, we go through details of each stage.
+Next, we go through the details of each stage.
 We discuss the experimental setup in Section~\ref{04:sec:experiments} and the results in Section~\ref{04:sec:discovery_results}.
 
 Most of the contents of this chapter were published at ACL 2021~\cite{hudecek-etal-2021-discovering}.
 We also present extensions to the published content to remove the requirement for third-party weak-supervision annotation models and put our method in the context of instruction-tuned LLMs.
 These extensions are discussed in Section~\ref{04:sec:candidate_selection} and reflected in the following experimental sections.
+Our experimental code is available on GitHub\footnote{\url{https://github.com/vojtsek/joint-induction}}.
 
 \section{Method overview}
 \label{04:sec:overview}
