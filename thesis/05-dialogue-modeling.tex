@@ -529,8 +529,9 @@ FT stage utilizes the decoder pre-trained in the AE stage, and the encoder part 
 \subsubsection{Training specifics}
 Training the network comprising multiple VAEs is challenging due to VAE training issues (Section~\ref{02:sec:vae}).
 To simplify the training process, we incorporate the layers one by one.
-Only the bottom layer is initially trained; more layers are added later.
-To achieve this, we introduce a \emph{fade-in coefficient} $\alpha$~\citep{li2020progressive} that is being annealed from $0 \rightarrow 1$ over a predetermined number of steps and serves to incorporate a new layer during training smoothly.
+Only the top layer is initially trained; more layers are added later.
+To achieve this, we introduce a \emph{fade-in coefficient} $\alpha$~\citep{li2020progressive} that is being annealed from $0 \rightarrow 1$ for each layer over a predetermined number of steps and serves to incorporate a new layer during training smoothly.
+Once the previous layer $l-1$ is trained, the new layer's output $g_{l}$ is multiplied by the fade-in coefficient, which is initially less than one and increases over time to ensure a smoother transition when incorporating this layer.
 This process is depicted in Figure~\ref{05:fig:HVTOD-fadein}.
 
 Furthermore, we experiment with an additional training objective -- placeholder predictions.
